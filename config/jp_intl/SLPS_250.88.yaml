@@ -45,6 +45,7 @@ options:
   named_regs_for_c_funcs: False
   string_encoding: ASCII
   data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
 
 segments:
 - name: ffx
@@ -62,7 +63,8 @@ segments:
     - [0x200180, data, data]
     - [0x226CD0, .data, archive/decode]
     - [0x226CE0, data, 326CE0]
-    - [0x468B00, rodata, rodata]
+    - [0x4698E8, .rodata, main/11D230]
+    - [0x469950, rodata, 569950]
     - [0x4733C8, .rodata, archive/decode]
     - [0x4733E0, rodata, 5733E0]
     - [0x478980, vutext, vutext]

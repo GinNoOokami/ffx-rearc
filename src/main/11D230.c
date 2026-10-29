@@ -31,3 +31,9 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/main/11D230", func_0011D6C8);
 INCLUDE_ASM("asm/jp_intl/nonmatchings/main/11D230", func_0011D6D0);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/main/11D230", func_0011D718);
+
+INCLUDE_RODATA("asm/jp_intl/nonmatchings/main/11D230", D_00569930);
+
+INCLUDE_RODATA("asm/jp_intl/nonmatchings/main/11D230", D_00569938);
+
+INCLUDE_RODATA("asm/jp_intl/nonmatchings/main/11D230", D_00569940);
