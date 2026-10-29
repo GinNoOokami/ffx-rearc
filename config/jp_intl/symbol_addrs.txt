@@ -2707,7 +2707,8 @@ func_0014DC98 = 0x0014DC98; // type:func
 func_0014DCC0 = 0x0014DCC0; // type:func
 func_0014DCE0 = 0x0014DCE0; // type:func
 func_0014DD18 = 0x0014DD18; // type:func
-func_0014DD98 = 0x0014DD98; // type:func
+// size given: owns jtbl_0056ACB0, whose case target 0x14DDF8 follows an unconditional j
+func_0014DD98 = 0x0014DD98; // type:func size:0x70
 func_0014DE08 = 0x0014DE08; // type:func
 func_0014DE80 = 0x0014DE80; // type:func
 func_0014DFC8 = 0x0014DFC8; // type:func
@@ -7366,8 +7367,10 @@ func_002225C8 = 0x002225C8; // type:func
 func_002225F0 = 0x002225F0; // type:func
 func_00222670 = 0x00222670; // type:func
 func_00222760 = 0x00222760; // type:func
-func_00222800 = 0x00222800; // type:func
-func_00222B80 = 0x00222B80; // type:func
+// size given: owns jtbl_00570E40, whose case target 0x222B44 follows an unconditional j
+func_00222800 = 0x00222800; // type:func size:0x380
+// size given: owns jtbl_00570E60, whose case target 0x222BF0 follows an unconditional j
+func_00222B80 = 0x00222B80; // type:func size:0x80
 func_00222C00 = 0x00222C00; // type:func
 func_00222D00 = 0x00222D00; // type:func
 func_00222DE0 = 0x00222DE0; // type:func
