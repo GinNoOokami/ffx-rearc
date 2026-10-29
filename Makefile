@@ -57,7 +57,8 @@ C_FLAGS    := -O2 -G0 -I include
 # nonmatchings/ holds the functions a C file pulls in with INCLUDE_ASM; they aren't built alone.
 S_FILES := $(shell find $(ASM_DIR) -name '*.s' -not -path '*/nonmatchings/*' 2>/dev/null)
 C_FILES := $(shell find src -name '*.c' 2>/dev/null)
-O_FILES := $(patsubst %.s,$(BUILD_DIR)/%.s.o,$(S_FILES)) $(patsubst %.c,$(BUILD_DIR)/%.c.o,$(C_FILES))
+HASM_FILES := $(shell find src -name '*.s' 2>/dev/null)
+O_FILES := $(patsubst %.s,$(BUILD_DIR)/%.s.o,$(S_FILES) $(HASM_FILES)) $(patsubst %.c,$(BUILD_DIR)/%.c.o,$(C_FILES))
 
 .PHONY: all check extract split clean distclean
 all: check
