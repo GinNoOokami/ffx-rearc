@@ -14,6 +14,7 @@ No assets from the original game are stored in this repository.
 * make
 * mips-binutils
 * 7z (optional, for ISO extraction)
+* curl (to download the original compiler; see Building)
 
 Install Python (tested with 3.14), install the requirements, and start the venv:
 
@@ -40,3 +41,5 @@ make extract
 make split    # disassemble the game with splat
 make          # rebuild and check it matches (prints "…SLPS_250.88.bin: OK")
 ```
+
+After changing the splat config or `symbol_addrs.txt`, run both again.

@@ -46,9 +46,18 @@ SPLAT   := $(PYTHON) -m splat split
 AS_FLAGS := -EL -march=r5900 -mabi=eabi -no-pad-sections -I include
 LD_FLAGS := -EL
 
+# The original compiler, unpacked into tools/cc/ by tools/fetch_toolchain. Its ee-gcc finds its own
+# cc1 and as (bin/../lib/gcc-lib, bin/../ee/bin), so C goes through the original assembler too.
+EE_CC_NAME := ee-gcc2.9-991111-01
+EE_CC_DIR  := tools/cc/$(EE_CC_NAME)
+EE_CC      := $(EE_CC_DIR)/bin/ee-gcc
+C_FLAGS    := -O2 -G0 -I include
+
 # ---- Inputs: whatever splat has written to asm/<version>/ ----
-S_FILES := $(shell find $(ASM_DIR) -name '*.s' 2>/dev/null)
-O_FILES := $(patsubst %.s,$(BUILD_DIR)/%.s.o,$(S_FILES))
+# nonmatchings/ holds the functions a C file pulls in with INCLUDE_ASM; they aren't built alone.
+S_FILES := $(shell find $(ASM_DIR) -name '*.s' -not -path '*/nonmatchings/*' 2>/dev/null)
+C_FILES := $(shell find src -name '*.c' 2>/dev/null)
+O_FILES := $(patsubst %.s,$(BUILD_DIR)/%.s.o,$(S_FILES)) $(patsubst %.c,$(BUILD_DIR)/%.c.o,$(C_FILES))
 
 .PHONY: all check extract split clean distclean
 all: check
@@ -56,7 +65,10 @@ all: check
 check: $(IMAGE)
 	@echo "$(IMAGE_SHA1)  $(IMAGE)" | sha1sum -c -
 
+# Splitting starts from an empty asm/<version>/: every .s found there is built, so a file left from
+# an old layout would be linked twice.
 split: $(ORIG_IMAGE)
+	rm -rf $(ASM_DIR)
 	$(SPLAT) $(SPLAT_YAML)
 
 extract: $(ORIG_ELF)
@@ -80,6 +92,20 @@ $(BUILD_DIR)/%.s.o: %.s
 	@mkdir -p $(@D)
 	$(AS) $(AS_FLAGS) -o $@ $<
 
+# The toolchain is an order-only prerequisite (after |): fetched when missing, but its timestamp
+# never forces a recompile. The old assembler writes a symbol table modern ld rejects (sh_info
+# doesn't count all local symbols); a plain objcopy rewrites it correctly.
+$(BUILD_DIR)/%.c.o: %.c | $(EE_CC_DIR)
+	@mkdir -p $(@D)
+	$(EE_CC) -c $(C_FLAGS) -o $@ $<
+	$(OBJCOPY) $@
+
+$(EE_CC_DIR):
+	tools/fetch_toolchain $(EE_CC_NAME)
+
+# splat writes, for each C file, the asm files its INCLUDE_ASMs pull in (create_asm_dependencies),
+# so a re-split recompiles it. The - skips files not written yet (before the first split).
+-include $(patsubst %.c,$(BUILD_DIR)/%.asmproc.d,$(C_FILES))
 $(ELF): $(O_FILES) $(LD_SCRIPT)
 	$(LD) $(LD_FLAGS) -T $(LD_SCRIPT) $(addprefix -T ,$(UNDEF_SYMS)) -Map $(@:.elf=.map) -o $@
 

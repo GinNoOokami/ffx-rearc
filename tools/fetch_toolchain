@@ -1,0 +1,36 @@
+#!/bin/sh
+# Unpack an original PS2 EE toolchain into tools/cc/<name>/.
+# Usage: tools/fetch_toolchain <name>      e.g. ee-gcc2.9-991111-01
+# The archive comes from $EE_TOOLCHAIN_CACHE if it is there, otherwise from decomp.me's compiler
+# packages on GitHub; either way its sha256 must match the table below.
+set -eu
+
+NAME=${1:?usage: $0 <toolchain name>}
+CACHE=${EE_TOOLCHAIN_CACHE:-$HOME/opt/ee-toolchains/archives}
+URL_BASE=https://github.com/decompme/compilers/releases/download/compilers
+
+case "$NAME" in
+  ee-gcc2.9-991111-01)
+    ARCHIVE=$NAME.tar.xz
+    SHA256=ed684fd98f89d36b0121caab311052089103e3b36241fcef4338cc9ea41c75b8 ;;
+  *) echo "$0: unknown toolchain $NAME" >&2; exit 2 ;;
+esac
+
+DEST=tools/cc/$NAME
+TMP=tools/cc/$ARCHIVE.part
+[ -e "$DEST" ] && { echo "$DEST already exists"; exit 0; }
+mkdir -p tools/cc
+
+if [ -f "$CACHE/$ARCHIVE" ]; then
+  cp "$CACHE/$ARCHIVE" "$TMP"
+else
+  echo "fetching $URL_BASE/$ARCHIVE"
+  curl -fL -o "$TMP" "$URL_BASE/$ARCHIVE"
+fi
+echo "$SHA256  $TMP" | sha256sum -c -
+
+# Unpack beside the destination first, so a failed unpack never leaves a half-filled tools/cc/<name>.
+mkdir "$DEST.part"
+tar xf "$TMP" -C "$DEST.part"
+mv "$DEST.part" "$DEST"
+rm "$TMP"
