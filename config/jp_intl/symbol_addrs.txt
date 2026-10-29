@@ -10,176 +10,308 @@ Sg_PcReadL = 0x0011EE60; // type:func
 Sg_PcRead = 0x0011EF68; // type:func
 // TkReadMapFile: inferred: prints "TkReadMapFile: %s\n" with printf
 TkReadMapFile = 0x00180988; // type:func
-// __ieee754_acos: newlib 1.8.2 libm/math/e_acos.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__ieee754_acos = 0x002E24C0; // type:func
-// __ieee754_fmod: newlib 1.8.2 libm/math/e_fmod.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__ieee754_fmod = 0x002E2DC8; // type:func
-// __ieee754_sqrt: newlib 1.8.2 libm/math/e_sqrt.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__ieee754_sqrt = 0x002E4400; // type:func
-// __ieee754_acosf: newlib 1.8.2 libm/math/ef_acos.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__ieee754_acosf = 0x002E4708; // type:func
-// __ieee754_fmodf: newlib 1.8.2 libm/math/ef_fmod.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__ieee754_fmodf = 0x002E4E20; // type:func
-// __ieee754_sqrtf: newlib 1.8.2 libm/math/ef_sqrt.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__ieee754_sqrtf = 0x002E5450; // type:func
-// __kernel_cos: newlib 1.8.2 libm/math/k_cos.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__kernel_cos = 0x002E5588; // type:func
-// __kernel_rem_pio2: newlib 1.8.2 libm/math/k_rem_pio2.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__kernel_rem_pio2 = 0x002E57D8; // type:func
-// __kernel_sin: newlib 1.8.2 libm/math/k_sin.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__kernel_sin = 0x002E6340; // type:func
-// __kernel_cosf: newlib 1.8.2 libm/math/kf_cos.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__kernel_cosf = 0x002E6518; // type:func
-// __kernel_rem_pio2f: newlib 1.8.2 libm/math/kf_rem_pio2.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__kernel_rem_pio2f = 0x002E6670; // type:func
-// __kernel_sinf: newlib 1.8.2 libm/math/kf_sin.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-__kernel_sinf = 0x002E6FC0; // type:func
-// copysign: newlib 1.8.2 libm/common/s_copysign.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-copysign = 0x002E7770; // type:func
-// cos: newlib 1.8.2 libm/math/s_cos.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-cos = 0x002E77B8; // type:func
-// fabs: newlib 1.8.2 libm/math/s_fabs.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-fabs = 0x002E78C0; // type:func
-// finite: newlib 1.8.2 libm/common/s_finite.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-finite = 0x002E78F8; // type:func
-// floor: newlib 1.8.2 libm/math/s_floor.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-floor = 0x002E7918; // type:func
-// isnan: newlib 1.8.2 libm/math/s_isnan.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-isnan = 0x002E7AF0; // type:func
-// matherr: newlib 1.8.2 libm/common/s_matherr.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-matherr = 0x002E7B28; // type:func
-// scalbn: newlib 1.8.2 libm/common/s_scalbn.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-scalbn = 0x002E7D50; // type:func
-// sin: newlib 1.8.2 libm/math/s_sin.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-sin = 0x002E7F08; // type:func
-// copysignf: newlib 1.8.2 libm/common/sf_copysign.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-copysignf = 0x002E82A8; // type:func
-// cosf: newlib 1.8.2 libm/math/sf_cos.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-cosf = 0x002E82D8; // type:func
-// fabsf: newlib 1.8.2 libm/math/sf_fabs.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-fabsf = 0x002E83C0; // type:func
-// floorf: newlib 1.8.2 libm/math/sf_floor.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-floorf = 0x002E83E0; // type:func
-// isnanf: newlib 1.8.2 libm/math/sf_isnan.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-isnanf = 0x002E84C8; // type:func
-// sinf: newlib 1.8.2 libm/math/sf_sin.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-sinf = 0x002E8650; // type:func
-// tanf: newlib 1.8.2 libm/math/sf_tan.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-tanf = 0x002E8740; // type:func
-// atan2: newlib 1.8.2 libm/math/w_atan2.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-atan2 = 0x002E88B8; // type:func
-// fmod: newlib 1.8.2 libm/math/w_fmod.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-fmod = 0x002E89D0; // type:func
-// pow: newlib 1.8.2 libm/math/w_pow.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-pow = 0x002E8AF0; // type:func
-// sqrt: newlib 1.8.2 libm/math/w_sqrt.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-sqrt = 0x002E8F20; // type:func
-// atan2f: newlib 1.8.2 libm/math/wf_atan2.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-atan2f = 0x002E9130; // type:func
-// fmodf: newlib 1.8.2 libm/math/wf_fmod.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-fmodf = 0x002E9258; // type:func
-// sqrtf: newlib 1.8.2 libm/math/wf_sqrt.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-sqrtf = 0x002E9398; // type:func
-// modf: newlib 1.8.2 libm/common/s_modf.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
-modf = 0x002E95C8; // type:func
-// __divdi3: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
+// sceGsPutDrawEnv: inferred: its error message is "sceGsPutDrawEnv: DMA Ch.2 does not terminate"
+sceGsPutDrawEnv = 0x002D9E28; // type:func
+// sceGsSyncPath: inferred: its five error messages start "sceGsSyncPath: " (DMA Ch.1/Ch.2, VIF1, VU1, GIF)
+sceGsSyncPath = 0x002DA2A0; // type:func
+// sceGsSetDefLoadImage: inferred: its error message is "sceGsSetDefLoadImage: too big size"
+sceGsSetDefLoadImage = 0x002DA5B8; // type:func
+// sceGsExecLoadImage: inferred: its error message is "sceGsExecLoadImage: DMA Ch.2 does not terminate"
+sceGsExecLoadImage = 0x002DA8E0; // type:func
+// sceGsExecStoreImage: inferred: its four error messages start "sceGsExecStoreImage: "
+sceGsExecStoreImage = 0x002DAA60; // type:func
+
+// libgcc.a of the ee-gcc2.9-991111 package: whole objects match exactly, relocated fields masked.
+__do_global_dtors = 0x002E97A0; // type:func
+__do_global_ctors = 0x002E97F8; // type:func
+__main = 0x002E98A8; // type:func
 __divdi3 = 0x002E98C8; // type:func
-// __muldi3: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
+exit = 0x002E9FB8; // type:func
+__fixunssfdi = 0x002E9FE8; // type:func
+__floatdidf = 0x002EA0E0; // type:func
+__floatdisf = 0x002EA178; // type:func
+__moddi3 = 0x002EA258; // type:func
 __muldi3 = 0x002EA8C0; // type:func
-// dpadd: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
+__udivdi3 = 0x002EA920; // type:func
+__umoddi3 = 0x002EAEF0; // type:func
+__pack_d = 0x002EB430; // type:func
+__unpack_d = 0x002EB560; // type:func
+_fpadd_parts_d = 0x002EB600; // type:func
 dpadd = 0x002EB840; // type:func
-// dpmul: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
+dpsub = 0x002EB898; // type:func
 dpmul = 0x002EB900; // type:func
-// dpdiv: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
 dpdiv = 0x002EBBA8; // type:func
-// dpcmp: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
+__fpcmp_parts_d = 0x002EBD10; // type:func
 dpcmp = 0x002EBE28; // type:func
-// litodp: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
 litodp = 0x002EBE78; // type:func
-// dptoli: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
 dptoli = 0x002EBF30; // type:func
-// dptofp: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
+dptoul = 0x002EBFC8; // type:func
+__negdf2 = 0x002EC068; // type:func
+__make_dp = 0x002EC0A0; // type:func
 dptofp = 0x002EC0D0; // type:func
-// fptodp: libgcc.a of the ee-gcc2.9-991111 package: exact match, relocated fields masked
+__pack_f = 0x002EC128; // type:func
+__unpack_f = 0x002EC238; // type:func
+_fpadd_parts_f = 0x002EC2C8; // type:func
+fpadd = 0x002EC500; // type:func
+fpsub = 0x002EC558; // type:func
+fpmul = 0x002EC5C0; // type:func
+fpdiv = 0x002EC7B8; // type:func
+__fpcmp_parts_f = 0x002EC918; // type:func
+fpcmp = 0x002ECA30; // type:func
+sitofp = 0x002ECA80; // type:func
+fptosi = 0x002ECB38; // type:func
+fptoui = 0x002ECBC8; // type:func
+__negsf2 = 0x002ECC60; // type:func
+__make_fp = 0x002ECC98; // type:func
 fptodp = 0x002ECCC8; // type:func
-// atoi: newlib 1.8.2 libc/stdlib/atoi.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+__fixdfdi = 0x00300010; // type:func
+
+// newlib 1.8.2, compiled with ee-gcc 2.9 991111-01 -O2 -G0 (gcc 2.95.2 stdarg.h/va-mips.h,
+// limits.h, float.h for the headers the compiler package lacks): exact match, relocated fields
+// masked; the function matches this address only, and no other function matches it.
+__ieee754_acos = 0x002E24C0; // type:func
+__ieee754_fmod = 0x002E2DC8; // type:func
+__ieee754_sqrt = 0x002E4400; // type:func
+__ieee754_acosf = 0x002E4708; // type:func
+__ieee754_fmodf = 0x002E4E20; // type:func
+__ieee754_sqrtf = 0x002E5450; // type:func
+__kernel_cos = 0x002E5588; // type:func
+__kernel_rem_pio2 = 0x002E57D8; // type:func
+__kernel_sin = 0x002E6340; // type:func
+__kernel_cosf = 0x002E6518; // type:func
+__kernel_rem_pio2f = 0x002E6670; // type:func
+__kernel_sinf = 0x002E6FC0; // type:func
+copysign = 0x002E7770; // type:func
+cos = 0x002E77B8; // type:func
+fabs = 0x002E78C0; // type:func
+finite = 0x002E78F8; // type:func
+floor = 0x002E7918; // type:func
+isnan = 0x002E7AF0; // type:func
+matherr = 0x002E7B28; // type:func
+scalbn = 0x002E7D50; // type:func
+sin = 0x002E7F08; // type:func
+copysignf = 0x002E82A8; // type:func
+cosf = 0x002E82D8; // type:func
+fabsf = 0x002E83C0; // type:func
+floorf = 0x002E83E0; // type:func
+isnanf = 0x002E84C8; // type:func
+scalbnf = 0x002E84F0; // type:func
+sinf = 0x002E8650; // type:func
+tanf = 0x002E8740; // type:func
+atan2 = 0x002E88B8; // type:func
+fmod = 0x002E89D0; // type:func
+pow = 0x002E8AF0; // type:func
+sqrt = 0x002E8F20; // type:func
+atan2f = 0x002E9130; // type:func
+fmodf = 0x002E9258; // type:func
+sqrtf = 0x002E9398; // type:func
+modf = 0x002E95C8; // type:func
 atoi = 0x002ECD28; // type:func
-// atol: newlib 1.8.2 libc/stdlib/atol.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 atol = 0x002ECD50; // type:func
-// bzero: newlib 1.8.2 libc/string/bzero.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 bzero = 0x002ECD70; // type:func
-// fclose: newlib 1.8.2 libc/stdio/fclose.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 fclose = 0x002ECDB8; // type:func
-// fflush: newlib 1.8.2 libc/stdio/fflush.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 fflush = 0x002ECEC0; // type:func
-// __sfmoreglue: newlib 1.8.2 libc/stdio/findfp.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __sfmoreglue = 0x002ED020; // type:func
-// __sfp: newlib 1.8.2 libc/stdio/findfp.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __sfp = 0x002ED090; // type:func
-// __sinit: newlib 1.8.2 libc/stdio/findfp.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __sinit = 0x002ED190; // type:func
-// _fopen_r: newlib 1.8.2 libc/stdio/fopen.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 _fopen_r = 0x002ED220; // type:func
-// fseek: newlib 1.8.2 libc/stdio/fseek.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 fseek = 0x002ED7F8; // type:func
-// _fwalk: newlib 1.8.2 libc/stdio/fwalk.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 _fwalk = 0x002EDCE8; // type:func
-// getenv: newlib 1.8.2 libc/stdlib/getenv.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 getenv = 0x002EDDB0; // type:func
-// _findenv_r: newlib 1.8.2 libc/stdlib/getenv_r.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 _findenv_r = 0x002EDDD8; // type:func
-// __smakebuf: newlib 1.8.2 libc/stdio/makebuf.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __smakebuf = 0x002EDF18; // type:func
-// _puts_r: newlib 1.8.2 libc/stdio/puts.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+_printf_r = 0x002EEE90; // type:func
 _puts_r = 0x002EEF20; // type:func
-// qsort: newlib 1.8.2 libc/stdlib/qsort.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 qsort = 0x002EEFD0; // type:func
-// srand: newlib 1.8.2 libc/stdlib/rand.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 srand = 0x002EF9F8; // type:func
-// rand: newlib 1.8.2 libc/stdlib/rand.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 rand = 0x002EFA08; // type:func
-// __srefill: newlib 1.8.2 libc/stdio/refill.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __srefill = 0x002EFA58; // type:func
-// _sbrk_r: newlib 1.8.2 libc/reent/sbrkr.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 _sbrk_r = 0x002EFBD0; // type:func
-// __sread: newlib 1.8.2 libc/stdio/stdio.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+_sprintf_r = 0x002EFC30; // type:func
+sscanf = 0x002EFD10; // type:func
 __sread = 0x002EFD98; // type:func
-// __swrite: newlib 1.8.2 libc/stdio/stdio.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __swrite = 0x002EFE00; // type:func
-// __sseek: newlib 1.8.2 libc/stdio/stdio.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __sseek = 0x002EFE80; // type:func
-// __sclose: newlib 1.8.2 libc/stdio/stdio.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __sclose = 0x002EFEE8; // type:func
-// strcasecmp: newlib 1.8.2 libc/string/strcasecmp.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 strcasecmp = 0x002EFF08; // type:func
-// strncasecmp: newlib 1.8.2 libc/string/strncasecmp.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 strncasecmp = 0x002F0608; // type:func
-// strrchr: newlib 1.8.2 libc/string/strrchr.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 strrchr = 0x002F0A60; // type:func
-// strtok: newlib 1.8.2 libc/string/strtok.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+_strtod_r = 0x002F0AB0; // type:func
 strtok = 0x002F1A08; // type:func
-// strtok_r: newlib 1.8.2 libc/string/strtok_r.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 strtok_r = 0x002F1A30; // type:func
-// _system_r: newlib 1.8.2 libc/stdlib/system.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+_strtol_r = 0x002F1AD0; // type:func
 _system_r = 0x002F1D40; // type:func
-// vprintf: newlib 1.8.2 libc/stdio/vprintf.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+__sprint = 0x002F1DE0; // type:func
+__sbprintf = 0x002F1E28; // type:func
+cvt = 0x002F3470; // type:func
+exponent = 0x002F3620; // type:func
+__svfscanf = 0x002F3700; // type:func
+__sccl = 0x002F4208; // type:func
 vprintf = 0x002F4310; // type:func
-// __swsetup: newlib 1.8.2 libc/stdio/wsetup.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+vsprintf = 0x002F4340; // type:func
 __swsetup = 0x002F43F8; // type:func
-// __sflags: newlib 1.8.2 libc/stdio/flags.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+quorem = 0x002F4560; // type:func
+_dtoa_r = 0x002F4778; // type:func
 __sflags = 0x002F5958; // type:func
-// fread: newlib 1.8.2 libc/stdio/fread.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 fread = 0x002F5A00; // type:func
-// __sfvwrite: newlib 1.8.2 libc/stdio/fvwrite.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 __sfvwrite = 0x002F5B20; // type:func
-// _mbtowc_r: newlib 1.8.2 libc/stdlib/mbtowc_r.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 _mbtowc_r = 0x002F6048; // type:func
-// isinf: newlib 1.8.2 libm/math/s_isinf.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+_Balloc = 0x002F6088; // type:func
+_Bfree = 0x002F6130; // type:func
+_multadd = 0x002F6160; // type:func
+_s2b = 0x002F6278; // type:func
+_hi0bits = 0x002F63C0; // type:func
+_lo0bits = 0x002F6448; // type:func
+_i2b = 0x002F6508; // type:func
+_multiply = 0x002F6540; // type:func
+_pow5mult = 0x002F6770; // type:func
+_lshift = 0x002F6870; // type:func
+__mcmp = 0x002F69E8; // type:func
+__mdiff = 0x002F6A50; // type:func
+_ulp = 0x002F6BE0; // type:func
+_b2d = 0x002F6C78; // type:func
+_d2b = 0x002F6DF8; // type:func
+_ratio = 0x002F6F78; // type:func
+_mprec_log10 = 0x002F7038; // type:func
 isinf = 0x002F7108; // type:func
-// __submore: newlib 1.8.2 libc/stdio/ungetc.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
+_strtoul_r = 0x002F7150; // type:func
 __submore = 0x002F73A8; // type:func
-// ungetc: newlib 1.8.2 libc/stdio/ungetc.c: exact match (ee-gcc 2.9 991111-01, -O2 -G0), relocated fields masked
 ungetc = 0x002F7498; // type:func
+
+// newlib 1.8.2, same build: exact match, but the bytes also occur elsewhere or another file
+// compiles to the same bytes; placed by a one-to-one function of the same object file lying
+// the same distance away as in the object.
+fopen = 0x002ED300; // type:func
+_findenv = 0x002EDD80; // type:func
+_getenv_r = 0x002EDEF8; // type:func
+printf = 0x002EEED0; // type:func
+puts = 0x002EEFA8; // type:func
+sprintf = 0x002EFC98; // type:func
+strtod = 0x002F19B0; // type:func
+strtol = 0x002F1D08; // type:func
+system = 0x002F1D78; // type:func
+strtoul = 0x002F7370; // type:func
+
+// Sony libkernl kernel-call stubs (li $3,N; syscall; jr $ra; nop) in the table at 0x2F7C80: named
+// from the call number N with ps2sdk's syscallnr.h. Inferred: the number is in the code, the
+// name table is public documentation of the kernel, not Sony's library.
+ResetEE = 0x002F7C90; // type:func
+SetGsCrt = 0x002F7CA0; // type:func
+KExit = 0x002F7CC0; // type:func
+_LoadExecPS2 = 0x002F7CE0; // type:func
+_ExecPS2 = 0x002F7CF0; // type:func
+AddSbusIntcHandler = 0x002F7D20; // type:func
+RemoveSbusIntcHandler = 0x002F7D30; // type:func
+Interrupt2Iop = 0x002F7D40; // type:func
+SetVTLBRefillHandler = 0x002F7D50; // type:func
+SetVCommonHandler = 0x002F7D60; // type:func
+SetVInterruptHandler = 0x002F7D70; // type:func
+AddIntcHandler = 0x002F7D80; // type:func
+AddIntcHandler2 = 0x002F7D90; // type:func
+RemoveIntcHandler = 0x002F7DA0; // type:func
+AddDmacHandler = 0x002F7DB0; // type:func
+AddDmacHandler2 = 0x002F7DC0; // type:func
+RemoveDmacHandler = 0x002F7DD0; // type:func
+_EnableIntc = 0x002F7DE0; // type:func
+_DisableIntc = 0x002F7DF0; // type:func
+_EnableDmac = 0x002F7E00; // type:func
+_DisableDmac = 0x002F7E10; // type:func
+SetAlarm = 0x002F7E20; // type:func
+_iEnableIntc = 0x002F7E40; // type:func
+_iDisableIntc = 0x002F7E50; // type:func
+_iEnableDmac = 0x002F7E60; // type:func
+_iDisableDmac = 0x002F7E70; // type:func
+iReleaseAlarm = 0x002F7E90; // type:func
+CreateThread = 0x002F7EA0; // type:func
+DeleteThread = 0x002F7EB0; // type:func
+StartThread = 0x002F7EC0; // type:func
+ExitThread = 0x002F7ED0; // type:func
+ExitDeleteThread = 0x002F7EE0; // type:func
+TerminateThread = 0x002F7EF0; // type:func
+iTerminateThread = 0x002F7F00; // type:func
+DisableDispatchThread = 0x002F7F10; // type:func
+EnableDispatchThread = 0x002F7F20; // type:func
+ChangeThreadPriority = 0x002F7F30; // type:func
+iChangeThreadPriority = 0x002F7F40; // type:func
+RotateThreadReadyQueue = 0x002F7F50; // type:func
+_iRotateThreadReadyQueue = 0x002F7F60; // type:func
+ReleaseWaitThread = 0x002F7F70; // type:func
+iReleaseWaitThread = 0x002F7F80; // type:func
+GetThreadId = 0x002F7F90; // type:func
+ReferThreadStatus = 0x002F7FA0; // type:func
+iReferThreadStatus = 0x002F7FB0; // type:func
+SleepThread = 0x002F7FC0; // type:func
+WakeupThread = 0x002F7FD0; // type:func
+_iWakeupThread = 0x002F7FE0; // type:func
+CancelWakeupThread = 0x002F7FF0; // type:func
+iCancelWakeupThread = 0x002F8000; // type:func
+SuspendThread = 0x002F8010; // type:func
+_iSuspendThread = 0x002F8020; // type:func
+ResumeThread = 0x002F8030; // type:func
+iResumeThread = 0x002F8040; // type:func
+EndOfHeap = 0x002F8080; // type:func
+CreateSema = 0x002F80A0; // type:func
+DeleteSema = 0x002F80B0; // type:func
+SignalSema = 0x002F80C0; // type:func
+iSignalSema = 0x002F80D0; // type:func
+WaitSema = 0x002F80E0; // type:func
+PollSema = 0x002F80F0; // type:func
+iPollSema = 0x002F8100; // type:func
+ReferSemaStatus = 0x002F8110; // type:func
+iReferSemaStatus = 0x002F8120; // type:func
+SetOsdConfigParam = 0x002F8140; // type:func
+GetOsdConfigParam = 0x002F8150; // type:func
+GetGsHParam = 0x002F8160; // type:func
+GetGsVParam = 0x002F8170; // type:func
+SetGsHParam = 0x002F8180; // type:func
+SetGsVParam = 0x002F8190; // type:func
+CreateEventFlag = 0x002F81A0; // type:func
+DeleteEventFlag = 0x002F81B0; // type:func
+SetEventFlag = 0x002F81C0; // type:func
+EnableIntcHandler = 0x002F8260; // type:func
+iEnableIntcHandler = 0x002F8270; // type:func
+DisableIntcHandler = 0x002F8280; // type:func
+iDisableIntcHandler = 0x002F8290; // type:func
+EnableDmacHandler = 0x002F82A0; // type:func
+iEnableDmacHandler = 0x002F82B0; // type:func
+DisableDmacHandler = 0x002F82C0; // type:func
+iDisableDmacHandler = 0x002F82D0; // type:func
+KSeg0 = 0x002F82E0; // type:func
+EnableCache = 0x002F82F0; // type:func
+DisableCache = 0x002F8300; // type:func
+GetCop0 = 0x002F8310; // type:func
+FlushCache = 0x002F8320; // type:func
+CpuConfig = 0x002F8330; // type:func
+iGetCop0 = 0x002F8340; // type:func
+iFlushCache = 0x002F8350; // type:func
+iCpuConfig = 0x002F8360; // type:func
+sceSifStopDma = 0x002F8370; // type:func
+SetCPUTimerHandler = 0x002F8380; // type:func
+SetCPUTimer = 0x002F8390; // type:func
+SetOsdConfigParam2 = 0x002F83A0; // type:func
+GetOsdConfigParam2 = 0x002F83B0; // type:func
+GsGetIMR = 0x002F83C0; // type:func
+iGsGetIMR = 0x002F83D0; // type:func
+GsPutIMR = 0x002F83E0; // type:func
+iGsPutIMR = 0x002F83F0; // type:func
+SetPgifHandler = 0x002F8400; // type:func
+SetVSyncFlag = 0x002F8410; // type:func
+SetSyscall = 0x002F8420; // type:func
+_print = 0x002F8430; // type:func
+sceSifDmaStat = 0x002F8440; // type:func
+isceSifDmaStat = 0x002F8450; // type:func
+sceSifSetDma = 0x002F8460; // type:func
+isceSifSetDma = 0x002F8470; // type:func
+sceSifSetDChain = 0x002F8480; // type:func
+isceSifSetDChain = 0x002F8490; // type:func
+sceSifSetReg = 0x002F84A0; // type:func
+sceSifGetReg = 0x002F84B0; // type:func
+_ExecOSD = 0x002F84C0; // type:func
+Deci2Call = 0x002F84D0; // type:func
+PSMode = 0x002F84E0; // type:func
+MachineType = 0x002F84F0; // type:func
+GetMemorySize = 0x002F8500; // type:func
+
 // D_00186B00: data inside .text: an 8x8 1-bit font (glyph rows read as ASCII from blank, !, ", #),
 // 0x5E4 bytes, addressed from 0x15A54C; 256-byte aligned, zero padding before and after.
 D_00186B00 = 0x00186B00; // type:u32 size:0x5E4
@@ -10234,15 +10366,10 @@ func_002D99B0 = 0x002D99B0; // type:func
 func_002D9A70 = 0x002D9A70; // type:func
 func_002D9B38 = 0x002D9B38; // type:func
 func_002D9D20 = 0x002D9D20; // type:func
-func_002D9E28 = 0x002D9E28; // type:func
 func_002D9F10 = 0x002D9F10; // type:func
 func_002DA1A8 = 0x002DA1A8; // type:func
 func_002DA208 = 0x002DA208; // type:func
-func_002DA2A0 = 0x002DA2A0; // type:func
-func_002DA5B8 = 0x002DA5B8; // type:func
 func_002DA7A0 = 0x002DA7A0; // type:func
-func_002DA8E0 = 0x002DA8E0; // type:func
-func_002DAA60 = 0x002DAA60; // type:func
 func_002DB0F0 = 0x002DB0F0; // type:func
 func_002DB2D0 = 0x002DB2D0; // type:func
 func_002DB330 = 0x002DB330; // type:func
@@ -10443,54 +10570,18 @@ func_002E70C8 = 0x002E70C8; // type:func
 func_002E7360 = 0x002E7360; // type:func
 func_002E7B50 = 0x002E7B50; // type:func
 func_002E8000 = 0x002E8000; // type:func
-func_002E84F0 = 0x002E84F0; // type:func
 func_002E87C8 = 0x002E87C8; // type:func
 func_002E9030 = 0x002E9030; // type:func
 func_002E94B8 = 0x002E94B8; // type:func
-func_002E97A0 = 0x002E97A0; // type:func
-func_002E97F8 = 0x002E97F8; // type:func
-func_002E98A8 = 0x002E98A8; // type:func
-func_002E9FB8 = 0x002E9FB8; // type:func
-func_002E9FE8 = 0x002E9FE8; // type:func
-func_002EA0E0 = 0x002EA0E0; // type:func
-func_002EA178 = 0x002EA178; // type:func
-func_002EA258 = 0x002EA258; // type:func
-func_002EA920 = 0x002EA920; // type:func
-func_002EAEF0 = 0x002EAEF0; // type:func
-func_002EB430 = 0x002EB430; // type:func
-func_002EB560 = 0x002EB560; // type:func
-func_002EB600 = 0x002EB600; // type:func
-func_002EB898 = 0x002EB898; // type:func
-func_002EBD10 = 0x002EBD10; // type:func
-func_002EBFC8 = 0x002EBFC8; // type:func
-func_002EC068 = 0x002EC068; // type:func
-func_002EC0A0 = 0x002EC0A0; // type:func
-func_002EC128 = 0x002EC128; // type:func
-func_002EC238 = 0x002EC238; // type:func
-func_002EC2C8 = 0x002EC2C8; // type:func
-func_002EC500 = 0x002EC500; // type:func
-func_002EC558 = 0x002EC558; // type:func
-func_002EC5C0 = 0x002EC5C0; // type:func
-func_002EC7B8 = 0x002EC7B8; // type:func
-func_002EC918 = 0x002EC918; // type:func
-func_002ECA30 = 0x002ECA30; // type:func
-func_002ECA80 = 0x002ECA80; // type:func
-func_002ECB38 = 0x002ECB38; // type:func
-func_002ECBC8 = 0x002ECBC8; // type:func
-func_002ECC60 = 0x002ECC60; // type:func
-func_002ECC98 = 0x002ECC98; // type:func
 func_002ECD08 = 0x002ECD08; // type:func
 func_002ECDA8 = 0x002ECDA8; // type:func
 func_002ECFC8 = 0x002ECFC8; // type:func
 func_002ED170 = 0x002ED170; // type:func
 func_002ED180 = 0x002ED180; // type:func
-func_002ED300 = 0x002ED300; // type:func
 func_002ED330 = 0x002ED330; // type:func
 func_002ED368 = 0x002ED368; // type:func
 func_002ED688 = 0x002ED688; // type:func
 func_002EDC88 = 0x002EDC88; // type:func
-func_002EDD80 = 0x002EDD80; // type:func
-func_002EDEF8 = 0x002EDEF8; // type:func
 func_002EE068 = 0x002EE068; // type:func
 func_002EE2C0 = 0x002EE2C0; // type:func
 func_002EEA38 = 0x002EEA38; // type:func
@@ -10501,14 +10592,8 @@ func_002EED60 = 0x002EED60; // type:func
 func_002EEE20 = 0x002EEE20; // type:func
 func_002EEE28 = 0x002EEE28; // type:func
 func_002EEE30 = 0x002EEE30; // type:func
-func_002EEE90 = 0x002EEE90; // type:func
-func_002EEED0 = 0x002EEED0; // type:func
-func_002EEFA8 = 0x002EEFA8; // type:func
 func_002EFA38 = 0x002EFA38; // type:func
-func_002EFC30 = 0x002EFC30; // type:func
-func_002EFC98 = 0x002EFC98; // type:func
 func_002EFD08 = 0x002EFD08; // type:func
-func_002EFD10 = 0x002EFD10; // type:func
 func_002EFFBC = 0x002EFFBC; // type:func
 func_002F00E8 = 0x002F00E8; // type:func
 func_002F0278 = 0x002F0278; // type:func
@@ -10516,27 +10601,13 @@ func_002F03BC = 0x002F03BC; // type:func
 func_002F04D0 = 0x002F04D0; // type:func
 func_002F06E8 = 0x002F06E8; // type:func
 func_002F08A0 = 0x002F08A0; // type:func
-func_002F0AB0 = 0x002F0AB0; // type:func
-func_002F19B0 = 0x002F19B0; // type:func
 func_002F19E0 = 0x002F19E0; // type:func
-func_002F1AD0 = 0x002F1AD0; // type:func
-func_002F1D08 = 0x002F1D08; // type:func
-func_002F1D78 = 0x002F1D78; // type:func
 func_002F1DA0 = 0x002F1DA0; // type:func
 func_002F1DC0 = 0x002F1DC0; // type:func
-func_002F1DE0 = 0x002F1DE0; // type:func
-func_002F1E28 = 0x002F1E28; // type:func
 func_002F1EE0 = 0x002F1EE0; // type:func
 func_002F1F58 = 0x002F1F58; // type:func
-func_002F3470 = 0x002F3470; // type:func
-func_002F3620 = 0x002F3620; // type:func
-func_002F3700 = 0x002F3700; // type:func
-func_002F4208 = 0x002F4208; // type:func
-func_002F4340 = 0x002F4340; // type:func
 func_002F4398 = 0x002F4398; // type:func
 func_002F4508 = 0x002F4508; // type:func
-func_002F4560 = 0x002F4560; // type:func
-func_002F4778 = 0x002F4778; // type:func
 func_002F5948 = 0x002F5948; // type:func
 func_002F5950 = 0x002F5950; // type:func
 func_002F5EF8 = 0x002F5EF8; // type:func
@@ -10544,113 +10615,21 @@ func_002F5F80 = 0x002F5F80; // type:func
 func_002F5F90 = 0x002F5F90; // type:func
 func_002F5FC0 = 0x002F5FC0; // type:func
 func_002F5FE8 = 0x002F5FE8; // type:func
-func_002F6088 = 0x002F6088; // type:func
-func_002F6130 = 0x002F6130; // type:func
-func_002F6160 = 0x002F6160; // type:func
-func_002F6278 = 0x002F6278; // type:func
-func_002F63C0 = 0x002F63C0; // type:func
-func_002F6448 = 0x002F6448; // type:func
-func_002F6508 = 0x002F6508; // type:func
-func_002F6540 = 0x002F6540; // type:func
-func_002F6770 = 0x002F6770; // type:func
-func_002F6870 = 0x002F6870; // type:func
-func_002F69E8 = 0x002F69E8; // type:func
-func_002F6A50 = 0x002F6A50; // type:func
-func_002F6BE0 = 0x002F6BE0; // type:func
-func_002F6C78 = 0x002F6C78; // type:func
-func_002F6DF8 = 0x002F6DF8; // type:func
-func_002F6F78 = 0x002F6F78; // type:func
-func_002F7038 = 0x002F7038; // type:func
 func_002F70A8 = 0x002F70A8; // type:func
-func_002F7150 = 0x002F7150; // type:func
-func_002F7370 = 0x002F7370; // type:func
 func_002F7620 = 0x002F7620; // type:func
 func_002F76E0 = 0x002F76E0; // type:func
 func_002F7C80 = 0x002F7C80; // type:func
-func_002F7C90 = 0x002F7C90; // type:func
-func_002F7CA0 = 0x002F7CA0; // type:func
 func_002F7CB0 = 0x002F7CB0; // type:func
-func_002F7CC0 = 0x002F7CC0; // type:func
 func_002F7CD0 = 0x002F7CD0; // type:func
-func_002F7CE0 = 0x002F7CE0; // type:func
-func_002F7CF0 = 0x002F7CF0; // type:func
 func_002F7D00 = 0x002F7D00; // type:func
 func_002F7D10 = 0x002F7D10; // type:func
-func_002F7D20 = 0x002F7D20; // type:func
-func_002F7D30 = 0x002F7D30; // type:func
-func_002F7D40 = 0x002F7D40; // type:func
-func_002F7D50 = 0x002F7D50; // type:func
-func_002F7D60 = 0x002F7D60; // type:func
-func_002F7D70 = 0x002F7D70; // type:func
-func_002F7D80 = 0x002F7D80; // type:func
-func_002F7D90 = 0x002F7D90; // type:func
-func_002F7DA0 = 0x002F7DA0; // type:func
-func_002F7DB0 = 0x002F7DB0; // type:func
-func_002F7DC0 = 0x002F7DC0; // type:func
-func_002F7DD0 = 0x002F7DD0; // type:func
-func_002F7DE0 = 0x002F7DE0; // type:func
-func_002F7DF0 = 0x002F7DF0; // type:func
-func_002F7E00 = 0x002F7E00; // type:func
-func_002F7E10 = 0x002F7E10; // type:func
-func_002F7E20 = 0x002F7E20; // type:func
 func_002F7E30 = 0x002F7E30; // type:func
-func_002F7E40 = 0x002F7E40; // type:func
-func_002F7E50 = 0x002F7E50; // type:func
-func_002F7E60 = 0x002F7E60; // type:func
-func_002F7E70 = 0x002F7E70; // type:func
 func_002F7E80 = 0x002F7E80; // type:func
-func_002F7E90 = 0x002F7E90; // type:func
-func_002F7EA0 = 0x002F7EA0; // type:func
-func_002F7EB0 = 0x002F7EB0; // type:func
-func_002F7EC0 = 0x002F7EC0; // type:func
-func_002F7ED0 = 0x002F7ED0; // type:func
-func_002F7EE0 = 0x002F7EE0; // type:func
-func_002F7EF0 = 0x002F7EF0; // type:func
-func_002F7F00 = 0x002F7F00; // type:func
-func_002F7F10 = 0x002F7F10; // type:func
-func_002F7F20 = 0x002F7F20; // type:func
-func_002F7F30 = 0x002F7F30; // type:func
-func_002F7F40 = 0x002F7F40; // type:func
-func_002F7F50 = 0x002F7F50; // type:func
-func_002F7F60 = 0x002F7F60; // type:func
-func_002F7F70 = 0x002F7F70; // type:func
-func_002F7F80 = 0x002F7F80; // type:func
-func_002F7F90 = 0x002F7F90; // type:func
-func_002F7FA0 = 0x002F7FA0; // type:func
-func_002F7FB0 = 0x002F7FB0; // type:func
-func_002F7FC0 = 0x002F7FC0; // type:func
-func_002F7FD0 = 0x002F7FD0; // type:func
-func_002F7FE0 = 0x002F7FE0; // type:func
-func_002F7FF0 = 0x002F7FF0; // type:func
-func_002F8000 = 0x002F8000; // type:func
-func_002F8010 = 0x002F8010; // type:func
-func_002F8020 = 0x002F8020; // type:func
-func_002F8030 = 0x002F8030; // type:func
-func_002F8040 = 0x002F8040; // type:func
 func_002F8050 = 0x002F8050; // type:func
 func_002F8060 = 0x002F8060; // type:func
 func_002F8070 = 0x002F8070; // type:func
-func_002F8080 = 0x002F8080; // type:func
 func_002F8090 = 0x002F8090; // type:func
-func_002F80A0 = 0x002F80A0; // type:func
-func_002F80B0 = 0x002F80B0; // type:func
-func_002F80C0 = 0x002F80C0; // type:func
-func_002F80D0 = 0x002F80D0; // type:func
-func_002F80E0 = 0x002F80E0; // type:func
-func_002F80F0 = 0x002F80F0; // type:func
-func_002F8100 = 0x002F8100; // type:func
-func_002F8110 = 0x002F8110; // type:func
-func_002F8120 = 0x002F8120; // type:func
 func_002F8130 = 0x002F8130; // type:func
-func_002F8140 = 0x002F8140; // type:func
-func_002F8150 = 0x002F8150; // type:func
-func_002F8160 = 0x002F8160; // type:func
-func_002F8170 = 0x002F8170; // type:func
-func_002F8180 = 0x002F8180; // type:func
-func_002F8190 = 0x002F8190; // type:func
-func_002F81A0 = 0x002F81A0; // type:func
-func_002F81B0 = 0x002F81B0; // type:func
-func_002F81C0 = 0x002F81C0; // type:func
 func_002F81D0 = 0x002F81D0; // type:func
 func_002F81E0 = 0x002F81E0; // type:func
 func_002F81F0 = 0x002F81F0; // type:func
@@ -10660,49 +10639,6 @@ func_002F8220 = 0x002F8220; // type:func
 func_002F8230 = 0x002F8230; // type:func
 func_002F8240 = 0x002F8240; // type:func
 func_002F8250 = 0x002F8250; // type:func
-func_002F8260 = 0x002F8260; // type:func
-func_002F8270 = 0x002F8270; // type:func
-func_002F8280 = 0x002F8280; // type:func
-func_002F8290 = 0x002F8290; // type:func
-func_002F82A0 = 0x002F82A0; // type:func
-func_002F82B0 = 0x002F82B0; // type:func
-func_002F82C0 = 0x002F82C0; // type:func
-func_002F82D0 = 0x002F82D0; // type:func
-func_002F82E0 = 0x002F82E0; // type:func
-func_002F82F0 = 0x002F82F0; // type:func
-func_002F8300 = 0x002F8300; // type:func
-func_002F8310 = 0x002F8310; // type:func
-func_002F8320 = 0x002F8320; // type:func
-func_002F8330 = 0x002F8330; // type:func
-func_002F8340 = 0x002F8340; // type:func
-func_002F8350 = 0x002F8350; // type:func
-func_002F8360 = 0x002F8360; // type:func
-func_002F8370 = 0x002F8370; // type:func
-func_002F8380 = 0x002F8380; // type:func
-func_002F8390 = 0x002F8390; // type:func
-func_002F83A0 = 0x002F83A0; // type:func
-func_002F83B0 = 0x002F83B0; // type:func
-func_002F83C0 = 0x002F83C0; // type:func
-func_002F83D0 = 0x002F83D0; // type:func
-func_002F83E0 = 0x002F83E0; // type:func
-func_002F83F0 = 0x002F83F0; // type:func
-func_002F8400 = 0x002F8400; // type:func
-func_002F8410 = 0x002F8410; // type:func
-func_002F8420 = 0x002F8420; // type:func
-func_002F8430 = 0x002F8430; // type:func
-func_002F8440 = 0x002F8440; // type:func
-func_002F8450 = 0x002F8450; // type:func
-func_002F8460 = 0x002F8460; // type:func
-func_002F8470 = 0x002F8470; // type:func
-func_002F8480 = 0x002F8480; // type:func
-func_002F8490 = 0x002F8490; // type:func
-func_002F84A0 = 0x002F84A0; // type:func
-func_002F84B0 = 0x002F84B0; // type:func
-func_002F84C0 = 0x002F84C0; // type:func
-func_002F84D0 = 0x002F84D0; // type:func
-func_002F84E0 = 0x002F84E0; // type:func
-func_002F84F0 = 0x002F84F0; // type:func
-func_002F8500 = 0x002F8500; // type:func
 func_002F8510 = 0x002F8510; // type:func
 func_002F8520 = 0x002F8520; // type:func
 func_002F8560 = 0x002F8560; // type:func
@@ -10871,5 +10807,4 @@ func_002FFF40 = 0x002FFF40; // type:func
 func_002FFF88 = 0x002FFF88; // type:func
 func_002FFFA0 = 0x002FFFA0; // type:func
 func_002FFFE8 = 0x002FFFE8; // type:func
-func_00300010 = 0x00300010; // type:func
 func_00300070 = 0x00300070; // type:func
