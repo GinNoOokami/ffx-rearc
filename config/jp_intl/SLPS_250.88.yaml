@@ -1,0 +1,61 @@
+name: Final Fantasy X International (JP)
+sha1: 143a49aad843f367036e7dbfcce3094fbd5b4ca1
+
+options:
+  # What we're splitting
+  basename: SLPS_250.88
+  platform: ps2
+  compiler: EEGCC
+
+  # Where things are. All paths are relative to base_path, the repo root seen from this file.
+  base_path: ../..
+  target_path: build/jp_intl/orig/SLPS_250.88.bin
+  symbol_addrs_path: config/jp_intl/symbol_addrs.txt
+  extensions_path: tools/splat_ext
+  src_path: src
+
+  # Where splat writes. Everything generated is per version.
+  asm_path: asm/jp_intl
+  asset_path: assets/jp_intl
+  build_path: build/jp_intl
+  cache_path: build/jp_intl/.splache
+  ld_script_path: build/jp_intl/SLPS_250.88.ld
+  undefined_funcs_auto_path: build/jp_intl/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/jp_intl/undefined_syms_auto.txt
+
+  # Linking: gp, section order and packing as in the original
+  gp_value: 0x5841F0
+  ld_gp_expression: "0x5841F0"
+  section_order: [.text, .data, .rodata, .vutext, .lit4, .sbss, .bss]
+  auto_link_sections: [.data, .rodata, .lit4]
+  subalign: 8
+  ld_align_segment_vram_end: False
+  ld_align_section_vram_end: False
+
+  # Disassembly
+  find_file_boundaries: False
+  mips_abi_gpr: numeric
+  named_regs_for_c_funcs: False
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+
+segments:
+- name: ffx
+  type: code
+  start: 0x000000
+  vram: 0x00100000
+  subsegments:
+    - [0x000000, asm, text]
+    - [0x200180, data, data]
+    - [0x468B00, rodata, rodata]
+    - [0x478980, vutext, vutext]
+    - [0x47C200, lit4, lit4]
+- name: zerofill
+  type: code
+  start: 0x47C68C
+  vram: 0x0057C700
+  bss_size: 0x2187E8
+  subsegments:
+    - { type: sbss, vram: 0x0057C700, name: sbss }
+    - { type: bss,  vram: 0x0057C780, name: bss }
+- [0x47C68C]

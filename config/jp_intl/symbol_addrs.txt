@@ -1,0 +1,4 @@
+// entry: the ELF header's entry point
+entry = 0x00100008; // type:func
+// main: called by entry; calls Mem_Init, then calls the frame function forever
+main = 0x0011B9D8; // type:func
