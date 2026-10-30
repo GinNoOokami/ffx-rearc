@@ -57,16 +57,18 @@ segments:
     - [0x01D230, c, main/11D230]
     - [0x01D740, asm, 11D740]
     - [0x154830, c, archive/decode]
-    - [0x154958, asm, 254958]
+    - [0x154958, c, dbg/read_debug]
     - [0x155928, hasm, archive/255928]
     - [0x155FB8, asm, 255FB8]
     - [0x200180, data, data]
     - [0x226CD0, .data, archive/decode]
     - [0x226CE0, data, 326CE0]
+    - [0x226E20, data, 326E20]
     - [0x4698E8, .rodata, main/11D230]
     - [0x469950, rodata, 569950]
     - [0x4733C8, .rodata, archive/decode]
-    - [0x4733E0, rodata, 5733E0]
+    - [0x4733E0, .rodata, dbg/read_debug]
+    - [0x473430, rodata, 573430]
     - [0x478980, vutext, vutext]
     - [0x47C200, lit4, lit4]
 - name: zerofill
@@ -77,4 +79,6 @@ segments:
   subsegments:
     - { type: sbss, vram: 0x0057C700, name: sbss }
     - { type: bss,  vram: 0x0057C780, name: bss }
+    - { type: bss,  vram: 0x006A2C90, name: 6A2C90 }
+    - { type: bss,  vram: 0x006A3010, name: 6A3010 }
 - [0x47C68C]
