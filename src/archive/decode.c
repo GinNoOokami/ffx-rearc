@@ -1,10 +1,7 @@
 #include "common.h"
 
-extern s32 func_00254830(u8 *src, void *dst, s32 *out);
-extern void func_00255928();
-extern void func_00255AA0();
-
-void (*D_00326CD0[])() = { func_00254830, func_00255928, func_00255AA0, NULL };
+extern s32 func_00255928(u8 *src, void *dst, s32 *out);
+extern s32 func_00255AA0(u8 *src, void *dst, s32 *out);
 
 void func_002EEBAC(void*, u8*, s32);                /* memcpy? */
 
@@ -17,6 +14,12 @@ s32 func_00254830(u8 *src, void *dst, s32 *out) {
     return size;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/archive/decode", func_002548A0);
+s32 func_002548A0(void* dst, u8 *src) {
+  static s32 (*dispatchTable[])(u8*, void*, s32*) = { func_00254830, func_00255928, func_00255AA0 };
+  s32 result;
+
+  dispatchTable[src[0]](src, dst, &result);
+  return result;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/archive/decode", func_002548E8);
