@@ -1,6 +1,20 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254958);
+extern s8 D_00326E1C;
+extern s32 D_006A2C90[];
+extern s32 D_006A2CD0[];
+
+void func_00254958(void) {
+    s32 i;
+
+    if (D_00326E1C == 0) {
+        D_00326E1C = 1;
+        for (i = 0; i < 16; i++) {
+            D_006A2C90[i] = 0;
+            D_006A2CD0[i] = 0;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_002549A8);
 
