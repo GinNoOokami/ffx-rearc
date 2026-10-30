@@ -10,7 +10,7 @@ typedef signed char s8;
 typedef short s16;
 typedef int s32;
 typedef long s64;
-typedef int s128 __attribute__((mode(TI)));         /* 128-bit (EE registers, lq/sq) */
+typedef int s128 __attribute__((mode(TI))); /* 128-bit (EE registers, lq/sq) */
 
 /* Unsigned integers */
 typedef unsigned char u8;

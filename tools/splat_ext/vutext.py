@@ -8,4 +8,4 @@ class PS2SegVutext(CommonSegTextbin):
         return ".vutext"
 
     def get_section_flags(self) -> str:
-        return "ax" # allocated, executable
+        return "ax"  # allocated, executable

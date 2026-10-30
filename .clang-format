@@ -1,0 +1,33 @@
+# clang-format 22 (pinned in requirements.txt). LLVM's style with the changes FF7's decomp uses.
+Language: C
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+ColumnLimit: 120
+PointerAlignment: Left
+QualifierAlignment: Left
+SpaceAroundPointerQualifiers: Before
+InsertBraces: true
+InsertNewlineAtEOF: true
+LineEnding: LF
+RemoveParentheses: ReturnStatement
+RemoveEmptyLinesInUnwrappedLines: true
+KeepEmptyLines:
+  AtStartOfBlock: false
+  AtStartOfFile: false
+SortIncludes:
+  Enabled: false
+SpacesInLineCommentPrefix:
+  Maximum: 1
+NumericLiteralCase:
+  ExponentLetter: Lower
+  HexDigit: Upper
+  Prefix: Lower
+  Suffix: Upper
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+PenaltyBreakOpenParenthesis: 1
+PenaltyIndentedWhitespace: 1
+TypeNames: [s8, u8, s16, u16, s32, u32, s64, u64, s128, u128, f32, f64]

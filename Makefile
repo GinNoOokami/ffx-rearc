@@ -41,6 +41,7 @@ LD      := $(CROSS)ld
 OBJCOPY := $(CROSS)objcopy
 SEVENZIP ?= 7z
 PYTHON  ?= .venv/bin/python3
+VENV_BIN := $(dir $(PYTHON))
 SPLAT   := $(PYTHON) -m splat split
 
 AS_FLAGS := -EL -march=r5900 -mabi=eabi -no-pad-sections -I include
@@ -63,7 +64,7 @@ C_FILES := $(shell find src -name '*.c' 2>/dev/null)
 HASM_FILES := $(shell find src -name '*.s' 2>/dev/null)
 O_FILES := $(patsubst %.s,$(BUILD_DIR)/%.s.o,$(S_FILES) $(HASM_FILES)) $(patsubst %.c,$(BUILD_DIR)/%.c.o,$(C_FILES))
 
-.PHONY: all check extract split clean distclean
+.PHONY: all check expected extract split format clean distclean
 all: check
 
 check: $(IMAGE)
@@ -125,6 +126,12 @@ $(ELF): $(O_FILES) $(LD_SCRIPT)
 
 $(IMAGE): $(ELF)
 	$(OBJCOPY) -O binary $< $@
+
+# Formatting: clang-format (.clang-format) for our C, black for our Python; both pinned in
+# requirements.txt. Black skips git-ignored paths such as tools/cc/.
+format:
+	$(VENV_BIN)/clang-format -i $(shell find src include -name '*.[ch]')
+	$(VENV_BIN)/black -q tools
 
 clean:
 	rm -rf build/$(VERSION)
