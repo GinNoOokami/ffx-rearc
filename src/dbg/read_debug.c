@@ -1,5 +1,13 @@
 #include "common.h"
 
+typedef struct {
+    /* 0x00 */ u8 pad0[0x20];
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+} ArchiveState;
+
+ArchiveState* func_00162DD0(void);
+
 extern s8 D_00326E1C;
 extern s32 D_006A2C90[];
 extern s32 D_006A2CD0[];
@@ -49,14 +57,50 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254AD0);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254DA8);
 
-/*?*/ s32 func_00254AD0(s32);                               /* extern */
+/*?*/ s32 func_00254AD0(s32); /* extern */
 extern s16* D_0078DFC4;
 
-s32 func_00254DD8(s32 arg0, s32 arg1) {
-    return func_00254AD0(D_0078DFC4[arg0] + arg1);
-}
+s32 func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(D_0078DFC4[arg0] + arg1); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254E08);
+ArchiveState* func_00162DD0(void);
+s32 func_00162EB8(s32);
+s32 func_00165D70(s32, s32);
+s32 func_00254AB0(void);
+s32 func_002FC1A0(s32, s32);
+s32 func_002FC428(s32);
+s32 func_002FC5A8(s32, s32, s32);
+extern s8 D_00565DF4;
+extern s32 D_0078DFBC;
+
+s32 func_00254E08(s32 id) {
+    ArchiveState* state = func_00162DD0();
+    s32 size = func_00165D70(D_0078DFBC, id);
+    s32 name;
+    s32 index;
+    s32 fd;
+
+    if (size != 0) {
+        return size;
+    }
+    if (D_00565DF4 != 0) {
+        size = func_00162EB8(id);
+    } else {
+        index = state->unk20 + id;
+        if (func_00254AB0() != 0) {
+            name = func_00254AD0(index);
+            if (name != 0) {
+                fd = func_002FC1A0(name, 1);
+                if (fd < 0) {
+                    return 0;
+                }
+                size = func_002FC5A8(fd, 0, 2);
+                size = (size + 15) / 16 * 16;
+                func_002FC428(fd);
+            }
+        }
+    }
+    return size;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254EF0);
 
