@@ -255,7 +255,11 @@ void* func_00255840(void) {
     return func_00254F40(D_00326DF0, NULL);
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00255880);
+/*?*/ s32 func_00164628();                                  /* extern */
+
+s32 func_00255880(void) {
+    return func_00164628();
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_002558A0);
 
