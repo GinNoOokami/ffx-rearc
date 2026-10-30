@@ -1,9 +1,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "include_asm.h"
+#include <stddef.h>
 
-#define NULL ((void*)0)
+#include "include_asm.h"
 
 /* Signed integers */
 typedef signed char s8;

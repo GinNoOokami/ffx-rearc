@@ -51,7 +51,10 @@ LD_FLAGS := -EL
 EE_CC_NAME := ee-gcc2.9-991111-01
 EE_CC_DIR  := tools/cc/$(EE_CC_NAME)
 EE_CC      := $(EE_CC_DIR)/bin/ee-gcc
-C_FLAGS    := -O2 -G0 -I include
+
+# The system headers the package lacks (newlib's libc, gcc's own), unpacked by tools/fetch_headers.
+SYS_INC    := tools/cc/include
+C_FLAGS    := -O2 -G0 -I include -isystem $(SYS_INC)/gcc -isystem $(SYS_INC)/newlib
 
 # ---- Inputs: whatever splat has written to asm/<version>/ ----
 # nonmatchings/ holds the functions a C file pulls in with INCLUDE_ASM; they aren't built alone.
@@ -103,13 +106,16 @@ $(BUILD_DIR)/%.s.o: %.s
 # The toolchain is an order-only prerequisite (after |): fetched when missing, but its timestamp
 # never forces a recompile. The old assembler writes a symbol table modern ld rejects (sh_info
 # doesn't count all local symbols); a plain objcopy rewrites it correctly.
-$(BUILD_DIR)/%.c.o: %.c | $(EE_CC_DIR)
+$(BUILD_DIR)/%.c.o: %.c | $(EE_CC_DIR) $(SYS_INC)
 	@mkdir -p $(@D)
 	$(EE_CC) -c $(C_FLAGS) -o $@ $<
 	$(OBJCOPY) $@
 
 $(EE_CC_DIR):
 	tools/fetch_toolchain $(EE_CC_NAME)
+
+$(SYS_INC):
+	tools/fetch_headers
 
 # splat writes, for each C file, the asm files its INCLUDE_ASMs pull in (create_asm_dependencies),
 # so a re-split recompiles it. The - skips files not written yet (before the first split).

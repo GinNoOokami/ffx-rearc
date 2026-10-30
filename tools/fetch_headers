@@ -1,0 +1,46 @@
+#!/bin/sh
+# Unpack the system headers the original EE toolchain shipped into tools/cc/include/:
+#   newlib/  newlib 1.8.2's libc headers (stdio.h, string.h, sys/, machine/, ...)
+#   gcc/     gcc 2.95.2's own headers (stdarg.h, va-mips.h, stddef.h, varargs.h, limits.h, float.h)
+# The compiler package from tools/fetch_toolchain has neither. The archives come from
+# $EE_TOOLCHAIN_CACHE if they are there, otherwise from upstream; their sha256 must match below.
+set -eu
+
+CACHE=${EE_TOOLCHAIN_CACHE:-$HOME/opt/ee-toolchains/archives}
+NEWLIB=newlib-1.8.2.tar.gz
+NEWLIB_URL=https://sourceware.org/pub/newlib/$NEWLIB
+NEWLIB_SHA256=e52667ed78595dd1919f4a303f8b658b1d57b926e085e8021851b279143cf3ef
+GCC=gcc-core-2.95.2.tar.gz
+GCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-2.95.2/$GCC
+GCC_SHA256=65e68d39ba3f2a6b23431ee361b62fe0103b35c3ccaa818d174ace80dfc587b1
+
+DEST=tools/cc/include
+[ -e "$DEST" ] && { echo "$DEST already exists"; exit 0; }
+mkdir -p tools/cc
+
+# fetch <archive> <url> <sha256>: copy from the cache or download to tools/cc/<archive>.part
+fetch() {
+  if [ -f "$CACHE/$1" ]; then
+    cp "$CACHE/$1" "tools/cc/$1.part"
+  else
+    echo "fetching $2"
+    curl -fL -o "tools/cc/$1.part" "$2"
+  fi
+  echo "$3  tools/cc/$1.part" | sha256sum -c -
+}
+fetch $NEWLIB $NEWLIB_URL $NEWLIB_SHA256
+fetch $GCC $GCC_URL $GCC_SHA256
+
+# Unpack beside the destination first, so a failed unpack never leaves a half-filled include dir.
+mkdir -p "$DEST.part/newlib" "$DEST.part/gcc"
+tar xzf "tools/cc/$NEWLIB.part" -C "$DEST.part/newlib" --strip-components=4 \
+  newlib-1.8.2/newlib/libc/include
+G=gcc-2.95.2/gcc
+tar xzf "tools/cc/$GCC.part" -C "$DEST.part/gcc" --strip-components=3 \
+  $G/ginclude/stdarg.h $G/ginclude/va-mips.h $G/ginclude/stddef.h $G/ginclude/varargs.h
+# gcc installs these two under other names: glimits.h as limits.h, the float format's header as
+# float.h (float-i64.h: IEEE single float, 64-bit double).
+tar xzOf "tools/cc/$GCC.part" $G/glimits.h > "$DEST.part/gcc/limits.h"
+tar xzOf "tools/cc/$GCC.part" $G/config/float-i64.h > "$DEST.part/gcc/float.h"
+mv "$DEST.part" "$DEST"
+rm "tools/cc/$NEWLIB.part" "tools/cc/$GCC.part"
