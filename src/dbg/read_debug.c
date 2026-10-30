@@ -195,11 +195,11 @@ void func_002556A0(const char* path) {
 }
 
 /*?*/ s32 func_001ACEE8(char *); // getRegionCode?
-extern char D_00326CE0[]; // "host:/ffx/proj/battle/jp/cddata/cdrom.mdg"
-extern char D_00326D10[]; // "host:/ffx/proj/battle/jp/cddata/cdrom.fid"
-extern char D_00326D40[]; // "host:/ffx/proj/battle/jp/cddata/cdrom.fnd"
-extern char D_00326D70[]; // "host:/ffx/proj/prog/cdidx/jp/cdrom.mdg"
-extern char D_00326D98[]; // "host:/ffx/proj/prog/cdidx/jp/cdrom.fid"
+extern char D_00326CE0[]; // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
+extern char D_00326D10[]; // host:/ffx/proj/battle/jp/cddata/cdrom.fid
+extern char D_00326D40[]; // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
+extern char D_00326D70[]; // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
+extern char D_00326D98[]; // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
 
 void func_002556F8(void) {
     char region[2];
@@ -242,7 +242,18 @@ void* func_00255800(void) {
     return func_00254F40(D_00326DC0, NULL);
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00255840);
+extern char D_00326DF0[]; // host:/ffx/proj/prog/cdidx/jp/modulesize.bin
+
+void* func_00255840(void) {
+    char region[2];
+
+    func_001ACEE8(region);
+
+    D_00326DF0[0x1A] = region[0];
+    D_00326DF0[0x1B] = region[1];
+
+    return func_00254F40(D_00326DF0, NULL);
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00255880);
 
