@@ -38,7 +38,10 @@ s32 func_002549A8(s32 arg0, s32 arg1) {
     return i;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254A88);
+void func_00254A88(s32 arg0) {
+    D_006A2C90[arg0] = 0;
+    D_006A2CD0[arg0] = 0;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254AB0);
 
