@@ -1,45 +1,47 @@
 #include "common.h"
 
+#define FILE_NAME_CHG_TBL_CNT 16
+
 // Archive state (D_0078DF98). Function slots are filled by func_00165588; the
 // comments give the release function, and the host one from this file where
 // func_002558B0 overrides the slot. "()" = parameters not known yet.
 typedef struct {
-    /* 0x00 */ s32 (*unk0)();                        // func_00164040
-    /* 0x04 */ s32 (*unk4)(s32);                     // func_00163198 / func_00254EF0
-    /* 0x08 */ s32 (*unk8)();                        // func_00164970
-    /* 0x0C */ void (*unkC)(s32);                    // func_00165588 (this table's own init)
-    /* 0x10 */ s32 (*unk10)();                       // func_00163FD0
-    /* 0x14 */ s32 (*unk14)(s32);                    // func_00162EB8 / func_00254E08
-    /* 0x18 */ s32 unk18;                            // func_00165588's argument; 0 = host mode
-    /* 0x1C */ s32 (*unk1C)();                       // func_00165300
+    /* 0x00 */ s32 (*unk0)();     // func_00164040
+    /* 0x04 */ s32 (*unk4)(s32);  // func_00163198 / func_00254EF0
+    /* 0x08 */ s32 (*unk8)();     // func_00164970
+    /* 0x0C */ void (*unkC)(s32); // func_00165588 (this table's own init)
+    /* 0x10 */ s32 (*unk10)();    // func_00163FD0
+    /* 0x14 */ s32 (*unk14)(s32); // func_00162EB8 / func_00254E08
+    /* 0x18 */ s32 unk18;         // func_00165588's argument; 0 = host mode
+    /* 0x1C */ s32 (*unk1C)();    // func_00165300
     /* 0x20 */ s32 unk20;
     /* 0x24 */ s32 unk24;
-    /* 0x28 */ void* unk28;                          // cdrom.mdg
-    /* 0x2C */ s16* unk2C;                           // cdrom.fid
-    /* 0x30 */ void* unk30;                          // cdrom.fnd (host mode)
+    /* 0x28 */ void* unk28; // cdrom.mdg
+    /* 0x2C */ s16* unk2C;  // cdrom.fid
+    /* 0x30 */ void* unk30; // cdrom.fnd (host mode)
     /* 0x34 */ u8 pad34[0x54 - 0x34];
-    /* 0x54 */ void* (*unk54)(const char*, s32*);    // func_00162D30 / func_00254F40
-    /* 0x58 */ const char* (*unk58)(s32);            // func_00164A10 / func_00254DA8
+    /* 0x54 */ void* (*unk54)(const char*, s32*); // func_00162D30 / func_00254F40
+    /* 0x58 */ const char* (*unk58)(s32);         // func_00164A10 / func_00254DA8
     /* 0x5C */ u8 pad5C[0x60 - 0x5C];
-    /* 0x60 */ void (*unk60)(const char*);           // func_00162D18 / func_002556A0
-    /* 0x64 */ s32 (*unk64)();                       // func_00162E48
-    /* 0x68 */ void (*unk68)();                      // func_00163E90 / func_00255158
-    /* 0x6C */ s32 (*unk6C)();                       // func_00163168
+    /* 0x60 */ void (*unk60)(const char*); // func_00162D18 / func_002556A0
+    /* 0x64 */ s32 (*unk64)();             // func_00162E48
+    /* 0x68 */ void (*unk68)();            // func_00163E90 / func_00255158
+    /* 0x6C */ s32 (*unk6C)();             // func_00163168
     /* 0x70 */ u8 pad70[0x78 - 0x70];
-    /* 0x78 */ s32 (*unk78)(void);                   // func_00164628 / func_00255880
-    /* 0x7C */ s32 (*unk7C)();                       // func_00165378
-    /* 0x80 */ s32 (*unk80)();                       // func_001648F8
-    /* 0x84 */ s32 (*unk84)();                       // func_001653A0
-    /* 0x88 */ s32 (*unk88)();                       // func_00165548 / func_002558A0
-    /* 0x8C */ s32 (*unk8C)();                       // func_00165528 / func_002558A8
-    /* 0x90 */ s32 (*unk90)();                       // func_00164320
+    /* 0x78 */ s32 (*unk78)(void); // func_00164628 / func_00255880
+    /* 0x7C */ s32 (*unk7C)();     // func_00165378
+    /* 0x80 */ s32 (*unk80)();     // func_001648F8
+    /* 0x84 */ s32 (*unk84)();     // func_001653A0
+    /* 0x88 */ s32 (*unk88)();     // func_00165548 / func_002558A0
+    /* 0x8C */ s32 (*unk8C)();     // func_00165528 / func_002558A8
+    /* 0x90 */ s32 (*unk90)();     // func_00164320
 } ArchiveState;
 
 ArchiveState* func_00162DD0(void);
 
 extern s8 D_00326E1C;
-extern s32 D_006A2C90[];
-extern s32 D_006A2CD0[];
+extern const char* D_006A2C90[FILE_NAME_CHG_TBL_CNT];
+extern const char* D_006A2CD0[FILE_NAME_CHG_TBL_CNT];
 
 extern char D_00573400[]; // "read_debug.c", emitted by INCLUDE_RODATA
 extern ArchiveState D_0078DF98;
@@ -58,10 +60,10 @@ void func_00254958(void) {
     }
 }
 
-s32 func_002549A8(s32 arg0, s32 arg1) {
+s32 func_002549A8(const char* arg0, const char* arg1) {
     s32 i = 0;
 
-    if (D_006A2C90[0] != 0) {
+    if (D_006A2C90[0] != NULL) {
         for (i = 0; i < 16; i++) {
             if (D_006A2C90[i] == 0) {
                 break;
@@ -83,11 +85,79 @@ void func_00254A88(s32 arg0) {
     D_006A2CD0[arg0] = 0;
 }
 
+// getFileTbl
 void* func_00254AB0(void) { return func_00162DD0()->unk30; }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254AD0);
+const char* func_0011A480(void); // returns "sugimoto"
+extern char D_006A2D10[0x200];   // size inferred
 
-const char* func_00254AD0(s32);
+// Returns file `index`'s name from the cdrom.fnd table, expanded into a static buffer:
+// "$USER$" becomes func_0011A480()'s string, and a prefix found in the name-change table
+// (func_002549A8) becomes its replacement. NULL if there is no table or no such name.
+const char* func_00254AD0(s32 index) {
+    const char* name = NULL;
+    const char* user;
+    const char* str;
+    s32* fileTbl;
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 m;
+    s32 n;
+
+    // fileTbl[0] = entry count, fileTbl[1 + n] = offset of name n from the table start; a name
+    // runs to the next offset, and an entry with no length has no name.
+    fileTbl = func_00254AB0();
+    if (fileTbl != NULL && index < fileTbl[0]) {
+        s32 offset = fileTbl[index + 1];
+
+        if (fileTbl[index + 2] - offset > 0) {
+            name = (char*)fileTbl + offset;
+        }
+    }
+
+    if (name != NULL) {
+        user = func_0011A480();
+        for (j = 0, i = 0; D_006A2D10[j] = name[i], name[i] != '\0'; i++, j++) {
+            const char* p = &name[i];
+
+            if (p[0] == '$' && p[1] == 'U' && p[2] == 'S' && p[3] == 'E' && p[4] == 'R' && p[5] == '$') {
+                if (user != NULL) {
+                    for (k = 0; D_006A2D10[j++] = user[k], user[k] != '\0'; k++) {
+                    }
+                    // The copy leaves j past the '\0'; back up so the loop's j++ lands on it.
+                    j -= 2;
+                    i += 5;
+                }
+            } else {
+                // A match doesn't end the search: later entries are tried at the new position,
+                // and a second match overwrites the last character of the first replacement.
+                for (n = 0; n < FILE_NAME_CHG_TBL_CNT; n++) {
+                    if (D_006A2C90[n] == NULL) {
+                        continue;
+                    }
+
+                    str = D_006A2C90[n];
+                    for (k = 0; name[i + k] != '\0' && str[k] != '\0' && name[i + k] == str[k]; k++) {
+                    }
+
+                    if (str[k] == '\0') {
+                        str = D_006A2CD0[n];
+                        for (m = 0; D_006A2D10[j++] = str[m], str[m] != '\0'; m++) {
+                        }
+                        j -= 2;
+                        i += k - 1;
+                    }
+                }
+            }
+        }
+
+        name = D_006A2D10;
+    }
+
+    return name;
+}
+
 const char* func_00254DA8(s32 arg0) { return func_00254AD0(func_00162DD0()->unk20 + arg0); }
 
 extern s16* D_0078DFC4;
@@ -116,7 +186,7 @@ s32 func_00254E08(s32 id) {
         size = func_00162EB8(id);
     } else {
         index = state->unk20 + id;
-        if (func_00254AB0() != 0) {
+        if (func_00254AB0() != NULL) {
             const char* name = func_00254AD0(index);
             if (name != 0) {
                 fd = func_002FC1A0(name, 1);
@@ -222,12 +292,12 @@ void func_002556A0(const char* path) {
     D_0078DF98.unk30 = func_00255020(path, NULL);
 }
 
-/*?*/ s32 func_001ACEE8(char *); // getRegionCode?
-extern char D_00326CE0[]; // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
-extern char D_00326D10[]; // host:/ffx/proj/battle/jp/cddata/cdrom.fid
-extern char D_00326D40[]; // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
-extern char D_00326D70[]; // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
-extern char D_00326D98[]; // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
+/*?*/ s32 func_001ACEE8(char*); // getRegionCode?
+extern char D_00326CE0[];       // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
+extern char D_00326D10[];       // host:/ffx/proj/battle/jp/cddata/cdrom.fid
+extern char D_00326D40[];       // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
+extern char D_00326D70[];       // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
+extern char D_00326D98[];       // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
 
 void func_002556F8(void) {
     char region[2];
@@ -283,19 +353,13 @@ void* func_00255840(void) {
     return func_00254F40(D_00326DF0, NULL);
 }
 
-/*?*/ s32 func_00164628();                                  /* extern */
+/*?*/ s32 func_00164628(); /* extern */
 
-s32 func_00255880(void) {
-    return func_00164628();
-}
+s32 func_00255880(void) { return func_00164628(); }
 
-s32 func_002558A0(void) {
-    return -1;
-}
+s32 func_002558A0(void) { return -1; }
 
-s32 func_002558A8(void) {
-    return -1;
-}
+s32 func_002558A8(void) { return -1; }
 
 /*?*/ void func_00255158();
 
