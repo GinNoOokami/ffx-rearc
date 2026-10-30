@@ -120,13 +120,41 @@ s32 func_00254EF0(s32 arg0) {
 
 INCLUDE_RODATA("asm/jp_intl/nonmatchings/dbg/read_debug", D_00573400);
 
-void func_00254F18(s32 fd) {
+void func_00254F18(s32 fd, s32 arg1) {
     if (fd < 0) {
         func_00157788("fd >= 0", D_00573400, 0x14D);
     }
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254F40);
+/*?*/ void FlushCache(/*?*/ s32);                                    /* extern */
+s32 func_0011D370(s32, /*?*/ s32, s8 *, /*?*/ s32);                 /* extern */
+/*?*/ void func_002FC7E0(s32, s32, s32);                     /* extern */
+
+s32 func_00254F40(s32 arg0, s32 *arg1) {
+    void* block;
+    s32 size;
+    s32 fd;
+
+    fd = func_002FC1A0(arg0, 1);
+    func_00254F18(fd, arg0);
+
+    size = func_002FC5A8(fd, 0, 2);
+    func_002FC5A8(fd, 0, 0);
+    
+    block = func_0011D370((size + 3) / 4 * 4, 10, D_00573400, 0x165);
+    
+    FlushCache(0);
+
+    func_002FC7E0(fd, block, size);
+    func_002FC428(fd);
+    FlushCache(0);
+
+    if (arg1 != NULL) {
+        *arg1 = size;
+    }
+
+    return block;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00255020);
 
