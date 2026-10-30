@@ -16,7 +16,27 @@ void func_00254958(void) {
     }
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_002549A8);
+/*?*/ void func_00157788(/*?*/ u8*, /*?*/ u8*, /*?*/ s32); /* extern */
+
+s32 func_002549A8(s32 arg0, s32 arg1) {
+    s32 i = 0;
+
+    if (D_006A2C90[0] != 0) {
+        for (i = 0; i < 16; i++) {
+            if (D_006A2C90[i] == 0) {
+                break;
+            }
+        }
+    }
+
+    if (i == 16) {
+        func_00157788("i!=FILE_NAME_CHG_TBL_CNT", "read_debug.c", 0x50);
+    }
+
+    D_006A2C90[i] = arg0;
+    D_006A2CD0[i] = arg1;
+    return i;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254A88);
 
