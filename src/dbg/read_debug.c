@@ -109,7 +109,12 @@ s32 func_00254E08(s32 id) {
     return size;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254EF0);
+/*?*/ s32 func_00163138(s32);                               /* extern */
+extern s32 D_0078DFB8;
+
+s32 func_00254EF0(s32 arg0) {
+    return func_00163138(D_0078DFB8 + arg0);
+}
 
 INCLUDE_RODATA("asm/jp_intl/nonmatchings/dbg/read_debug", D_00573400);
 
