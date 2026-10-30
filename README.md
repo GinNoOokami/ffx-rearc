@@ -38,8 +38,7 @@ make extract
 ## Building
 
 ```bash
-make split    # disassemble the game with splat
-make          # rebuild and check it matches (prints "…SLPS_250.88.bin: OK")
+make          # disassemble, rebuild and check it matches (prints "…SLPS_250.88.bin: OK")
 ```
 
-After changing the splat config or `symbol_addrs.txt`, run both again.
+`make` disassembles again by itself after a change to the splat config or `symbol_addrs.txt`.

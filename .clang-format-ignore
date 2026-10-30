@@ -1,0 +1,3 @@
+# Files clang-format skips (gitignore-style patterns, relative to this directory).
+# splat writes include_asm.h on every split.
+include/include_asm.h

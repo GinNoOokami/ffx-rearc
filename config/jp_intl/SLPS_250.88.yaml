@@ -21,10 +21,10 @@ options:
   asm_path: asm/jp_intl
   asset_path: assets/jp_intl
   build_path: build/jp_intl
-  cache_path: build/jp_intl/.splache
-  ld_script_path: build/jp_intl/SLPS_250.88.ld
-  undefined_funcs_auto_path: build/jp_intl/undefined_funcs_auto.txt
-  undefined_syms_auto_path: build/jp_intl/undefined_syms_auto.txt
+  cache_path: asm/jp_intl/.splache
+  ld_script_path: asm/jp_intl/SLPS_250.88.ld
+  undefined_funcs_auto_path: asm/jp_intl/undefined_funcs_auto.txt
+  undefined_syms_auto_path: asm/jp_intl/undefined_syms_auto.txt
 
   # For each C file, a make dependency file listing the asm files its INCLUDE_ASMs pull in
   # (build/jp_intl/src/<file>.asmproc.d).

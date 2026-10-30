@@ -27,12 +27,14 @@ ORIG_ELF   := $(ORIG_DIR)/$(BASENAME)
 # the bytes the PS2 copies to RAM at 0x100000. That is what the build must reproduce.
 ORIG_IMAGE := $(BUILD_DIR)/orig/$(BASENAME).bin
 SPLAT_YAML := $(CONFIG_DIR)/$(BASENAME).yaml
-LD_SCRIPT  := $(BUILD_DIR)/$(BASENAME).ld
+SYMBOL_ADDRS := $(CONFIG_DIR)/symbol_addrs.txt
+SPLIT_STAMP := $(ASM_DIR)/split.stamp
+LD_SCRIPT  := $(ASM_DIR)/$(BASENAME).ld
 ELF        := $(BUILD_DIR)/$(BASENAME).elf
 IMAGE      := $(BUILD_DIR)/$(BASENAME).bin
 
 # Written by splat: symbols referenced at addresses outside every segment, defined at fixed values.
-UNDEF_SYMS := $(BUILD_DIR)/undefined_syms_auto.txt $(BUILD_DIR)/undefined_funcs_auto.txt
+UNDEF_SYMS := $(ASM_DIR)/undefined_syms_auto.txt $(ASM_DIR)/undefined_funcs_auto.txt
 
 # ---- Tools ----
 CROSS   ?= mips-linux-gnu-
@@ -64,8 +66,16 @@ C_FILES := $(shell find src -name '*.c' 2>/dev/null)
 HASM_FILES := $(shell find src -name '*.s' 2>/dev/null)
 O_FILES := $(patsubst %.s,$(BUILD_DIR)/%.s.o,$(S_FILES) $(HASM_FILES)) $(patsubst %.c,$(BUILD_DIR)/%.c.o,$(C_FILES))
 
-.PHONY: all check expected extract split format clean distclean
-all: check
+.PHONY: all build check expected extract split format clean distclean
+all: build
+
+# Everything in one command: re-split if splat's inputs changed, then build, check, refresh
+# expected/ and objdiff.json. The second pass is a fresh make, so its file lists (found when make
+# starts) include what the split just wrote. While a function doesn't match yet, the build stops at
+# the link or the sha1 check: the objects are rebuilt, and expected/ keeps the last matching state.
+build:
+	$(MAKE) $(SPLIT_STAMP)
+	$(MAKE) objdiff.json expected
 
 check: $(IMAGE)
 	@echo "$(IMAGE_SHA1)  $(IMAGE)" | sha1sum -c -
@@ -82,6 +92,18 @@ expected: check
 split: $(ORIG_IMAGE)
 	rm -rf $(ASM_DIR)
 	$(SPLAT) $(SPLAT_YAML)
+	touch $(SPLIT_STAMP)
+
+# The last split's inputs. Everything splat writes (asm, linker script, undefined-symbol lists, the
+# stamp) is under asm/<version>/, so make clean only recompiles; make distclean splits again. The
+# image splat reads is order-only: make clean deletes it, and rebuilding it isn't a change.
+$(SPLIT_STAMP): $(SPLAT_YAML) $(SYMBOL_ADDRS) $(ORIG_ELF) $(wildcard tools/splat_ext/*.py) | $(ORIG_IMAGE)
+	rm -rf $(ASM_DIR)
+	$(SPLAT) $(SPLAT_YAML)
+	touch $@
+
+objdiff.json: $(SPLAT_YAML) tools/objdiff_config.py
+	$(PYTHON) tools/objdiff_config.py $(SPLAT_YAML) $(BUILD_DIR) $@
 
 extract: $(ORIG_ELF)
 
