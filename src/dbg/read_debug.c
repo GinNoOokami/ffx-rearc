@@ -55,7 +55,9 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254AB0);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254AD0);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254DA8);
+s32 func_00254DA8(s32 arg0) {
+    return func_00254AD0(func_00162DD0()->unk20 + arg0);
+}
 
 /*?*/ s32 func_00254AD0(s32); /* extern */
 extern s16* D_0078DFC4;
