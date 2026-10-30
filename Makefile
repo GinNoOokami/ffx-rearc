@@ -66,6 +66,13 @@ all: check
 check: $(IMAGE)
 	@echo "$(IMAGE_SHA1)  $(IMAGE)" | sha1sum -c -
 
+# Target objects for diff tools: a copy of build/<version>/src, taken only after the image matches,
+# so every object holds the original code (still asm, or C that matches).
+expected: check
+	rm -rf expected/$(BUILD_DIR)
+	mkdir -p expected/$(BUILD_DIR)
+	cp -a $(BUILD_DIR)/src expected/$(BUILD_DIR)/
+
 # Splitting starts from an empty asm/<version>/: every .s found there is built, so a file left from
 # an old layout would be linked twice.
 split: $(ORIG_IMAGE)
