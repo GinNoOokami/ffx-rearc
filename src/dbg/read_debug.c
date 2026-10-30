@@ -1,12 +1,38 @@
 #include "common.h"
 
+// Archive state (D_0078DF98). Function slots are filled by func_00165588; the
+// comments give the release function, and the host one from this file where
+// func_002558B0 overrides the slot. "()" = parameters not known yet.
 typedef struct {
-    /* 0x00 */ u8 pad0[0x20];
+    /* 0x00 */ s32 (*unk0)();                        // func_00164040
+    /* 0x04 */ s32 (*unk4)(s32);                     // func_00163198 / func_00254EF0
+    /* 0x08 */ s32 (*unk8)();                        // func_00164970
+    /* 0x0C */ void (*unkC)(s32);                    // func_00165588 (this table's own init)
+    /* 0x10 */ s32 (*unk10)();                       // func_00163FD0
+    /* 0x14 */ s32 (*unk14)(s32);                    // func_00162EB8 / func_00254E08
+    /* 0x18 */ s32 unk18;                            // func_00165588's argument; 0 = host mode
+    /* 0x1C */ s32 (*unk1C)();                       // func_00165300
     /* 0x20 */ s32 unk20;
     /* 0x24 */ s32 unk24;
-    /* 0x28 */ void* unk28;
-    /* 0x2C */ s16* unk2C;
-    /* 0x30 */ void* unk30;
+    /* 0x28 */ void* unk28;                          // cdrom.mdg
+    /* 0x2C */ s16* unk2C;                           // cdrom.fid
+    /* 0x30 */ void* unk30;                          // cdrom.fnd (host mode)
+    /* 0x34 */ u8 pad34[0x54 - 0x34];
+    /* 0x54 */ void* (*unk54)(const char*, s32*);    // func_00162D30 / func_00254F40
+    /* 0x58 */ const char* (*unk58)(s32);            // func_00164A10 / func_00254DA8
+    /* 0x5C */ u8 pad5C[0x60 - 0x5C];
+    /* 0x60 */ void (*unk60)(const char*);           // func_00162D18 / func_002556A0
+    /* 0x64 */ s32 (*unk64)();                       // func_00162E48
+    /* 0x68 */ void (*unk68)();                      // func_00163E90 / func_00255158
+    /* 0x6C */ s32 (*unk6C)();                       // func_00163168
+    /* 0x70 */ u8 pad70[0x78 - 0x70];
+    /* 0x78 */ s32 (*unk78)(void);                   // func_00164628 / func_00255880
+    /* 0x7C */ s32 (*unk7C)();                       // func_00165378
+    /* 0x80 */ s32 (*unk80)();                       // func_001648F8
+    /* 0x84 */ s32 (*unk84)();                       // func_001653A0
+    /* 0x88 */ s32 (*unk88)();                       // func_00165548 / func_002558A0
+    /* 0x8C */ s32 (*unk8C)();                       // func_00165528 / func_002558A8
+    /* 0x90 */ s32 (*unk90)();                       // func_00164320
 } ArchiveState;
 
 ArchiveState* func_00162DD0(void);
@@ -124,6 +150,7 @@ void func_00254F18(s32 fd, const char* path) {
 void* func_0011D370(s32, s32, const char*, s32); // memalloc
 void func_002FC7E0(s32, void*, s32);
 
+// Debug PCload
 void* func_00254F40(const char* path, s32* arg1) {
     void* block;
     s32 size;
@@ -187,9 +214,10 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00255158);
 
 void func_0011D590(void*, /*?*/ s32);
 
+// Debug PcFileTblSet
 void func_002556A0(const char* path) {
-    if (D_0078DF98.unk30 != 0) {
-        func_0011D590(D_0078DF98.unk30, 0xA);
+    if (D_0078DF98.unk30 != NULL) {
+        func_0011D590(D_0078DF98.unk30, 10);
     }
     D_0078DF98.unk30 = func_00255020(path, NULL);
 }
@@ -269,4 +297,35 @@ s32 func_002558A8(void) {
     return -1;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_002558B0);
+/*?*/ void func_00255158();
+
+// Installs this file's loader functions into the archive state (D_0078DF98).
+// func_00165588(arg) stores arg at +0x18; with arg == 0 it calls this function,
+// otherwise it stores the release versions into the same nine slots:
+//
+//   slot   debug (here)    release         type (from the debug versions)
+//   +0x04  func_00254EF0   func_00163198   s32 (*)(s32)
+//   +0x14  func_00254E08   func_00162EB8   s32 (*)(s32)
+//   +0x54  func_00254F40   func_00162D30   void* (*)(const char*, s32*)
+//   +0x58  func_00254DA8   func_00164A10   const char* (*)(s32)
+//   +0x60  func_002556A0   func_00162D18   void (*)(const char*)
+//   +0x68  func_00255158   func_00163E90   ?
+//   +0x78  func_00255880   func_00164628   s32 (*)(void)
+//   +0x88  func_002558A0   func_00165548   s32 (*)(?)
+//   +0x8C  func_002558A8   func_00165528   s32 (*)(?)
+//
+// func_00255880 just calls the release +0x78, and func_00254E08 calls the
+// release +0x14 when D_00565DF4 != 0. The +0x88/+0x8C stubs only return -1,
+// so their parameters, if any, are not visible here.
+
+void func_002558B0(void) {
+    D_0078DF98.unk14 = func_00254E08;
+    D_0078DF98.unk58 = func_00254DA8;
+    D_0078DF98.unk54 = func_00254F40;
+    D_0078DF98.unk68 = func_00255158;
+    D_0078DF98.unk60 = func_002556A0;
+    D_0078DF98.unk78 = func_00255880;
+    D_0078DF98.unk88 = func_002558A0;
+    D_0078DF98.unk8C = func_002558A8;
+    D_0078DF98.unk4 = func_00254EF0;
+}
