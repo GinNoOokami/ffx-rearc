@@ -261,7 +261,9 @@ s32 func_00255880(void) {
     return func_00164628();
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_002558A0);
+s32 func_002558A0(void) {
+    return -1;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_002558A8);
 
