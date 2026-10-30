@@ -4,6 +4,9 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x20];
     /* 0x20 */ s32 unk20;
     /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 unk30;
 } ArchiveState;
 
 ArchiveState* func_00162DD0(void);
@@ -51,7 +54,9 @@ void func_00254A88(s32 arg0) {
     D_006A2CD0[arg0] = 0;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254AB0);
+s32 func_00254AB0(void) {
+    return func_00162DD0()->unk30;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254AD0);
 
