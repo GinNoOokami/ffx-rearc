@@ -15,6 +15,8 @@ extern s8 D_00326E1C;
 extern s32 D_006A2C90[];
 extern s32 D_006A2CD0[];
 
+extern char D_00573400[]; // "read_debug.c", emitted by INCLUDE_RODATA
+
 void func_00254958(void) {
     s32 i;
 
@@ -41,7 +43,7 @@ s32 func_002549A8(s32 arg0, s32 arg1) {
     }
 
     if (i == 16) {
-        func_00157788("i!=FILE_NAME_CHG_TBL_CNT", "read_debug.c", 0x50);
+        func_00157788("i!=FILE_NAME_CHG_TBL_CNT", D_00573400, 0x50);
     }
 
     D_006A2C90[i] = arg0;
@@ -118,7 +120,11 @@ s32 func_00254EF0(s32 arg0) {
 
 INCLUDE_RODATA("asm/jp_intl/nonmatchings/dbg/read_debug", D_00573400);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254F18);
+void func_00254F18(s32 fd) {
+    if (fd < 0) {
+        func_00157788("fd >= 0", D_00573400, 0x14D);
+    }
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00254F40);
 
