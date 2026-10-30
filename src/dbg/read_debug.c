@@ -16,6 +16,7 @@ extern s32 D_006A2C90[];
 extern s32 D_006A2CD0[];
 
 extern char D_00573400[]; // "read_debug.c", emitted by INCLUDE_RODATA
+extern ArchiveState D_0078DF98;
 
 void func_00254958(void) {
     s32 i;
@@ -186,7 +187,14 @@ s32 func_00255020(s32 arg0, s32* arg1) {
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00255158);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_002556A0);
+/*?*/ void func_0011D590(s32, /*?*/ s32);                            /* extern */
+
+void func_002556A0(s32 arg0) {
+    if (D_0078DF98.unk30 != 0) {
+        func_0011D590(D_0078DF98.unk30, 0xA);
+    }
+    D_0078DF98.unk30 = func_00255020(arg0, NULL);
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_002556F8);
 
