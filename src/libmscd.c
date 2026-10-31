@@ -45,7 +45,12 @@ void func_00162CC8(void) {
     memset(D_00595AEC, 0, 512 * sizeof(Unk00595AEC));
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D18);
+void func_00157788(char*, char*, s32); /* assert? */
+extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
+
+void func_00162D18(const char* path) {
+     func_00157788(D_0056B730, D_0056B720, 0x20C);
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D30);
 
