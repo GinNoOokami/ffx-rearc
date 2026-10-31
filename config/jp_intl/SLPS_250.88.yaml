@@ -56,6 +56,8 @@ segments:
     - [0x000000, asm, text]
     - [0x01D230, c, main/11D230]
     - [0x01D740, asm, 11D740]
+    - [0x062CB8, c, libmscd]
+    - [0x065E98, asm, 165E98]
     - [0x154830, c, archive/decode]
     - [0x154958, c, dbg/read_debug]
     - [0x155928, hasm, archive/255928]
