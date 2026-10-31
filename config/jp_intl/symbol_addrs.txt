@@ -318,6 +318,9 @@ GetMemorySize = 0x002F8500; // type:func
 // SIF_RPCE_* values; the command numbers fit ps2sdk's RPC protocol.
 sceSifBindRpc = 0x002FAFB8; // type:func
 sceSifCallRpc = 0x002FB188; // type:func
+// sceSifCheckStatRpc: inferred: takes the client struct, returns 1 while its request packet is
+// active (packet set, ids equal, packet word 0x10 bit 0), else 0; sceCdSync polls it
+sceSifCheckStatRpc = 0x002FB378; // type:func
 // Sony libkernl file I/O: SIF RPC clients of IOP server 0x80000001 (bound by 0x2FBF10 into the
 // client struct at 0x794B80), named from the function number each passes to sceSifCallRpc
 // (0 open, 1 close, 2 read, 3 write, 4 lseek, 5 ioctl). Inferred: the numbers are in the code, the
@@ -328,6 +331,33 @@ sceLseek = 0x002FC5A8; // type:func
 sceRead = 0x002FC7E0; // type:func
 sceWrite = 0x002FCA50; // type:func
 sceIoctl = 0x002FCD10; // type:func
+// Sony libcdvd: SIF RPC clients, named from the IOP server each binds (0x80000592 init,
+// 0x80000593 S-commands, 0x80000595 N-commands, 0x80000597 file search, 0x8000059A disk ready)
+// and the function number it passes to sceSifCallRpc. Inferred: the server IDs and numbers are in
+// the code, the numbering is ps2sdk's CDVD protocol, the sce names are the SDK's libcdvd.h.
+sceCdSearchFile = 0x002E0928; // type:func
+sceCdInit = 0x002E10B0; // type:func
+sceCdDiskReady = 0x002E1390; // type:func
+sceCdMmode = 0x002E1588; // type:func
+sceCdRead = 0x002E1650; // type:func
+sceCdSeek = 0x002E1830; // type:func
+sceCdStandby = 0x002E1900; // type:func
+sceCdPause = 0x002E19B0; // type:func
+sceCdGetDiskType = 0x002E1A60; // type:func
+sceCdGetError = 0x002E1AF8; // type:func
+sceCdStatus = 0x002E1B90; // type:func
+sceCdBreak = 0x002E1C48; // type:func
+sceCdPowerOff = 0x002E1D00; // type:func
+sceCdReadClock = 0x002E1DB8; // type:func
+// sceCdSync: inferred: no RPC; mode 0 prints "N cmd wait\n" and waits on the read flag and
+// sceSifCheckStatRpc(N-command client), other modes return the busy state
+sceCdSync = 0x002E0E30; // type:func
+// sceCdInitEeCB: inferred: fills a ThreadParam (initPriority = arg 0, stack = arg 1, stackSize =
+// arg 2, gpReg = _gp) and creates/starts a thread, or changes its priority if it exists
+sceCdInitEeCB = 0x002E0580; // type:func
+// sceCdPOffCallback: inferred: two arguments (function, its argument) stored with interrupts off,
+// returns the previous function
+sceCdPOffCallback = 0x002E0810; // type:func
 
 // D_00186B00: data inside .text: an 8x8 1-bit font (glyph rows read as ASCII from blank, !, ", #),
 // 0x5E4 bytes, addressed from 0x15A54C; 256-byte aligned, zero padding before and after.
@@ -10545,32 +10575,15 @@ func_002E0360 = 0x002E0360; // type:func
 func_002E03C8 = 0x002E03C8; // type:func
 func_002E0420 = 0x002E0420; // type:func
 func_002E04C0 = 0x002E04C0; // type:func
-func_002E0580 = 0x002E0580; // type:func
 func_002E0658 = 0x002E0658; // type:func
 func_002E06F8 = 0x002E06F8; // type:func
 func_002E0790 = 0x002E0790; // type:func
-func_002E0810 = 0x002E0810; // type:func
 func_002E0880 = 0x002E0880; // type:func
 func_002E08C0 = 0x002E08C0; // type:func
-func_002E0928 = 0x002E0928; // type:func
 func_002E0C28 = 0x002E0C28; // type:func
 func_002E0D98 = 0x002E0D98; // type:func
-func_002E0E30 = 0x002E0E30; // type:func
 func_002E0ED0 = 0x002E0ED0; // type:func
 func_002E0F40 = 0x002E0F40; // type:func
-func_002E10B0 = 0x002E10B0; // type:func
-func_002E1390 = 0x002E1390; // type:func
-func_002E1588 = 0x002E1588; // type:func
-func_002E1650 = 0x002E1650; // type:func
-func_002E1830 = 0x002E1830; // type:func
-func_002E1900 = 0x002E1900; // type:func
-func_002E19B0 = 0x002E19B0; // type:func
-func_002E1A60 = 0x002E1A60; // type:func
-func_002E1AF8 = 0x002E1AF8; // type:func
-func_002E1B90 = 0x002E1B90; // type:func
-func_002E1C48 = 0x002E1C48; // type:func
-func_002E1D00 = 0x002E1D00; // type:func
-func_002E1DB8 = 0x002E1DB8; // type:func
 func_002E1EB0 = 0x002E1EB0; // type:func
 func_002E1F18 = 0x002E1F18; // type:func
 func_002E1F80 = 0x002E1F80; // type:func
@@ -10748,7 +10761,6 @@ func_002FAD60 = 0x002FAD60; // type:func
 func_002FAEB8 = 0x002FAEB8; // type:func
 func_002FAF08 = 0x002FAF08; // type:func
 func_002FB0F8 = 0x002FB0F8; // type:func
-func_002FB378 = 0x002FB378; // type:func
 func_002FB3B8 = 0x002FB3B8; // type:func
 func_002FB450 = 0x002FB450; // type:func
 func_002FB520 = 0x002FB520; // type:func
