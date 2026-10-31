@@ -1,3 +1,4 @@
+#include <string.h>
 #include "common.h"
 
 typedef s32 fnHandler(u8* src, void* dst, s32* out);
@@ -5,14 +6,13 @@ typedef s32 fnHandler(u8* src, void* dst, s32* out);
 extern fnHandler func_00255928;
 extern fnHandler func_00255AA0;
 
-void func_002EEBAC(void*, u8*, s32);   /* memcpy? */
 void func_00157788(char*, char*, s32); /* assert? */
 
 // Reads a little endian 'size' from src, then copies that many bytes from src to dst
 s32 func_00254830(u8* src, void* dst, s32* out) {
     s32 size = src[1] + (src[2] << 8) + (src[3] << 16) + (src[4] << 24);
 
-    func_002EEBAC(dst, src + 5, size);
+    memcpy(dst, src + 5, size);
 
     *out = size;
     return size;
