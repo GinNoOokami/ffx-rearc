@@ -27,6 +27,7 @@ extern s32 D_0030DAA8;
 extern s32 D_0030DAB0;
 extern char D_0056B720[]; // "libmscd.c"
 extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
+extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
 extern Unk0057C71C* D_0057C71C;
 extern char* D_00595AD0;
@@ -47,7 +48,7 @@ void func_00162CC8(void) {
 
 void func_00162D18(const char* path) { dbgAssert(D_0056B730, D_0056B720, 0x20C); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D30);
+void func_00162D30(const char* path) { dbgAssert(D_0056B750, D_0056B720, 0x211); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D48);
 
