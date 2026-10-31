@@ -18,6 +18,8 @@ s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
 void func_00166878();
 
+void func_002D1C70(void (*)());
+
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
 extern sceCdRMode D_0030DA98;
@@ -66,7 +68,7 @@ void func_00162D58(void) {
     }
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162DC0);
+void func_00162DC0(void) { func_002D1C70(func_00162D58); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162DD0);
 
