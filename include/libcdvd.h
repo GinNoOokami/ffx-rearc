@@ -54,6 +54,16 @@ typedef struct {
     u_char year;
 } sceCdCLOCK;
 
+/* Command results ("Interrupts" in the SDK); sceCdDiskReady returns SCECdComplete when the
+   drive is ready, SCECdNotReady when not */
+#define CdlNoIntr 0x00
+#define CdlDataReady 0x01
+#define SCECdComplete 0x02
+#define CdlAcknowledge 0x03 /* reserved */
+#define CdlDataEnd 0x04
+#define CdlDiskError 0x05
+#define SCECdNotReady 0x06
+
 int sceCdInit(int init_mode);                                     /* 0x2E10B0, 0x80000592 */
 int sceCdInitEeCB(int cb_prio, void* stack_addr, int stack_size); /* 0x2E0580 */
 int* sceCdCallback(void (*func)(int));                            /* 0x2E03C8 */

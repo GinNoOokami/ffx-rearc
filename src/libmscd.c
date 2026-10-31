@@ -63,13 +63,19 @@ s32 func_002D1C60(void);
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
 extern u8 D_0030DA98[];
+extern sceCdRMode D_0030DAA0;
+extern s8 D_0030DAA4;
+extern s32 D_0030DAA8;
 extern volatile u8 D_0030DAB4;
 extern s8 D_00565DF4;
 extern char D_0056B768[];
 extern Unk0078E030* D_0057C700;
 extern Unk0057C71C* D_0057C71C;
 extern char* D_00595AD0;
-extern s32 D_00595AD8;
+extern s32 D_00595AD4;        // sectorNum
+extern s32 D_00595AD8;        // size
+extern void* D_00595ADC;      // buffer
+extern sceCdRMode D_00595AE0; // mode
 extern char D_00595AF0[];
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162CB8);
@@ -109,11 +115,6 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163198);
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001631C0);
 
 void func_0015B330(void);
-extern s8 D_0030DAA4;
-extern s32 D_0030DAA8;
-extern s32 D_00595AD4;
-extern void* D_00595ADC;
-extern sceCdRMode D_00595AE0;
 
 s32 func_001631D0(s32 arg0, s32 size, void* buffer, sceCdRMode* mode) {
     s32 sectors;
@@ -138,7 +139,27 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001632B8);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163450);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001636F0);
+s32 func_0015B830(); /* extern */
+
+s32 func_001636F0(void) {
+    s32 status = func_0015B830();
+
+    if (status == 0) {
+        return 0;
+    }
+
+    if (status == -1) {
+        return 1;
+    }
+
+    if (sceCdDiskReady(1) != SCECdComplete) {
+        return -1;
+    }
+
+    sceCdBreak();
+    func_001631D0(D_00595AD4, D_00595AD8, D_00595ADC, &D_0030DAA0);
+    return 1;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163768);
 
