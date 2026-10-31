@@ -70,7 +70,9 @@ void func_00162D58(void) {
 
 void func_00162DC0(void) { func_002D1C70(func_00162D58); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162DD0);
+extern ArchiveState D_0078DF98;
+
+ArchiveState* func_00162DD0(void) { return &D_0078DF98; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162DE0);
 
