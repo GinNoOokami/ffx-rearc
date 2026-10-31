@@ -62,7 +62,8 @@ EE_CC      := $(EE_CC_DIR)/bin/ee-gcc
 
 # The system headers the package lacks (newlib's libc, gcc's own), unpacked by tools/fetch_headers.
 SYS_INC    := tools/cc/include
-C_FLAGS    := -O2 -G0 -I include -isystem $(SYS_INC)/gcc -isystem $(SYS_INC)/newlib
+C_INCLUDES := -I include -isystem $(SYS_INC)/gcc -isystem $(SYS_INC)/newlib
+C_FLAGS    := -O2 -G0 $(C_INCLUDES)
 
 # ---- Inputs: whatever splat has written to asm/<version>/ ----
 # nonmatchings/ holds the functions a C file pulls in with INCLUDE_ASM; they aren't built alone.
@@ -149,6 +150,7 @@ $(BUILD_DIR)/%.c.o: %.c | $(EE_CC_DIR) $(SYS_INC)
 	@mkdir -p $(@D)
 	$(EE_CC) -c $(C_FLAGS) -o $@ $<
 	$(OBJCOPY) $@
+	@cpp -MM -MP -MT $@ -MF $(@:.o=.d) -undef -nostdinc $(C_INCLUDES) $<
 
 $(EE_CC_DIR):
 	tools/fetch_toolchain $(EE_CC_NAME)
@@ -159,6 +161,10 @@ $(SYS_INC):
 # splat writes, for each C file, the asm files its INCLUDE_ASMs pull in (create_asm_dependencies),
 # so a re-split recompiles it. The - skips files not written yet (before the first split).
 -include $(patsubst %.c,$(BUILD_DIR)/%.asmproc.d,$(C_FILES))
+
+# Each C object's header dependencies, written by the host cpp after the compile (the old ee-gcc's
+# -MMD puts its .d in the current directory under the wrong target name).
+-include $(patsubst %.c,$(BUILD_DIR)/%.c.d,$(C_FILES))
 $(ELF): $(O_FILES) $(LD_SCRIPT)
 	$(LD) $(LD_FLAGS) -T $(LD_SCRIPT) $(addprefix -T ,$(UNDEF_SYMS)) -Map $(@:.elf=.map) -o $@
 
