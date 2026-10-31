@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <sifdev.h>
+#include <libcdvd.h>
 
 #include "common.h"
 
@@ -106,7 +108,29 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163198);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001631C0);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001631D0);
+void func_0015B330(void);
+extern s8 D_0030DAA4;
+extern s32 D_0030DAA8;
+extern s32 D_00595AD4;
+extern void* D_00595ADC;
+extern sceCdRMode D_00595AE0;
+
+s32 func_001631D0(s32 arg0, s32 size, void* buffer, sceCdRMode* mode) {
+    s32 sectors;
+    D_0030DAA4 = 0;
+    D_0030DAA8 = 0;
+
+    D_00595AD4 = arg0;
+    D_00595AD8 = size;
+    D_00595ADC = buffer;
+    D_00595AE0 = *mode;
+
+    func_0015B330();
+
+    sectors = size / 2048;
+    FlushCache(0);
+    return sceCdRead(arg0, sectors, buffer, mode);
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163290);
 
@@ -308,8 +332,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165A18);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165A50);
 
-void func_00165AE0(void) {
-}
+void func_00165AE0(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165AE8);
 
