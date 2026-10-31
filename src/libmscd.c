@@ -4,45 +4,8 @@
 #include <libcdvd.h>
 
 #include "common.h"
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x5C];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 pad60[0x70 - 0x60];
-    /* 0x70 */ s32 unk70;
-    /* 0x74 */ s32 unk74;
-} ArchiveState;
-
-typedef struct {
-    /* 0x00 */ u32 unk0;
-    /* 0x04 */ void* unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ u8 padC[0x1C - 0xC];
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ void* unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ u32 unk2C;
-    /* 0x30 */ u8 pad30;
-    /* 0x31 */ s8 unk31;
-    /* 0x32 */ s8 unk32;
-    /* 0x33 */ s8 unk33;
-    /* 0x34 */ u8 pad34[0x38 - 0x34];
-} Unk0078E030;
-
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 pad1[0xC - 0x1];
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 pad14[0x24 - 0x14];
-    /* 0x24 */ char unk24[0x10];
-} Unk00595AEC; // 0x34 bytes
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s8 unk10;
-} Unk00588A00;
+#include "libmscd.h"
+#include "mem.h"
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x1C];
@@ -50,16 +13,9 @@ typedef struct {
 } Unk0057C71C;
 
 void FlushCache(s32);
-Unk00588A00* func_001244D0(void);
 void func_00125B40(void);
-void func_00163450(s32, s32, void*, sceCdRMode*, s32);
-void func_00163768(Unk0078E030*);
-void func_00163938(Unk0078E030*);
-Unk00595AEC* func_00165D00(s32, s32);
 s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
-void func_0017133C(s32);
-s32 func_002D1C60(void);
 
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
@@ -68,10 +24,7 @@ extern sceCdRMode D_0030DAA0;
 extern s8 D_0030DAA4;
 extern s8 D_0030DAA5;
 extern s32 D_0030DAA8;
-extern volatile u8 D_0030DAB4;
-extern s8 D_00565DF4;
 extern char D_0056B768[];
-extern Unk0078E030* D_0057C700;
 extern Unk0057C71C* D_0057C71C;
 extern char* D_00595AD0;
 extern s32 D_00595AD4;        // sectorNum
@@ -83,7 +36,6 @@ extern char D_00595AF0[];
 
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
-void* func_0011D370(s32, s32, const char*, s32); // memalloc
 extern s32 D_0030DAB0;
 extern char D_0056B720[];
 

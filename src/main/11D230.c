@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mem.h"
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/main/11D230", func_0011D230);
 
