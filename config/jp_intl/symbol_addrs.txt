@@ -10,16 +10,6 @@ Sg_PcReadL = 0x0011EE60; // type:func
 Sg_PcRead = 0x0011EF68; // type:func
 // TkReadMapFile: inferred: prints "TkReadMapFile: %s\n" with printf
 TkReadMapFile = 0x00180988; // type:func
-// sceGsPutDrawEnv: inferred: its error message is "sceGsPutDrawEnv: DMA Ch.2 does not terminate"
-sceGsPutDrawEnv = 0x002D9E28; // type:func
-// sceGsSyncPath: inferred: its five error messages start "sceGsSyncPath: " (DMA Ch.1/Ch.2, VIF1, VU1, GIF)
-sceGsSyncPath = 0x002DA2A0; // type:func
-// sceGsSetDefLoadImage: inferred: its error message is "sceGsSetDefLoadImage: too big size"
-sceGsSetDefLoadImage = 0x002DA5B8; // type:func
-// sceGsExecLoadImage: inferred: its error message is "sceGsExecLoadImage: DMA Ch.2 does not terminate"
-sceGsExecLoadImage = 0x002DA8E0; // type:func
-// sceGsExecStoreImage: inferred: its four error messages start "sceGsExecStoreImage: "
-sceGsExecStoreImage = 0x002DAA60; // type:func
 
 // libgcc.a of the ee-gcc2.9-991111 package: whole objects match exactly, relocated fields masked.
 __do_global_dtors = 0x002E97A0; // type:func
@@ -331,6 +321,38 @@ sceLseek = 0x002FC5A8; // type:func
 sceRead = 0x002FC7E0; // type:func
 sceWrite = 0x002FCA50; // type:func
 sceIoctl = 0x002FCD10; // type:func
+// Sony libgraph: graphdev.c builds one object per function (#ifdef SCE_GS_FUNC_001 … 031). From
+// the SDK 2.5.1 source, each built with ee-gcc2.9-991111-01-dtls13010 -O2 -G0 -fno-common, these
+// match exactly, each at one ELF address (relocated fields masked); FFX's order is the source's.
+sceGsGetGParam = 0x002D96C8; // type:func
+sceGsResetPath = 0x002D96D8; // type:func
+sceGsSetDefDispEnv = 0x002D9740; // type:func
+sceGsPutDispEnv = 0x002D99B0; // type:func
+sceGszbufaddr = 0x002D9A70; // type:func
+sceGsSetDefDrawEnv = 0x002D9B38; // type:func
+sceGsSetDefClear = 0x002D9D20; // type:func
+sceGsPutDrawEnv = 0x002D9E28; // type:func
+sceGsSetDefDBuff = 0x002D9F10; // type:func
+sceGsSwapDBuff = 0x002DA1A8; // type:func
+sceGsSetDefLoadImage = 0x002DA5B8; // type:func
+sceGsSetDefStoreImage = 0x002DA7A0; // type:func
+sceGsExecLoadImage = 0x002DA8E0; // type:func
+sceGsSetDefDrawEnv2 = 0x002DB0F0; // type:func
+sceGsSwapDBuffDc = 0x002DB2D0; // type:func
+// sceGsSetDefTexEnv: matches exactly too, but lies apart from the rest of libgraph, between libm's
+// sqrtf and modf (placement unexplained)
+sceGsSetDefTexEnv = 0x002E94B8; // type:func
+// sceGsSyncPath / sceGsExecStoreImage: their source objects differ (30/197, 17/419 words), and their
+// error messages start with their names ("sceGsSyncPath: ", "sceGsExecStoreImage: "). Inferred.
+sceGsSyncPath = 0x002DA2A0; // type:func
+sceGsExecStoreImage = 0x002DAA60; // type:func
+// sceGsSyncV: inferred: no 2.5.1 object (its slot, FUNC_011, is gone); the SDK header declares it
+// between sceGsSwapDBuff and sceGsSyncPath, where it sits; no arguments, returns GS CSR bit 13
+// (FIELD) after a libkernl call chosen by a sceGsGetGParam field
+sceGsSyncV = 0x002DA208; // type:func
+// sceGsResetGraph: inferred: not in graphdev.c; writes GS CSR (0x12001000), stores its four
+// arguments in the sceGsGetGParam block (+0, +2, +4, +6), sets IMR and the interrupt handler
+sceGsResetGraph = 0x002D9538; // type:func
 // Sony libdma: the SDK 2.5.1 libdma.c, compiled with ee-gcc2.9-991111-01-dtls13010 -O2 -G0
 // -fno-common, matches these 6 functions exactly (each at one ELF address, relocated fields masked).
 // Its other 13 functions don't match: FFX's 2.3.x object is laid out differently from 0x2DB690 on
@@ -10594,20 +10616,6 @@ func_002D94F8 = 0x002D94F8; // type:func
 func_002D9510 = 0x002D9510; // type:func
 func_002D9520 = 0x002D9520; // type:func
 func_002D9530 = 0x002D9530; // type:func
-func_002D9538 = 0x002D9538; // type:func
-func_002D96C8 = 0x002D96C8; // type:func
-func_002D96D8 = 0x002D96D8; // type:func
-func_002D9740 = 0x002D9740; // type:func
-func_002D99B0 = 0x002D99B0; // type:func
-func_002D9A70 = 0x002D9A70; // type:func
-func_002D9B38 = 0x002D9B38; // type:func
-func_002D9D20 = 0x002D9D20; // type:func
-func_002D9F10 = 0x002D9F10; // type:func
-func_002DA1A8 = 0x002DA1A8; // type:func
-func_002DA208 = 0x002DA208; // type:func
-func_002DA7A0 = 0x002DA7A0; // type:func
-func_002DB0F0 = 0x002DB0F0; // type:func
-func_002DB2D0 = 0x002DB2D0; // type:func
 func_002DC0A0 = 0x002DC0A0; // type:func
 func_002DD7D8 = 0x002DD7D8; // type:func
 func_002DDA48 = 0x002DDA48; // type:func
@@ -10663,7 +10671,6 @@ func_002E7B50 = 0x002E7B50; // type:func
 func_002E8000 = 0x002E8000; // type:func
 func_002E87C8 = 0x002E87C8; // type:func
 func_002E9030 = 0x002E9030; // type:func
-func_002E94B8 = 0x002E94B8; // type:func
 func_002ECD08 = 0x002ECD08; // type:func
 func_002ECDA8 = 0x002ECDA8; // type:func
 func_002ECFC8 = 0x002ECFC8; // type:func
