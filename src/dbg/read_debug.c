@@ -1,7 +1,8 @@
+#include <sifdev.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "common.h"
-#include <sifdev.h>
 
 #define FILE_NAME_CHG_TBL_CNT 16
 
@@ -326,7 +327,6 @@ void* func_00162D48();                                 /* extern */
 Unk00595AEC* func_00165D00(s32, s32);
 /*?*/ void func_0017133C(/*?*/ s32); /* extern */
 s32 func_002D1C60(void);
-/*?*/ void func_002EEBAC(void*, void*, s32); /* extern */
 extern volatile u8 D_0030DAB4;
 extern void* D_0057C700;
 extern char D_006A2F10[];
@@ -410,15 +410,15 @@ void func_00255158(void) {
                     rest = secs * 2048;
                     func_00163450(entry->unk1C, size, entry->unk4, mode, entry->unk28);
                     FlushCache(0);
-                    func_002EEBAC(entry->unk4, (char*)entry->unk4 + 5, rest);
+                    memcpy(entry->unk4, (char*)entry->unk4 + 5, rest);
                     func_00163450(entry->unk1C + secs, 0x800, buf, mode, entry->unk28);
                     FlushCache(0);
                     size -= rest;
-                    func_002EEBAC((char*)entry->unk4 + rest, buf, size - 5);
+                    memcpy((char*)entry->unk4 + rest, buf, size - 5);
                 } else {
                     func_00163450(entry->unk1C, 0x800, buf, mode, entry->unk28);
                     FlushCache(0);
-                    func_002EEBAC(entry->unk4, buf + 5, size - 5);
+                    memcpy(entry->unk4, buf + 5, size - 5);
                 }
             } else {
                 secs = size / 2048;
@@ -435,7 +435,7 @@ void func_00255158(void) {
                     rest = size & 0x7FF;
                 copy:
                     FlushCache(0);
-                    func_002EEBAC((char*)entry->unk4 + size - rest, buf, rest);
+                    memcpy((char*)entry->unk4 + size - rest, buf, rest);
                 }
                 if (entry->unk33 != 0) {
                     if (func_001244D0()->unk10 != 0) {
