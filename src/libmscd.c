@@ -16,6 +16,7 @@ void FlushCache(s32);
 void func_00125B40(void);
 s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
+void func_00166878();
 
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
@@ -52,7 +53,18 @@ void func_00162D30(const char* path) { dbgAssert(D_0056B750, D_0056B720, 0x211);
 
 char* func_00162D48(void) { return D_00595AD0; }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D58);
+void func_00162D58(void) {
+    switch ((s8)D_0030DAB4) {
+    case 1:
+        func_00163768(D_0057C700);
+        D_0030DAB4 = 0;
+        break;
+    case 3:
+        func_00166878();
+        D_0030DAB4 = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162DC0);
 
