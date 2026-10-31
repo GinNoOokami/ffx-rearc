@@ -131,6 +131,8 @@ strtok = 0x002F1A08; // type:func
 strtok_r = 0x002F1A30; // type:func
 _strtol_r = 0x002F1AD0; // type:func
 _system_r = 0x002F1D40; // type:func
+tolower = 0x002F1DA0; // type:func
+toupper = 0x002F1DC0; // type:func
 __sprint = 0x002F1DE0; // type:func
 __sbprintf = 0x002F1E28; // type:func
 cvt = 0x002F3470; // type:func
@@ -301,6 +303,69 @@ Deci2Call = 0x002F84D0; // type:func
 PSMode = 0x002F84E0; // type:func
 MachineType = 0x002F84F0; // type:func
 GetMemorySize = 0x002F8500; // type:func
+// Interrupt helpers. DIntr: disables interrupts, loops until Status.EIE is clear, returns the
+// previous EIE state; EIntr: returns the EIE state and enables interrupts. Inferred: the SDK
+// eekernel.h declares DIntr/EIntr (added in 2.2.0 by its changelog) as the DI/EI it uses.
+DIntr = 0x002FFF40; // type:func
+EIntr = 0x002FFF88; // type:func
+// The public Intc/Dmac calls: each calls the kernel stub of the same name with a leading underscore
+// (named from its call number), the non-i ones between DIntr and EIntr when interrupts were on.
+// Inferred: the SDK eekernel.h declares these names.
+DisableIntc = 0x002F8AC8; // type:func
+EnableIntc = 0x002F8B30; // type:func
+DisableDmac = 0x002F8B98; // type:func
+EnableDmac = 0x002F8C00; // type:func
+iEnableIntc = 0x002F8C68; // type:func
+iDisableIntc = 0x002F8C88; // type:func
+iEnableDmac = 0x002F8CA8; // type:func
+iDisableDmac = 0x002F8CC8; // type:func
+// D-cache range helpers: two workers walk 64-byte lines issuing cache 0x14 (0x2F8848: write back
+// and invalidate) or 0x16 (0x2F8988: invalidate); the plain forms run them between DIntr/EIntr, the
+// i forms directly. Inferred; names from the SDK eekernel.h.
+SyncDCache = 0x002F88F0; // type:func
+iSyncDCache = 0x002F8970; // type:func
+InvalidDCache = 0x002F8A30; // type:func
+iInvalidDCache = 0x002F8AB0; // type:func
+// scePrintf: inferred: varargs; points the formatter's output hook (0x5689E8) at 0x2F98C0 (DECI2
+// TTY output), formats with 0x2F9BA0, restores the hook. The SDK eekernel.h declares it.
+// 0x2FA168 is the same front end with the default hook (libkernl's own messages): no SDK name.
+scePrintf = 0x002FA1A0; // type:func
+// SIF command layer: named by matching each function's logic to ps2sdk's EE sifcmd.c (a
+// reimplementation of the same API) and by the SDK 2.4.2 sifcmd.h declarations. Inferred.
+// sceSifInitCmd: sets up the SIF0 receive DMA (channel 0x1000C000, AddDmacHandler, EnableDmac) and
+// the SIF registers; sceSifExitCmd: DisableDmac + RemoveDmacHandler
+sceSifInitCmd = 0x002FA278; // type:func
+sceSifExitCmd = 0x002FA4F8; // type:func
+// sceSifSetCmdBuffer / sceSifSetSysCmdBuffer: swap the user / system handler table (the two that
+// sceSifAddCmdHandler picks between by the command's system bit), return the old one
+sceSifSetCmdBuffer = 0x002FA530; // type:func
+sceSifSetSysCmdBuffer = 0x002FA548; // type:func
+sceSifAddCmdHandler = 0x002FA560; // type:func
+sceSifRemoveCmdHandler = 0x002FA590; // type:func
+// sceSifGetSreg / sceSifSetSreg: read / write the software register array at 0x791FC0
+sceSifGetSreg = 0x002FA230; // type:func
+sceSifSetSreg = 0x002FA248; // type:func
+// sceSifSendCmd / isceSifSendCmd: the shared body 0x2FA5B8 with mode 0 (sceSifSetDma) / 1
+// (isceSifSetDma)
+sceSifSendCmd = 0x002FA6F0; // type:func
+isceSifSendCmd = 0x002FA730; // type:func
+// sceSifWriteBackDCache: 64-byte-aligned range, called before every RPC send
+sceSifWriteBackDCache = 0x002FA898; // type:func
+// SIF RPC, same method (ps2sdk sifrpc.c; SDK sifrpc.h; field offsets as in the header's
+// sceSifQueueData / sceSifServeData). sceSifInitRpc: calls sceSifInitCmd and installs the handlers
+// for commands 0x80000008/9/A/C
+sceSifInitRpc = 0x002FA948; // type:func
+// sceSifGetOtherData: sends command 0x8000000C (read data) and waits
+sceSifGetOtherData = 0x002FAD60; // type:func
+sceSifSetRpcQueue = 0x002FB3B8; // type:func
+sceSifRegisterRpc = 0x002FB450; // type:func
+sceSifRemoveRpc = 0x002FB520; // type:func
+sceSifRemoveRpcQueue = 0x002FB5B8; // type:func
+sceSifGetNextRequest = 0x002FB648; // type:func
+// sceSifExecRequest: runs the server function, then sends command 0x80000008 (end); sceSifRpcLoop:
+// sceSifGetNextRequest / sceSifExecRequest / SleepThread
+sceSifExecRequest = 0x002FB6A0; // type:func
+sceSifRpcLoop = 0x002FB868; // type:func
 // Sony libkernl SIF RPC client. sceSifCallRpc: 9 arguments (a0-t3, 9th on the stack), sends SIF
 // command 0x8000000A with a 0x40-byte packet, returns -1/-2/-3 when it can't get a packet / send it
 // / create its semaphore, tests mode bits 1 and 2. sceSifBindRpc: 3 arguments, same pattern with
@@ -321,6 +386,56 @@ sceLseek = 0x002FC5A8; // type:func
 sceRead = 0x002FC7E0; // type:func
 sceWrite = 0x002FCA50; // type:func
 sceIoctl = 0x002FCD10; // type:func
+// The other file I/O functions, same method. FILEIO's numbering beyond ps2sdk's comes from the
+// disc's own IOP module (FILEIO in IOPRP234.IMG, "PsIIfileio  2340"): its dispatcher indexes a
+// 27-entry jump table by the function number, and each handler calls one ioman export
+// (ps2sdk's export table names them): 0x6 remove, 0x7 mkdir, 0x8 rmdir, 0x9 dopen, 0xA dclose,
+// 0xB dread, 0xC getstat, 0xD chstat, 0xE format, 0xF AddDrv, 0x10 DelDrv, 0x11 rename,
+// 0x12 chdir, 0x13 sync, 0x14 mount, 0x15 umount, 0x16 lseek64, 0x17 devctl, 0x18 symlink,
+// 0x19 readlink, 0x1A ioctl2. Names: the SDK 2.4.2 sifdev.h. Inferred.
+sceIoctl2 = 0x002FD060; // type:func
+// 0x2FD238: shared body of the name-only calls; the wrappers pass the function number
+sceRemove = 0x002FD3E0; // type:func
+sceMkdir = 0x002FD400; // type:func
+sceRmdir = 0x002FD5B0; // type:func
+sceFormat = 0x002FD5D0; // type:func
+sceDopen = 0x002FD980; // type:func
+sceDclose = 0x002FDA48; // type:func
+sceDread = 0x002FDBB0; // type:func
+sceGetstat = 0x002FDD08; // type:func
+sceChstat = 0x002FDEA8; // type:func
+sceRename = 0x002FE0E8; // type:func
+sceChdir = 0x002FE2D8; // type:func
+sceSync = 0x002FE2F8; // type:func
+sceMount = 0x002FE490; // type:func
+sceUmount = 0x002FE700; // type:func
+sceLseek64 = 0x002FE720; // type:func
+sceDevctl = 0x002FE958; // type:func
+sceSymlink = 0x002FEB88; // type:func
+sceReadlink = 0x002FED68; // type:func
+// Module loading: SIF RPC clients of IOP server 0x80000006 (bound by 0x2FEF30, client struct
+// 0x794E40). The disc's IOP LOADFILE module (IOPRP234.IMG) dispatches function numbers 0-10
+// through a table; each handler calls the modload export ps2sdk's table names: 0 LoadStartModule,
+// 1 ELF load, 6 LoadModuleBuffer + StartModule, 7 StopModule, 8 UnloadModule, 9
+// SearchModuleByName, 10 SearchModuleByAddress. Shared bodies: 0x2FF708 (fno 0), 0x2FF970 (fno 1),
+// 0x2FF0F8 (fno 6). The wrapper pairs differ as the SDK prototypes do: the plain form passes a
+// local result slot, the Start form forwards the caller's int *result; sceSifLoadElf passes "all"
+// as the section name. Inferred; names from the SDK 2.4.2 sifdev.h.
+sceSifLoadModule = 0x002FF930; // type:func
+sceSifLoadStartModule = 0x002FF950; // type:func
+sceSifLoadModuleBuffer = 0x002FF6C8; // type:func
+sceSifLoadStartModuleBuffer = 0x002FF6E8; // type:func
+sceSifLoadElfPart = 0x002FFA78; // type:func
+sceSifLoadElf = 0x002FFA98; // type:func
+sceSifStopModule = 0x002FF300; // type:func
+sceSifUnloadModule = 0x002FF508; // type:func
+sceSifSearchModuleByName = 0x002FF598; // type:func
+sceSifSearchModuleByAddress = 0x002FF638; // type:func
+// sceSifSyncIop: inferred: returns whether SMFLAG (sceSifGetReg(4)) has the boot-end bit 0x40000
+sceSifSyncIop = 0x002FFDF8; // type:func
+// sceSifRebootIop: inferred: builds "rom0:UDNL " + its argument (prints "too long parameter '%s'\n"
+// past 0x50 bytes), restarts SIF and resets the IOP through 0x2FFC90
+sceSifRebootIop = 0x002FFE30; // type:func
 // Sony libgraph: graphdev.c builds one object per function (#ifdef SCE_GS_FUNC_001 … 031). From
 // the SDK 2.5.1 source, each built with ee-gcc2.9-991111-01-dtls13010 -O2 -G0 -fno-common, these
 // match exactly, each at one ELF address (relocated fields masked); FFX's order is the source's.
@@ -10700,8 +10815,6 @@ func_002F04D0 = 0x002F04D0; // type:func
 func_002F06E8 = 0x002F06E8; // type:func
 func_002F08A0 = 0x002F08A0; // type:func
 func_002F19E0 = 0x002F19E0; // type:func
-func_002F1DA0 = 0x002F1DA0; // type:func
-func_002F1DC0 = 0x002F1DC0; // type:func
 func_002F1EE0 = 0x002F1EE0; // type:func
 func_002F1F58 = 0x002F1F58; // type:func
 func_002F4398 = 0x002F4398; // type:func
@@ -10754,19 +10867,7 @@ func_002F87D0 = 0x002F87D0; // type:func
 func_002F87F8 = 0x002F87F8; // type:func
 func_002F8820 = 0x002F8820; // type:func
 func_002F8848 = 0x002F8848; // type:func
-func_002F88F0 = 0x002F88F0; // type:func
-func_002F8970 = 0x002F8970; // type:func
 func_002F8988 = 0x002F8988; // type:func
-func_002F8A30 = 0x002F8A30; // type:func
-func_002F8AB0 = 0x002F8AB0; // type:func
-func_002F8AC8 = 0x002F8AC8; // type:func
-func_002F8B30 = 0x002F8B30; // type:func
-func_002F8B98 = 0x002F8B98; // type:func
-func_002F8C00 = 0x002F8C00; // type:func
-func_002F8C68 = 0x002F8C68; // type:func
-func_002F8C88 = 0x002F8C88; // type:func
-func_002F8CA8 = 0x002F8CA8; // type:func
-func_002F8CC8 = 0x002F8CC8; // type:func
 func_002F8CE8 = 0x002F8CE8; // type:func
 func_002F8CF8 = 0x002F8CF8; // type:func
 func_002F8D08 = 0x002F8D08; // type:func
@@ -10801,23 +10902,10 @@ func_002F99A8 = 0x002F99A8; // type:func
 func_002F9A38 = 0x002F9A38; // type:func
 func_002F9BA0 = 0x002F9BA0; // type:func
 func_002FA168 = 0x002FA168; // type:func
-func_002FA1A0 = 0x002FA1A0; // type:func
 func_002FA200 = 0x002FA200; // type:func
-func_002FA230 = 0x002FA230; // type:func
-func_002FA248 = 0x002FA248; // type:func
 func_002FA268 = 0x002FA268; // type:func
-func_002FA278 = 0x002FA278; // type:func
-func_002FA4F8 = 0x002FA4F8; // type:func
-func_002FA530 = 0x002FA530; // type:func
-func_002FA548 = 0x002FA548; // type:func
-func_002FA560 = 0x002FA560; // type:func
-func_002FA590 = 0x002FA590; // type:func
 func_002FA5B8 = 0x002FA5B8; // type:func
-func_002FA6F0 = 0x002FA6F0; // type:func
-func_002FA730 = 0x002FA730; // type:func
 func_002FA770 = 0x002FA770; // type:func
-func_002FA898 = 0x002FA898; // type:func
-func_002FA948 = 0x002FA948; // type:func
 func_002FAAE8 = 0x002FAAE8; // type:func
 func_002FAB10 = 0x002FAB10; // type:func
 func_002FABB8 = 0x002FABB8; // type:func
@@ -10825,17 +10913,9 @@ func_002FABD8 = 0x002FABD8; // type:func
 func_002FAC08 = 0x002FAC08; // type:func
 func_002FAC48 = 0x002FAC48; // type:func
 func_002FAD00 = 0x002FAD00; // type:func
-func_002FAD60 = 0x002FAD60; // type:func
 func_002FAEB8 = 0x002FAEB8; // type:func
 func_002FAF08 = 0x002FAF08; // type:func
 func_002FB0F8 = 0x002FB0F8; // type:func
-func_002FB3B8 = 0x002FB3B8; // type:func
-func_002FB450 = 0x002FB450; // type:func
-func_002FB520 = 0x002FB520; // type:func
-func_002FB5B8 = 0x002FB5B8; // type:func
-func_002FB648 = 0x002FB648; // type:func
-func_002FB6A0 = 0x002FB6A0; // type:func
-func_002FB868 = 0x002FB868; // type:func
 func_002FB8A8 = 0x002FB8A8; // type:func
 func_002FB908 = 0x002FB908; // type:func
 func_002FB990 = 0x002FB990; // type:func
@@ -10848,52 +10928,19 @@ func_002FBEE0 = 0x002FBEE0; // type:func
 func_002FBF10 = 0x002FBF10; // type:func
 func_002FC0D8 = 0x002FC0D8; // type:func
 func_002FC168 = 0x002FC168; // type:func
-func_002FD060 = 0x002FD060; // type:func
 func_002FD238 = 0x002FD238; // type:func
-func_002FD3E0 = 0x002FD3E0; // type:func
-func_002FD400 = 0x002FD400; // type:func
-func_002FD5B0 = 0x002FD5B0; // type:func
-func_002FD5D0 = 0x002FD5D0; // type:func
 func_002FD840 = 0x002FD840; // type:func
 func_002FD960 = 0x002FD960; // type:func
-func_002FD980 = 0x002FD980; // type:func
-func_002FDA48 = 0x002FDA48; // type:func
-func_002FDBB0 = 0x002FDBB0; // type:func
-func_002FDD08 = 0x002FDD08; // type:func
-func_002FDEA8 = 0x002FDEA8; // type:func
-func_002FE0E8 = 0x002FE0E8; // type:func
-func_002FE2D8 = 0x002FE2D8; // type:func
-func_002FE2F8 = 0x002FE2F8; // type:func
-func_002FE490 = 0x002FE490; // type:func
-func_002FE700 = 0x002FE700; // type:func
-func_002FE720 = 0x002FE720; // type:func
-func_002FE958 = 0x002FE958; // type:func
-func_002FEB88 = 0x002FEB88; // type:func
-func_002FED68 = 0x002FED68; // type:func
 func_002FEF30 = 0x002FEF30; // type:func
 func_002FF030 = 0x002FF030; // type:func
 func_002FF0C0 = 0x002FF0C0; // type:func
 func_002FF0F8 = 0x002FF0F8; // type:func
-func_002FF300 = 0x002FF300; // type:func
-func_002FF508 = 0x002FF508; // type:func
-func_002FF598 = 0x002FF598; // type:func
-func_002FF638 = 0x002FF638; // type:func
-func_002FF6C8 = 0x002FF6C8; // type:func
-func_002FF6E8 = 0x002FF6E8; // type:func
 func_002FF708 = 0x002FF708; // type:func
-func_002FF930 = 0x002FF930; // type:func
-func_002FF950 = 0x002FF950; // type:func
 func_002FF970 = 0x002FF970; // type:func
-func_002FFA78 = 0x002FFA78; // type:func
-func_002FFA98 = 0x002FFA98; // type:func
 func_002FFAC0 = 0x002FFAC0; // type:func
 func_002FFBB0 = 0x002FFBB0; // type:func
 func_002FFC90 = 0x002FFC90; // type:func
 func_002FFDD0 = 0x002FFDD0; // type:func
-func_002FFDF8 = 0x002FFDF8; // type:func
-func_002FFE30 = 0x002FFE30; // type:func
-func_002FFF40 = 0x002FFF40; // type:func
-func_002FFF88 = 0x002FFF88; // type:func
 func_002FFFA0 = 0x002FFFA0; // type:func
 func_002FFFE8 = 0x002FFFE8; // type:func
 func_00300070 = 0x00300070; // type:func
