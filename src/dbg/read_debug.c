@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include <sifdev.h>
 
 #define FILE_NAME_CHG_TBL_CNT 16
 
@@ -170,9 +171,6 @@ const char* func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(D_0078DFC4[
 ArchiveState* func_00162DD0(void);
 s32 func_00162EB8(s32);
 s32 func_00165D70(s32, s32);
-s32 func_002FC1A0(const char*, s32); // sceOpen (returns fd)
-s32 func_002FC428(s32);              // sceClose (arg0 = fd)
-s32 func_002FC5A8(s32, s32, s32);    // sceLseek
 extern s8 D_00565DF4;
 extern s32 D_0078DFBC;
 
@@ -192,13 +190,13 @@ s32 func_00254E08(s32 id) {
         if (func_00254AB0() != NULL) {
             const char* name = func_00254AD0(index);
             if (name != 0) {
-                fd = func_002FC1A0(name, 1);
+                fd = sceOpen(name, SCE_RDONLY);
                 if (fd < 0) {
                     return 0;
                 }
-                size = func_002FC5A8(fd, 0, 2);
+                size = sceLseek(fd, 0, SCE_SEEK_END);
                 size = (size + 15) / 16 * 16;
-                func_002FC428(fd);
+                sceClose(fd);
             }
         }
     }
@@ -221,7 +219,6 @@ void func_00254F18(s32 fd, const char* path) {
 
 /*?*/ void FlushCache(/*?*/ s32);
 void* func_0011D370(s32, s32, const char*, s32); // memalloc
-void func_002FC7E0(s32, void*, s32);             // sceRead
 
 // Debug PCload
 void* func_00254F40(const char* path, s32* arg1) {
@@ -229,18 +226,18 @@ void* func_00254F40(const char* path, s32* arg1) {
     s32 size;
     s32 fd;
 
-    fd = func_002FC1A0(path, 1);
+    fd = sceOpen(path, SCE_RDONLY);
     func_00254F18(fd, path);
 
-    size = func_002FC5A8(fd, 0, 2);
-    func_002FC5A8(fd, 0, 0);
+    size = sceLseek(fd, 0, SCE_SEEK_END);
+    sceLseek(fd, 0, SCE_SEEK_SET);
 
     block = func_0011D370((size + 3) / 4 * 4, 10, D_00573400, 0x165);
 
     FlushCache(0);
 
-    func_002FC7E0(fd, block, size);
-    func_002FC428(fd);
+    sceRead(fd, block, size);
+    sceClose(fd);
     FlushCache(0);
 
     if (arg1 != NULL) {
@@ -259,11 +256,11 @@ void* func_00255020(const char* path, s32* arg1) {
     s32 fd;
     void* block;
 
-    fd = func_002FC1A0(path, 1);
+    fd = sceOpen(path, SCE_RDONLY);
     func_00254F18(fd, path);
 
-    size = func_002FC5A8(fd, 0, 2);
-    func_002FC5A8(fd, 0, 0);
+    size = sceLseek(fd, 0, SCE_SEEK_END);
+    sceLseek(fd, 0, SCE_SEEK_SET);
 
     if ((func_002D93E8() == 1) && D_00565DF0 == 0) {
         block = func_0011D370((size + 3) / 4 * 4, 10, D_00573400, 0x188);
@@ -272,8 +269,8 @@ void* func_00255020(const char* path, s32* arg1) {
     }
     FlushCache(0);
 
-    func_002FC7E0(fd, block, size);
-    func_002FC428(fd);
+    sceRead(fd, block, size);
+    sceClose(fd);
     FlushCache(0);
 
     if (arg1 != NULL) {
@@ -285,8 +282,8 @@ void* func_00255020(const char* path, s32* arg1) {
 
 // 64 entries at D_0078E030 (= archive state +0x98), stride 0x38. Fields as func_00255158 uses them.
 typedef struct {
-    /* 0x00 */ u32 unk0;   // read size (func_002FC7E0); compared unsigned with unk2C
-    /* 0x04 */ void* unk4; // destination buffer (func_002FC7E0, memcpy)
+    /* 0x00 */ u32 unk0;   // read size (sceRead); compared unsigned with unk2C
+    /* 0x04 */ void* unk4; // destination buffer (sceRead, memcpy)
     /* 0x08 */ s32 unk8;   // func_00165D00's second argument
     /* 0x0C */ u8 padC[0x1C - 0xC];
     /* 0x1C */ s32 unk1C;   // sector: unk1C << 11 is the seek offset
@@ -330,7 +327,6 @@ Unk00595AEC* func_00165D00(s32, s32);
 /*?*/ void func_0017133C(/*?*/ s32); /* extern */
 s32 func_002D1C60(void);
 /*?*/ void func_002EEBAC(void*, void*, s32); /* extern */
-s32 func_002FCD10(s32, s32, s32*);           // sceIoctl
 extern volatile u8 D_0030DAB4;
 extern void* D_0057C700;
 extern char D_006A2F10[];
@@ -387,23 +383,23 @@ void func_00255158(void) {
         if (exFile != NULL) {
             sprintf(D_006A2F10, "pfs0:/ex/%s", exFile->unk24);
             one = 1;
-            fd = func_002FC1A0(D_006A2F10, 0x8001);
+            fd = sceOpen(D_006A2F10, SCE_RDONLY | SCE_NOWAIT);
             if (fd < 0) {
                 dbgBreak();
             }
-            while (func_002FCD10(fd, 1, &stat), stat != 0) {
+            while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                 func_0017133C(one);
             }
-            func_002FC5A8(fd, exFile->unkC, 0);
-            while (func_002FCD10(fd, 1, &stat), stat != 0) {
+            sceLseek(fd, exFile->unkC, SCE_SEEK_SET);
+            while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                 func_0017133C(one);
             }
             FlushCache(0);
-            func_002FC7E0(fd, entry->unk4, exFile->unk10);
-            while (func_002FCD10(fd, 1, &stat), stat != 0) {
+            sceRead(fd, entry->unk4, exFile->unk10);
+            while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                 func_0017133C(one);
             }
-            func_002FC428(fd);
+            sceClose(fd);
             FlushCache(0);
         } else if (D_00565DF4 != 0) {
             size = entry->unk2C;
@@ -461,22 +457,22 @@ void func_00255158(void) {
             } while (0);
         } else {
             if (entry->unk1C != 0) {
-                archive->unk5C = func_002FC1A0(D_0078EE30[i], 1);
+                archive->unk5C = sceOpen(D_0078EE30[i], SCE_RDONLY);
                 func_00254F18(archive->unk5C, D_0078EE30[i]);
-                func_002FC5A8(archive->unk5C, entry->unk1C << 11, 0);
+                sceLseek(archive->unk5C, entry->unk1C << 11, SCE_SEEK_SET);
                 FlushCache(0);
-                func_002FC7E0(archive->unk5C, entry->unk4, entry->unk0);
-                func_002FC428(archive->unk5C);
+                sceRead(archive->unk5C, entry->unk4, entry->unk0);
+                sceClose(archive->unk5C);
                 FlushCache(0);
             } else {
-                archive->unk5C = func_002FC1A0(D_0078EE30[i], 0x8001);
+                archive->unk5C = sceOpen(D_0078EE30[i], SCE_RDONLY | SCE_NOWAIT);
                 func_00254F18(archive->unk5C, D_0078EE30[i]);
                 FlushCache(0);
-                func_002FC7E0(archive->unk5C, entry->unk4, entry->unk0);
-                while (func_002FCD10(archive->unk5C, 1, &stat), stat != 0) {
+                sceRead(archive->unk5C, entry->unk4, entry->unk0);
+                while (sceIoctl(archive->unk5C, SCE_FS_EXECUTING, &stat), stat != 0) {
                     func_0017133C(1);
                 }
-                func_002FC428(archive->unk5C);
+                sceClose(archive->unk5C);
                 FlushCache(0);
             }
         }
