@@ -23,6 +23,10 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 typedef float f32;
 typedef double f64;
 
+// dbgAssert: called with an expression or message string, a file name and a line number
+// ("fd >= 0", "read_debug.c", 0x14D; "PcFileTblSet  DVD MODE ONLY", "libmscd.c", 0x20C)
+void dbgAssert(const char* expr, const char* file, s32 line);
+
 static inline void dbgBreak(void) { asm("break 0\n\t"); }
 
 #endif

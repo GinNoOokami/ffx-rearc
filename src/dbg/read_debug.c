@@ -15,8 +15,6 @@ extern const char* D_006A2CD0[FILE_NAME_CHG_TBL_CNT];
 extern char D_00573400[]; // "read_debug.c", emitted by INCLUDE_RODATA
 extern ArchiveState D_0078DF98;
 
-void func_00157788(const char*, const char*, s32); // dbgAssert
-
 void func_00254958(void) {
     s32 i;
 
@@ -41,7 +39,7 @@ s32 func_002549A8(const char* arg0, const char* arg1) {
     }
 
     if (i == 16) {
-        func_00157788("i!=FILE_NAME_CHG_TBL_CNT", D_00573400, 0x50);
+        dbgAssert("i!=FILE_NAME_CHG_TBL_CNT", D_00573400, 0x50);
     }
 
     D_006A2C90[i] = arg0;
@@ -176,7 +174,7 @@ INCLUDE_RODATA("asm/jp_intl/nonmatchings/dbg/read_debug", D_00573400);
 // Assert an invalid fd
 void func_00254F18(s32 fd, const char* path) {
     if (fd < 0) {
-        func_00157788("fd >= 0", D_00573400, 0x14D);
+        dbgAssert("fd >= 0", D_00573400, 0x14D);
     }
 }
 

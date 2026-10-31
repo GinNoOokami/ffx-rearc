@@ -4,6 +4,7 @@ entry = 0x00100008; // type:func
 Sg_AnalysysELFformat = 0x00119F90; // type:func
 // main: called by entry; calls 0x11BE48, then calls the frame function forever
 main = 0x0011B9D8; // type:func
+dbgAssert = 0x00157788; // type:func
 // Sg_PcReadL: inferred: passes "Sg_PcReadL" as the 2nd argument of the assert function 0x179058
 Sg_PcReadL = 0x0011EE60; // type:func
 // Sg_PcRead: inferred: passes "Sg_PcRead" as the 2nd argument of the assert function 0x179058
@@ -3881,7 +3882,6 @@ func_001575B8 = 0x001575B8; // type:func
 func_00157648 = 0x00157648; // type:func
 func_001576F0 = 0x001576F0; // type:func
 func_00157778 = 0x00157778; // type:func
-func_00157788 = 0x00157788; // type:func
 func_001577B0 = 0x001577B0; // type:func
 func_001577D0 = 0x001577D0; // type:func
 func_001577D8 = 0x001577D8; // type:func

@@ -24,7 +24,10 @@ extern sceCdRMode D_0030DAA0;
 extern s8 D_0030DAA4;
 extern s8 D_0030DAA5;
 extern s32 D_0030DAA8;
-extern char D_0056B768[];
+extern s32 D_0030DAB0;
+extern char D_0056B720[]; // "libmscd.c"
+extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
+extern char D_0056B768[]; // "pfs0:/ex/%s"
 extern Unk0057C71C* D_0057C71C;
 extern char* D_00595AD0;
 extern s32 D_00595AD4;        // sectorNum
@@ -36,21 +39,13 @@ extern char D_00595AF0[];
 
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
-extern s32 D_0030DAB0;
-extern char D_0056B720[];
-
 void func_00162CC8(void) {
     D_0030DAB0 = 0;
     D_00595AEC = (Unk00595AEC*)func_0011D370(512 * sizeof(Unk00595AEC), 10, D_0056B720, 0x203);
     memset(D_00595AEC, 0, 512 * sizeof(Unk00595AEC));
 }
 
-void func_00157788(char*, char*, s32); /* assert? */
-extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
-
-void func_00162D18(const char* path) {
-     func_00157788(D_0056B730, D_0056B720, 0x20C);
-}
+void func_00162D18(const char* path) { dbgAssert(D_0056B730, D_0056B720, 0x20C); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D30);
 
