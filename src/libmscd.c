@@ -50,7 +50,7 @@ void func_00162D18(const char* path) { dbgAssert(D_0056B730, D_0056B720, 0x20C);
 
 void func_00162D30(const char* path) { dbgAssert(D_0056B750, D_0056B720, 0x211); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D48);
+char* func_00162D48(void) { return D_00595AD0; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D58);
 
