@@ -60,11 +60,13 @@ s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
 void func_0017133C(s32);
 s32 func_002D1C60(void);
+
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
 extern sceCdRMode D_0030DA98;
 extern sceCdRMode D_0030DAA0;
 extern s8 D_0030DAA4;
+extern s8 D_0030DAA5;
 extern s32 D_0030DAA8;
 extern volatile u8 D_0030DAB4;
 extern s8 D_00565DF4;
@@ -78,7 +80,7 @@ extern void* D_00595ADC;      // buffer
 extern sceCdRMode D_00595AE0; // mode
 extern char D_00595AF0[];
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162CB8);
+void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162CC8);
 
