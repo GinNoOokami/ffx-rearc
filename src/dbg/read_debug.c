@@ -241,8 +241,6 @@ void* func_00255020(const char* path, s32* arg1) {
 }
 
 extern char D_006A2F10[];
-extern /*?*/ Unk0078E030 D_0078E030[];
-extern char D_0078EE30[64][128];
 
 // Not matching yet. With NON_MATCHING the C below is one instruction off, but only because of
 // three changes that steer the compiler and are unlikely to be in the original:
@@ -306,7 +304,7 @@ void func_00255158(void) {
                 func_0017133C(one);
             }
             FlushCache(0);
-            sceRead(fd, entry->unk4, exFile->unk10);
+            sceRead(fd, entry->unk4.p, exFile->unk10);
             while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                 func_0017133C(one);
             }
@@ -319,22 +317,22 @@ void func_00255158(void) {
                 secs = size / 2048;
                 if (secs != 0 && size > 0) {
                     rest = secs * 2048;
-                    func_00163450(entry->unk1C, size, entry->unk4, &mode, entry->unk28);
+                    func_00163450(entry->unk1C, size, entry->unk4.p, &mode, entry->unk28);
                     FlushCache(0);
-                    memcpy(entry->unk4, (char*)entry->unk4 + 5, rest);
+                    memcpy(entry->unk4.p, (char*)entry->unk4.p + 5, rest);
                     func_00163450(entry->unk1C + secs, 0x800, buf, &mode, entry->unk28);
                     FlushCache(0);
                     size -= rest;
-                    memcpy((char*)entry->unk4 + rest, buf, size - 5);
+                    memcpy((char*)entry->unk4.p + rest, buf, size - 5);
                 } else {
                     func_00163450(entry->unk1C, 0x800, buf, &mode, entry->unk28);
                     FlushCache(0);
-                    memcpy(entry->unk4, buf + 5, size - 5);
+                    memcpy(entry->unk4.p, buf + 5, size - 5);
                 }
             } else {
                 secs = size / 2048;
                 if (secs != 0) {
-                    func_00163450(entry->unk1C, entry->unk2C, entry->unk4, &mode, entry->unk28);
+                    func_00163450(entry->unk1C, entry->unk2C, entry->unk4.p, &mode, entry->unk28);
                     rest = size & 0x7FF;
                     if (rest != 0) {
                         func_00163450(entry->unk1C + secs, 0x800, buf, &mode, entry->unk28);
@@ -346,7 +344,7 @@ void func_00255158(void) {
                     rest = size & 0x7FF;
                 copy:
                     FlushCache(0);
-                    memcpy((char*)entry->unk4 + size - rest, buf, rest);
+                    memcpy((char*)entry->unk4.p + size - rest, buf, rest);
                 }
                 if (entry->unk33 != 0) {
                     if (func_001244D0()->unk10 != 0) {
@@ -372,14 +370,14 @@ void func_00255158(void) {
                 func_00254F18(archive->unk5C, D_0078EE30[i]);
                 sceLseek(archive->unk5C, entry->unk1C << 11, SCE_SEEK_SET);
                 FlushCache(0);
-                sceRead(archive->unk5C, entry->unk4, entry->unk0);
+                sceRead(archive->unk5C, entry->unk4.p, entry->unk0);
                 sceClose(archive->unk5C);
                 FlushCache(0);
             } else {
                 archive->unk5C = sceOpen(D_0078EE30[i], SCE_RDONLY | SCE_NOWAIT);
                 func_00254F18(archive->unk5C, D_0078EE30[i]);
                 FlushCache(0);
-                sceRead(archive->unk5C, entry->unk4, entry->unk0);
+                sceRead(archive->unk5C, entry->unk4.p, entry->unk0);
                 while (sceIoctl(archive->unk5C, SCE_FS_EXECUTING, &stat), stat != 0) {
                     func_0017133C(1);
                 }

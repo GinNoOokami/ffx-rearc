@@ -41,6 +41,8 @@ extern sceCdRMode D_00595AE0; // mode
 extern Unk00595AEC* D_00595AEC;
 extern char D_00595AF0[];
 
+extern s32 D_0078DFB0;
+
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
 void func_00162CC8(void) {
@@ -70,11 +72,22 @@ void func_00162D58(void) {
 
 void func_00162DC0(void) { func_002D1C70(func_00162D58); }
 
-extern ArchiveState D_0078DF98;
-
 ArchiveState* func_00162DD0(void) { return &D_0078DF98; }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162DE0);
+void func_00162DE0(s32 arg0) {
+    if (D_0078DF98.unk18 == 0) {
+        *D_0078EE30[arg0] = 0;
+    }
+
+    D_0078E030[arg0].unk8 = 0;
+    D_0078E030[arg0].unk4.p = NULL;
+    D_0078E030[arg0].unk0 = 0;
+    D_0078E030[arg0].unk30 = 0;
+    D_0078E030[arg0].unk31 = 0;
+    D_0078E030[arg0].unk24 = 0;
+    D_0078E030[arg0].unk32 = 0;
+    D_0078E030[arg0].unk33 = 0;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162E48);
 
@@ -246,7 +259,7 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
 
     if (exFile != NULL) {
         sprintf(D_00595AF0, D_0056B768, exFile->unk24);
-        func_00166798(D_00595AF0, entry->unk4, exFile->unk10, exFile->unkC);
+        func_00166798(D_00595AF0, entry->unk4.p, exFile->unk10, exFile->unkC);
         if (func_00165EB8() == 0) {
             goto end;
         }
@@ -258,15 +271,15 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
         size = entry->unk0 + 5;
         secs = size / 2048;
         if (secs != 0 && size > 0) {
-            func_00163450(entry->unk1C, size, entry->unk4, &D_0030DA98, entry->unk28);
+            func_00163450(entry->unk1C, size, entry->unk4.p, &D_0030DA98, entry->unk28);
             FlushCache(0);
 
-            if (*(char*)entry->unk4 == 0) {
-                memcpy(entry->unk4, (char*)entry->unk4 + 5, secs * 2048);
+            if (*(char*)entry->unk4.p == 0) {
+                memcpy(entry->unk4.p, (char*)entry->unk4.p + 5, secs * 2048);
                 size -= secs * 2048;
                 func_00163450(entry->unk1C + secs, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
                 FlushCache(0);
-                memcpy((char*)entry->unk4 + secs * 2048, D_00595AD0, size - 5);
+                memcpy((char*)entry->unk4.p + secs * 2048, D_00595AD0, size - 5);
                 goto end;
             }
 
@@ -274,7 +287,7 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
                 func_00163450(entry->unk1C + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
                 rest = size & 0x7FF;
                 FlushCache(0);
-                memcpy((char*)entry->unk4 + size - rest, D_00595AD0, rest);
+                memcpy((char*)entry->unk4.p + size - rest, D_00595AD0, rest);
             } else {
                 FlushCache(0);
             }
@@ -283,22 +296,22 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
             FlushCache(0);
 
             if (*D_00595AD0 == 0) {
-                memcpy(entry->unk4, D_00595AD0 + 5, size - 5);
+                memcpy(entry->unk4.p, D_00595AD0 + 5, size - 5);
                 goto end;
             }
 
             rest = size & 0x7FF;
             FlushCache(0);
-            memcpy((char*)entry->unk4 + size - rest, D_00595AD0, rest);
+            memcpy((char*)entry->unk4.p + size - rest, D_00595AD0, rest);
         }
     } else {
         if (size / 2048 != 0) {
-            func_00163450(entry->unk1C, entry->unk2C, entry->unk4, &D_0030DA98, entry->unk28);
+            func_00163450(entry->unk1C, entry->unk2C, entry->unk4.p, &D_0030DA98, entry->unk28);
             if (size & 0x7FF) {
                 func_00163450(entry->unk1C + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
                 rest = size & 0x7FF;
                 FlushCache(0);
-                memcpy((char*)entry->unk4 + size - rest, D_00595AD0, rest);
+                memcpy((char*)entry->unk4.p + size - rest, D_00595AD0, rest);
             } else {
                 FlushCache(0);
             }
@@ -306,7 +319,7 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
             func_00163450(entry->unk1C, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
             rest = size & 0x7FF;
             FlushCache(0);
-            memcpy((char*)entry->unk4 + size - rest, D_00595AD0, rest);
+            memcpy((char*)entry->unk4.p + size - rest, D_00595AD0, rest);
         }
     }
 
