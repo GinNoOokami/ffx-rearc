@@ -51,23 +51,23 @@ typedef struct {
 } sceMcTblGetDir __attribute__((aligned(64)));
 
 /* Parameter names as in the SDK header: none */
-int sceMcInit(void);                                             /* 0x2DEB80, fno 0xFE */
-int sceMcGetInfo(int, int, int*, int*, int*);                    /* 0x2DF6B8, fno 0x01 */
-int sceMcOpen(int, int, const char*, int);                       /* 0x2DEEE0, fno 0x02 */
-int sceMcClose(int);                                             /* 0x2DF050, fno 0x03 */
-int sceMcSeek(int, int, int);                                    /* 0x2DF108, fno 0x04 */
-int sceMcRead(int, void*, int);                                  /* 0x2DF270, fno 0x05 */
-int sceMcWrite(int, void*, int);                                 /* 0x2DF390, fno 0x06 */
-int sceMcFlush(int);                                             /* 0x2DFD60, fno 0x0A */
-int sceMcMkdir(int, int, const char*);                           /* 0x2DF018 */
-int sceMcChdir(int, int, const char*, char*);                    /* 0x2DFA20, fno 0x0C */
+int sceMcInit(void);                                                    /* 0x2DEB80, fno 0xFE */
+int sceMcGetInfo(int, int, int*, int*, int*);                           /* 0x2DF6B8, fno 0x01 */
+int sceMcOpen(int, int, const char*, int);                              /* 0x2DEEE0, fno 0x02 */
+int sceMcClose(int);                                                    /* 0x2DF050, fno 0x03 */
+int sceMcSeek(int, int, int);                                           /* 0x2DF108, fno 0x04 */
+int sceMcRead(int, void*, int);                                         /* 0x2DF270, fno 0x05 */
+int sceMcWrite(int, void*, int);                                        /* 0x2DF390, fno 0x06 */
+int sceMcFlush(int);                                                    /* 0x2DFD60, fno 0x0A */
+int sceMcMkdir(int, int, const char*);                                  /* 0x2DF018 */
+int sceMcChdir(int, int, const char*, char*);                           /* 0x2DFA20, fno 0x0C */
 int sceMcGetDir(int, int, const char*, unsigned, int, sceMcTblGetDir*); /* 0x2DF840, fno 0x0D */
-int sceMcSetFileInfo(int, int, const char*, const char*, unsigned); /* 0x2DFE18, fno 0x0E */
-int sceMcDelete(int, int, const char*);                          /* 0x2DFC38, fno 0x0F */
-int sceMcFormat(int, int);                                       /* 0x2DFB70, fno 0x10 */
-int sceMcUnformat(int, int);                                     /* 0x2E0158, fno 0x11 */
-int sceMcGetEntSpace(int, int, const char*);                     /* 0x2E0220, fno 0x12 */
-int sceMcRename(int, int, const char*, const char*);             /* 0x2DFFF0, fno 0x0E, flag 0x10 */
-int sceMcSync(int, int*, int*);                                  /* 0x2DF580 */
+int sceMcSetFileInfo(int, int, const char*, const char*, unsigned);     /* 0x2DFE18, fno 0x0E */
+int sceMcDelete(int, int, const char*);                                 /* 0x2DFC38, fno 0x0F */
+int sceMcFormat(int, int);                                              /* 0x2DFB70, fno 0x10 */
+int sceMcUnformat(int, int);                                            /* 0x2E0158, fno 0x11 */
+int sceMcGetEntSpace(int, int, const char*);                            /* 0x2E0220, fno 0x12 */
+int sceMcRename(int, int, const char*, const char*);                    /* 0x2DFFF0, fno 0x0E, flag 0x10 */
+int sceMcSync(int, int*, int*);                                         /* 0x2DF580 */
 
 #endif

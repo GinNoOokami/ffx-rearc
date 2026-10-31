@@ -18,20 +18,20 @@
 #define scePadStateStable (6)
 #define scePadStateClosed (99) /* port not open (SDK 2.1+) */
 
-int scePadInit(int mode);                                                    /* 0x2DD908 */
-int scePadEnd(void);                                                         /* 0x2DDAE8, cmd 0x0F */
-int scePadPortOpen(int port, int slot, u_long128* addr);                     /* 0x2DDB68, cmd 0x01 */
-int scePadPortClose(int port, int slot);                                     /* 0x2DDD50, cmd 0x0E */
-int scePadRead(int port, int slot, unsigned char* rdata);                    /* 0x2DDEB8 */
-int scePadGetState(int port, int slot);                                      /* 0x2DDF38 */
-int scePadGetReqState(int port, int slot);                                   /* 0x2DE050 */
-int scePadInfoAct(int port, int slot, int actno, int term);                  /* 0x2DE0D8 */
-int scePadInfoComb(int port, int slot, int listno, int offs);                /* 0x2DE1F8 */
-int scePadInfoMode(int port, int slot, int term, int offs);                  /* 0x2DE318 */
-int scePadSetMainMode(int port, int slot, int offs, int lock);               /* 0x2DE450, cmd 0x06 */
-int scePadSetActDirect(int port, int slot, const unsigned char* data);       /* 0x2DE508 */
-int scePadSetActAlign(int port, int slot, const unsigned char* data);        /* 0x2DE5C0, cmd 0x08 */
-int scePadInfoPressMode(int port, int slot);                                 /* 0x2DE800 */
-int scePadEnterPressMode(int port, int slot);                                /* 0x2DE860 */
+int scePadInit(int mode);                                              /* 0x2DD908 */
+int scePadEnd(void);                                                   /* 0x2DDAE8, cmd 0x0F */
+int scePadPortOpen(int port, int slot, u_long128* addr);               /* 0x2DDB68, cmd 0x01 */
+int scePadPortClose(int port, int slot);                               /* 0x2DDD50, cmd 0x0E */
+int scePadRead(int port, int slot, unsigned char* rdata);              /* 0x2DDEB8 */
+int scePadGetState(int port, int slot);                                /* 0x2DDF38 */
+int scePadGetReqState(int port, int slot);                             /* 0x2DE050 */
+int scePadInfoAct(int port, int slot, int actno, int term);            /* 0x2DE0D8 */
+int scePadInfoComb(int port, int slot, int listno, int offs);          /* 0x2DE1F8 */
+int scePadInfoMode(int port, int slot, int term, int offs);            /* 0x2DE318 */
+int scePadSetMainMode(int port, int slot, int offs, int lock);         /* 0x2DE450, cmd 0x06 */
+int scePadSetActDirect(int port, int slot, const unsigned char* data); /* 0x2DE508 */
+int scePadSetActAlign(int port, int slot, const unsigned char* data);  /* 0x2DE5C0, cmd 0x08 */
+int scePadInfoPressMode(int port, int slot);                           /* 0x2DE800 */
+int scePadEnterPressMode(int port, int slot);                          /* 0x2DE860 */
 
 #endif
