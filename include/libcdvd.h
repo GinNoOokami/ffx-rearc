@@ -64,6 +64,15 @@ typedef struct {
 #define CdlDiskError 0x05
 #define SCECdNotReady 0x06
 
+/* sceCdStatus results ("Status Contents" in the SDK) */
+#define SCECdStatStop 0x00
+#define SCECdStatShellOpen 0x01 /* lid opened since the last check */
+#define SCECdStatSpin 0x02
+#define SCECdStatRead 0x06
+#define SCECdStatPause 0x0A
+#define SCECdStatSeek 0x12
+#define SCECdStatEmg 0x20 /* error */
+
 int sceCdInit(int init_mode);                                     /* 0x2E10B0, 0x80000592 */
 int sceCdInitEeCB(int cb_prio, void* stack_addr, int stack_size); /* 0x2E0580 */
 int* sceCdCallback(void (*func)(int));                            /* 0x2E03C8 */

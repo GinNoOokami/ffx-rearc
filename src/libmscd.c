@@ -52,7 +52,7 @@ typedef struct {
 void FlushCache(s32);
 Unk00588A00* func_001244D0(void);
 void func_00125B40(void);
-void func_00163450(s32, s32, void*, u8*, s32);
+void func_00163450(s32, s32, void*, sceCdRMode*, s32);
 void func_00163768(Unk0078E030*);
 void func_00163938(Unk0078E030*);
 Unk00595AEC* func_00165D00(s32, s32);
@@ -62,7 +62,7 @@ void func_0017133C(s32);
 s32 func_002D1C60(void);
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
-extern u8 D_0030DA98[];
+extern sceCdRMode D_0030DA98;
 extern sceCdRMode D_0030DAA0;
 extern s8 D_0030DAA4;
 extern s32 D_0030DAA8;
@@ -135,7 +135,69 @@ s32 func_001631D0(s32 arg0, s32 size, void* buffer, sceCdRMode* mode) {
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163290);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001632B8);
+u32 func_00163168(/*?*/ s32, /*?*/ s32); /* extern */
+extern s8 D_0030DAA5;
+extern char* D_0030DCD8;
+
+// After the disc lid was opened: waits for the drive, then re-reads a sector until its first 32 bytes
+// match D_0030DCD8 (same disc). Returns 1 if the lid wasn't opened or there is no ID, else 0.
+// gotos: gcc 2.95 moves a loop's test to the bottom if a break/condition exits it near the top, but the
+// inner wait loop keeps its test at the top; no break/continue shape found matches, these gotos do.
+s32 func_001632B8(void) {
+    u32 lsn;
+    s32 result;
+
+    if (sceCdStatus() == SCECdStatShellOpen) {
+    restart:
+        while (1) {
+            if (sceCdDiskReady(1) == SCECdComplete && sceCdStatus() != SCECdStatShellOpen) {
+            read:
+                if (D_0030DAA5 == 0) {
+                    return 0;
+                }
+                if (D_0030DCD8 == NULL) {
+                    return 1;
+                }
+
+                func_0017133C(1);
+                func_0015B330();
+
+                lsn = func_00163168(1, 1);
+                FlushCache(0);
+                if (sceCdRead(lsn, 1, D_00595AD0, &D_0030DA98) == 0) {
+                    goto restart;
+                }
+
+                while ((result = func_0015B830()) != 0) {
+                    if (result != -1) {
+                        goto restart;
+                    }
+                    func_0017133C(1);
+                }
+
+                FlushCache(0);
+                D_00595AD0[32] = '\0';
+                if (memcmp(D_00595AD0, D_0030DCD8, 32) == 0) {
+                    return 0;
+                }
+
+                while (1) {
+                    if (sceCdDiskReady(1) == SCECdComplete) {
+                        if (sceCdStatus() == SCECdStatShellOpen) {
+                            goto restart;
+                        }
+                        goto read;
+                    }
+                    func_0017133C(1);
+                }
+            }
+
+            D_0030DAA4 = 1;
+            func_0017133C(1);
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163450);
 
@@ -216,20 +278,20 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
         size = entry->unk0 + 5;
         secs = size / 2048;
         if (secs != 0 && size > 0) {
-            func_00163450(entry->unk1C, size, entry->unk4, D_0030DA98, entry->unk28);
+            func_00163450(entry->unk1C, size, entry->unk4, &D_0030DA98, entry->unk28);
             FlushCache(0);
 
             if (*(char*)entry->unk4 == 0) {
                 memcpy(entry->unk4, (char*)entry->unk4 + 5, secs * 2048);
                 size -= secs * 2048;
-                func_00163450(entry->unk1C + secs, 0x800, D_00595AD0, D_0030DA98, entry->unk28);
+                func_00163450(entry->unk1C + secs, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
                 FlushCache(0);
                 memcpy((char*)entry->unk4 + secs * 2048, D_00595AD0, size - 5);
                 goto end;
             }
 
             if (size & 0x7FF) {
-                func_00163450(entry->unk1C + size / 2048, 0x800, D_00595AD0, D_0030DA98, entry->unk28);
+                func_00163450(entry->unk1C + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
                 rest = size & 0x7FF;
                 FlushCache(0);
                 memcpy((char*)entry->unk4 + size - rest, D_00595AD0, rest);
@@ -237,7 +299,7 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
                 FlushCache(0);
             }
         } else {
-            func_00163450(entry->unk1C, 0x800, D_00595AD0, D_0030DA98, entry->unk28);
+            func_00163450(entry->unk1C, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
             FlushCache(0);
 
             if (*D_00595AD0 == 0) {
@@ -251,9 +313,9 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
         }
     } else {
         if (size / 2048 != 0) {
-            func_00163450(entry->unk1C, entry->unk2C, entry->unk4, D_0030DA98, entry->unk28);
+            func_00163450(entry->unk1C, entry->unk2C, entry->unk4, &D_0030DA98, entry->unk28);
             if (size & 0x7FF) {
-                func_00163450(entry->unk1C + size / 2048, 0x800, D_00595AD0, D_0030DA98, entry->unk28);
+                func_00163450(entry->unk1C + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
                 rest = size & 0x7FF;
                 FlushCache(0);
                 memcpy((char*)entry->unk4 + size - rest, D_00595AD0, rest);
@@ -261,7 +323,7 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
                 FlushCache(0);
             }
         } else {
-            func_00163450(entry->unk1C, 0x800, D_00595AD0, D_0030DA98, entry->unk28);
+            func_00163450(entry->unk1C, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
             rest = size & 0x7FF;
             FlushCache(0);
             memcpy((char*)entry->unk4 + size - rest, D_00595AD0, rest);
