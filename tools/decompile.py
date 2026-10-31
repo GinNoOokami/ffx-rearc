@@ -54,6 +54,10 @@ def make_context(c_file: Path, out: Path) -> None:
             stdout=f,
             check=True,
         )  # fmt: skip
+    # m2c's C parser reads "sizeof (T) * 8" (newlib's NFDBITS, in fd_set) as sizeof applied
+    # to the cast "(T) *8". Bracketing every "sizeof (T)" restores the C meaning.
+    text = out.read_text()
+    out.write_text(re.sub(r"sizeof \((\w+)\)", r"(sizeof (\1))", text))
 
 
 def run_m2c(asm: Path, name: str, context: Path, m2c_args: list[str]) -> str:
