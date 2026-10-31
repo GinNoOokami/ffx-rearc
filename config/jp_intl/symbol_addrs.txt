@@ -331,6 +331,84 @@ sceLseek = 0x002FC5A8; // type:func
 sceRead = 0x002FC7E0; // type:func
 sceWrite = 0x002FCA50; // type:func
 sceIoctl = 0x002FCD10; // type:func
+// Sony libdma: the SDK 2.5.1 libdma.c, compiled with ee-gcc2.9-991111-01-dtls13010 -O2 -G0
+// -fno-common, matches these 6 functions exactly (each at one ELF address, relocated fields masked).
+// Its other 13 functions don't match: FFX's 2.3.x object is laid out differently from 0x2DB690 on
+// (see below).
+memclr = 0x002DB330; // type:func
+sceDmaGetChan = 0x002DB368; // type:func
+sceDmaReset = 0x002DB390; // type:func
+sceDmaPutEnv = 0x002DB480; // type:func
+sceDmaGetEnv = 0x002DB658; // type:func
+sceDmaRestart = 0x002DBDE8; // type:func
+// dch: the channel table sceDmaGetChan indexes (relocation in its exact match); ten pointers to
+// the DMA channel registers, VIF0 0x10008000 … toSPR 0x1000D400
+dch = 0x00565E50; // size:0x28
+// The other libdma functions: named by matching their code to the 2.5.1 source and by the SDK
+// header's order, which FFX's layout follows (the 2.0-only SendM/SyncN/LastSyncTime/Callback are
+// absent, as in 2.4.2). Inferred. Each send/receive inlines a wait on CHCR.STR that prints
+// "libdma: sync timeout", then sets the channel registers and CHCR mode/direction/start bits.
+// sceDmaDebug: one argument, swaps it with the word at 0x565E78 and returns the old value; sits
+// between sceDmaReset and sceDmaPutEnv as in the header
+sceDmaDebug = 0x002DB470; // type:func
+// sceDmaPutStallAddr: returns D_STADR (0x1000E060), writes the argument there unless it is -1
+sceDmaPutStallAddr = 0x002DB690; // type:func
+// sceDmaSend: tadr = arg, qwc = 0, CHCR |= 0x105 (chain, from memory, start)
+sceDmaSend = 0x002DB6B8; // type:func
+// sceDmaSendN / sceDmaSendI: madr, qwc = args; CHCR |= 0x101 (normal) / 0x109 (interleave)
+sceDmaSendN = 0x002DB790; // type:func
+sceDmaSendI = 0x002DB878; // type:func
+// sceDmaRecv / sceDmaRecvN / sceDmaRecvI: as the sends with the direction bit cleared;
+// one argument, mode 0x4 (chain) / three arguments, mode 0 / 0x8
+sceDmaRecv = 0x002DB960; // type:func
+sceDmaRecvN = 0x002DBA28; // type:func
+sceDmaRecvI = 0x002DBB18; // type:func
+// sceDmaSync: (d, mode, timeout); returns CHCR.STR or waits on it
+sceDmaSync = 0x002DBC08; // type:func
+// sceDmaWatch: (d, addr, mode, timeout); compares MADR with addr
+sceDmaWatch = 0x002DBCD0; // type:func
+// sceDmaPause: sets D_ENABLEW (0x1000F590) unless D_ENABLER (0x1000F520) is set, clears CHCR.STR,
+// writes D_ENABLEW 0; returns the old CHCR
+sceDmaPause = 0x002DBDA0; // type:func
+// Sony libdev: the SDK 2.5.1 devvu0.c, devvu1.c and devvif0.c, compiled as libdma above (the
+// library Makefile adds -fno-exceptions), match as whole objects at 0x2DBE00, 0x2DC210 and
+// 0x2DC768: devvu1 and devvif0 completely, devvu0 except sceDevVu0PutCnd (0x2DC0A0, 32 of 91
+// words differ). The game's own toolchain matches only 3 of devvif0's 8 functions.
+sceDevVu0CheckBusy = 0x002DBE00; // type:func
+sceDevVu0Reset = 0x002DBE18; // type:func
+sceDevVu0Pause = 0x002DBE30; // type:func
+sceDevVu0Continue = 0x002DBE90; // type:func
+sceDevVu0PutDBit = 0x002DBEE0; // type:func
+sceDevVu0PutTBit = 0x002DBF10; // type:func
+sceDevVu0GetDBit = 0x002DBF40; // type:func
+sceDevVu0GetTBit = 0x002DBF50; // type:func
+sceDevVu0Sync = 0x002DBF60; // type:func
+sceDevVu0Exec = 0x002DBFA0; // type:func
+sceDevVu0GetTpc = 0x002DBFB0; // type:func
+sceDevVu0GetCnd = 0x002DBFC0; // type:func
+sceVuCheckBusy = 0x002DC210; // type:func
+sceVu0MemWriteQ = 0x002DC240; // type:func
+sceVu0MemReadQ = 0x002DC280; // type:func
+sceDevVu1Reset = 0x002DC2C8; // type:func
+sceDevVu1Pause = 0x002DC2E0; // type:func
+sceDevVu1Continue = 0x002DC340; // type:func
+sceDevVu1PutDBit = 0x002DC390; // type:func
+sceDevVu1PutTBit = 0x002DC3C0; // type:func
+sceDevVu1GetDBit = 0x002DC3F0; // type:func
+sceDevVu1GetTBit = 0x002DC400; // type:func
+sceDevVu1Sync = 0x002DC410; // type:func
+sceDevVu1Exec = 0x002DC458; // type:func
+sceDevVu1GetTpc = 0x002DC468; // type:func
+sceDevVu1GetCnd = 0x002DC490; // type:func
+sceDevVu1PutCnd = 0x002DC620; // type:func
+sceDevVif0Reset = 0x002DC768; // type:func
+sceDevVif0Pause = 0x002DC790; // type:func
+sceDevVif0Continue = 0x002DC7F8; // type:func
+sceDevVif0PutErr = 0x002DC838; // type:func
+sceDevVif0GetErr = 0x002DC858; // type:func
+sceDevVif0Sync = 0x002DC868; // type:func
+sceDevVif0GetCnd = 0x002DC8B8; // type:func
+sceDevVif0PutFifo = 0x002DCA38; // type:func
 // Sony libvu0: the SDK 2.0 libvu0.c, compiled with ee-gcc2.9-991111-01-dtls13010 -O2 -G0
 // -fno-common (the library Makefile's flags), matches as a whole object: all 42 functions at
 // 0x2DCA98-0x2DD7D4 and its 0x30 bytes of .data at 0x565F00, relocated fields masked. The game's
@@ -10530,59 +10608,7 @@ func_002DA208 = 0x002DA208; // type:func
 func_002DA7A0 = 0x002DA7A0; // type:func
 func_002DB0F0 = 0x002DB0F0; // type:func
 func_002DB2D0 = 0x002DB2D0; // type:func
-func_002DB330 = 0x002DB330; // type:func
-func_002DB368 = 0x002DB368; // type:func
-func_002DB390 = 0x002DB390; // type:func
-func_002DB470 = 0x002DB470; // type:func
-func_002DB480 = 0x002DB480; // type:func
-func_002DB658 = 0x002DB658; // type:func
-func_002DB690 = 0x002DB690; // type:func
-func_002DB6B8 = 0x002DB6B8; // type:func
-func_002DB790 = 0x002DB790; // type:func
-func_002DB878 = 0x002DB878; // type:func
-func_002DB960 = 0x002DB960; // type:func
-func_002DBA28 = 0x002DBA28; // type:func
-func_002DBB18 = 0x002DBB18; // type:func
-func_002DBC08 = 0x002DBC08; // type:func
-func_002DBCD0 = 0x002DBCD0; // type:func
-func_002DBDA0 = 0x002DBDA0; // type:func
-func_002DBDE8 = 0x002DBDE8; // type:func
-func_002DBE00 = 0x002DBE00; // type:func
-func_002DBE18 = 0x002DBE18; // type:func
-func_002DBE30 = 0x002DBE30; // type:func
-func_002DBE90 = 0x002DBE90; // type:func
-func_002DBEE0 = 0x002DBEE0; // type:func
-func_002DBF10 = 0x002DBF10; // type:func
-func_002DBF40 = 0x002DBF40; // type:func
-func_002DBF50 = 0x002DBF50; // type:func
-func_002DBF60 = 0x002DBF60; // type:func
-func_002DBFA0 = 0x002DBFA0; // type:func
-func_002DBFB0 = 0x002DBFB0; // type:func
-func_002DBFC0 = 0x002DBFC0; // type:func
 func_002DC0A0 = 0x002DC0A0; // type:func
-func_002DC210 = 0x002DC210; // type:func
-func_002DC240 = 0x002DC240; // type:func
-func_002DC280 = 0x002DC280; // type:func
-func_002DC2C8 = 0x002DC2C8; // type:func
-func_002DC2E0 = 0x002DC2E0; // type:func
-func_002DC340 = 0x002DC340; // type:func
-func_002DC390 = 0x002DC390; // type:func
-func_002DC3C0 = 0x002DC3C0; // type:func
-func_002DC3F0 = 0x002DC3F0; // type:func
-func_002DC400 = 0x002DC400; // type:func
-func_002DC410 = 0x002DC410; // type:func
-func_002DC458 = 0x002DC458; // type:func
-func_002DC468 = 0x002DC468; // type:func
-func_002DC490 = 0x002DC490; // type:func
-func_002DC620 = 0x002DC620; // type:func
-func_002DC768 = 0x002DC768; // type:func
-func_002DC790 = 0x002DC790; // type:func
-func_002DC7F8 = 0x002DC7F8; // type:func
-func_002DC838 = 0x002DC838; // type:func
-func_002DC858 = 0x002DC858; // type:func
-func_002DC868 = 0x002DC868; // type:func
-func_002DC8B8 = 0x002DC8B8; // type:func
-func_002DCA38 = 0x002DCA38; // type:func
 func_002DD7D8 = 0x002DD7D8; // type:func
 func_002DDA48 = 0x002DDA48; // type:func
 func_002DDE08 = 0x002DDE08; // type:func
