@@ -23,4 +23,6 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 typedef float f32;
 typedef double f64;
 
+static inline void dbgBreak(void) { asm("break 0\n\t"); }
+
 #endif
