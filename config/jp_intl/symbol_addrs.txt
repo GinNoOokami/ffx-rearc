@@ -311,6 +311,23 @@ Deci2Call = 0x002F84D0; // type:func
 PSMode = 0x002F84E0; // type:func
 MachineType = 0x002F84F0; // type:func
 GetMemorySize = 0x002F8500; // type:func
+// Sony libkernl SIF RPC client. sceSifCallRpc: 9 arguments (a0-t3, 9th on the stack), sends SIF
+// command 0x8000000A with a 0x40-byte packet, returns -1/-2/-3 when it can't get a packet / send it
+// / create its semaphore, tests mode bits 1 and 2. sceSifBindRpc: 3 arguments, same pattern with
+// command 0x80000009. Inferred: the shapes and error codes fit the SDK sifrpc.h prototypes and
+// SIF_RPCE_* values; the command numbers fit ps2sdk's RPC protocol.
+sceSifBindRpc = 0x002FAFB8; // type:func
+sceSifCallRpc = 0x002FB188; // type:func
+// Sony libkernl file I/O: SIF RPC clients of IOP server 0x80000001 (bound by 0x2FBF10 into the
+// client struct at 0x794B80), named from the function number each passes to sceSifCallRpc
+// (0 open, 1 close, 2 read, 3 write, 4 lseek, 5 ioctl). Inferred: the numbers are in the code, the
+// numbering is ps2sdk's FILEIO protocol, the sce names are the SDK's sifdev.h.
+sceOpen = 0x002FC1A0; // type:func
+sceClose = 0x002FC428; // type:func
+sceLseek = 0x002FC5A8; // type:func
+sceRead = 0x002FC7E0; // type:func
+sceWrite = 0x002FCA50; // type:func
+sceIoctl = 0x002FCD10; // type:func
 
 // D_00186B00: data inside .text: an 8x8 1-bit font (glyph rows read as ASCII from blank, !, ", #),
 // 0x5E4 bytes, addressed from 0x15A54C; 256-byte aligned, zero padding before and after.
@@ -10730,9 +10747,7 @@ func_002FAD00 = 0x002FAD00; // type:func
 func_002FAD60 = 0x002FAD60; // type:func
 func_002FAEB8 = 0x002FAEB8; // type:func
 func_002FAF08 = 0x002FAF08; // type:func
-func_002FAFB8 = 0x002FAFB8; // type:func
 func_002FB0F8 = 0x002FB0F8; // type:func
-func_002FB188 = 0x002FB188; // type:func
 func_002FB378 = 0x002FB378; // type:func
 func_002FB3B8 = 0x002FB3B8; // type:func
 func_002FB450 = 0x002FB450; // type:func
@@ -10753,12 +10768,6 @@ func_002FBEE0 = 0x002FBEE0; // type:func
 func_002FBF10 = 0x002FBF10; // type:func
 func_002FC0D8 = 0x002FC0D8; // type:func
 func_002FC168 = 0x002FC168; // type:func
-func_002FC1A0 = 0x002FC1A0; // type:func
-func_002FC428 = 0x002FC428; // type:func
-func_002FC5A8 = 0x002FC5A8; // type:func
-func_002FC7E0 = 0x002FC7E0; // type:func
-func_002FCA50 = 0x002FCA50; // type:func
-func_002FCD10 = 0x002FCD10; // type:func
 func_002FD060 = 0x002FD060; // type:func
 func_002FD238 = 0x002FD238; // type:func
 func_002FD3E0 = 0x002FD3E0; // type:func
