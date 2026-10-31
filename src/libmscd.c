@@ -37,7 +37,7 @@ typedef struct {
     /* 0x10 */ s32 unk10;
     /* 0x14 */ u8 pad14[0x24 - 0x14];
     /* 0x24 */ char unk24[0x10];
-} Unk00595AEC;
+} Unk00595AEC; // 0x34 bytes
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];
@@ -78,11 +78,20 @@ extern s32 D_00595AD4;        // sectorNum
 extern s32 D_00595AD8;        // size
 extern void* D_00595ADC;      // buffer
 extern sceCdRMode D_00595AE0; // mode
+extern Unk00595AEC* D_00595AEC;
 extern char D_00595AF0[];
 
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162CC8);
+void* func_0011D370(s32, s32, const char*, s32); // memalloc
+extern s32 D_0030DAB0;
+extern char D_0056B720[];
+
+void func_00162CC8(void) {
+    D_0030DAB0 = 0;
+    D_00595AEC = (Unk00595AEC*)func_0011D370(512 * sizeof(Unk00595AEC), 10, D_0056B720, 0x203);
+    memset(D_00595AEC, 0, 512 * sizeof(Unk00595AEC));
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162D18);
 
