@@ -331,6 +331,37 @@ sceLseek = 0x002FC5A8; // type:func
 sceRead = 0x002FC7E0; // type:func
 sceWrite = 0x002FCA50; // type:func
 sceIoctl = 0x002FCD10; // type:func
+// Sony libpad. scePadInit binds IOP servers 0x80000100/0x80000101; each RPC is function 1 with the
+// command in the packet's first word (0x01 open, 0x06 main mode, 0x08 act align, 0x0E close, 0x0F
+// end, 0x10 init: ps2sdk's numbering). The others make no RPC and are named by matching their logic
+// to ps2sdk's (per-port state block, 0x70 bytes per port, 0x1C per slot). Inferred; the sce names
+// are the SDK's libpad.h.
+// scePadInit: binds both servers, compares the module version (prints "libpad: Module version
+// mismatch "), then sends cmd 0x10
+scePadInit = 0x002DD908; // type:func
+scePadEnd = 0x002DDAE8; // type:func
+// scePadPortOpen: cmd 0x01; prints "libpad: buffer addr is not 64 byte align." and "libpad: pad
+// port is already open"
+scePadPortOpen = 0x002DDB68; // type:func
+scePadPortClose = 0x002DDD50; // type:func
+// scePadRead: copies the state block's length (+0x60) of bytes to arg 2, returns it
+scePadRead = 0x002DDEB8; // type:func
+// scePadGetState: 99 if the port isn't open; state 6 with request state 2 reads as 5
+scePadGetState = 0x002DDF38; // type:func
+scePadGetReqState = 0x002DE050; // type:func
+// scePadInfoAct / scePadInfoComb / scePadInfoMode: count for -1, -1 past the count, else the term's
+// table byte
+scePadInfoAct = 0x002DE0D8; // type:func
+scePadInfoComb = 0x002DE1F8; // type:func
+scePadInfoMode = 0x002DE318; // type:func
+scePadSetMainMode = 0x002DE450; // type:func
+// scePadSetActDirect: copies 6 bytes into the port's DMA block and sends it
+scePadSetActDirect = 0x002DE508; // type:func
+scePadSetActAlign = 0x002DE5C0; // type:func
+// scePadInfoPressMode: returns (0x2DE698(port, slot) ^ 0x3FFFF) == 0
+scePadInfoPressMode = 0x002DE800; // type:func
+// scePadEnterPressMode: calls 0x2DE750 (cmd 0x0A, button info) with 0xFFF
+scePadEnterPressMode = 0x002DE860; // type:func
 // Sony libmc: SIF RPC clients of IOP server 0x80000400, named from the function number each passes
 // to sceSifCallRpc (ps2sdk's XMCSERV numbering) and from the command code each stores for
 // sceMcSync, which equals the SDK's sceMcFuncNo* value. Inferred: numbers and codes are in the
@@ -10545,29 +10576,14 @@ func_002DD688 = 0x002DD688; // type:func
 func_002DD6E8 = 0x002DD6E8; // type:func
 func_002DD778 = 0x002DD778; // type:func
 func_002DD7D8 = 0x002DD7D8; // type:func
-func_002DD908 = 0x002DD908; // type:func
 func_002DDA48 = 0x002DDA48; // type:func
-func_002DDAE8 = 0x002DDAE8; // type:func
-func_002DDB68 = 0x002DDB68; // type:func
-func_002DDD50 = 0x002DDD50; // type:func
 func_002DDE08 = 0x002DDE08; // type:func
 func_002DDE68 = 0x002DDE68; // type:func
-func_002DDEB8 = 0x002DDEB8; // type:func
-func_002DDF38 = 0x002DDF38; // type:func
 func_002DDFB0 = 0x002DDFB0; // type:func
 func_002DDFE8 = 0x002DDFE8; // type:func
-func_002DE050 = 0x002DE050; // type:func
 func_002DE0A0 = 0x002DE0A0; // type:func
-func_002DE0D8 = 0x002DE0D8; // type:func
-func_002DE1F8 = 0x002DE1F8; // type:func
-func_002DE318 = 0x002DE318; // type:func
-func_002DE450 = 0x002DE450; // type:func
-func_002DE508 = 0x002DE508; // type:func
-func_002DE5C0 = 0x002DE5C0; // type:func
 func_002DE698 = 0x002DE698; // type:func
 func_002DE750 = 0x002DE750; // type:func
-func_002DE800 = 0x002DE800; // type:func
-func_002DE860 = 0x002DE860; // type:func
 func_002DE8B8 = 0x002DE8B8; // type:func
 func_002DE910 = 0x002DE910; // type:func
 func_002DE9E0 = 0x002DE9E0; // type:func
