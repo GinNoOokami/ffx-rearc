@@ -17,6 +17,8 @@
  *     sceSifCheckStatRpc reports the N-command client busy; other modes return 1 if busy, else 0.
  *   sceCdInitEeCB: creates the callback thread with initPriority = arg 0, stack = arg 1,
  *     stackSize = arg 2 (ThreadParam), or changes its priority if it exists.
+ *   sceCdCallback: returns 0 if sceCdSync(1) reports busy, else stores the function and
+ *     returns the previous one.
  *   sceCdPOffCallback: stores a function and its argument, returns the previous function
  *     (two arguments: not the one-argument sceCdCallback).
  */
@@ -54,6 +56,7 @@ typedef struct {
 
 int sceCdInit(int init_mode);                                          /* 0x2E10B0, 0x80000592 */
 int sceCdInitEeCB(int cb_prio, void* stack_addr, int stack_size);      /* 0x2E0580 */
+int* sceCdCallback(void (*func)(int));                                 /* 0x2E03C8 */
 int* sceCdPOffCallback(void (*func)(void*), void* addr);              /* 0x2E0810 */
 int sceCdDiskReady(int mode);                                          /* 0x2E1390, 0x8000059A */
 int sceCdSearchFile(sceCdlFILE* fp, const char* name);                 /* 0x2E0928, 0x80000597 */

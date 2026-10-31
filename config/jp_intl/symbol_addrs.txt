@@ -331,6 +331,33 @@ sceLseek = 0x002FC5A8; // type:func
 sceRead = 0x002FC7E0; // type:func
 sceWrite = 0x002FCA50; // type:func
 sceIoctl = 0x002FCD10; // type:func
+// Sony libmc: SIF RPC clients of IOP server 0x80000400, named from the function number each passes
+// to sceSifCallRpc (ps2sdk's XMCSERV numbering) and from the command code each stores for
+// sceMcSync, which equals the SDK's sceMcFuncNo* value. Inferred: numbers and codes are in the
+// code, the sce names are the SDK's libmc.h.
+sceMcInit = 0x002DEB80; // type:func
+sceMcOpen = 0x002DEEE0; // type:func
+// sceMcMkdir: inferred: calls sceMcOpen with mode 0x40, stores code 0xB (sceMcFuncNoMkdir)
+sceMcMkdir = 0x002DF018; // type:func
+sceMcClose = 0x002DF050; // type:func
+sceMcSeek = 0x002DF108; // type:func
+sceMcRead = 0x002DF270; // type:func
+sceMcWrite = 0x002DF390; // type:func
+// sceMcSync: inferred: (mode, int*, int*): -1 with no command pending; polls sceSifCheckStatRpc on
+// the libmc client (waits in mode 0), stores the pending command code and the result
+sceMcSync = 0x002DF580; // type:func
+sceMcGetInfo = 0x002DF6B8; // type:func
+sceMcGetDir = 0x002DF840; // type:func
+sceMcChdir = 0x002DFA20; // type:func
+sceMcFormat = 0x002DFB70; // type:func
+sceMcDelete = 0x002DFC38; // type:func
+sceMcFlush = 0x002DFD60; // type:func
+// sceMcSetFileInfo / sceMcRename: both send function 0xE; 5 vs 4 arguments, codes 0xE / 0x13,
+// sceMcRename sets flag 0x10
+sceMcSetFileInfo = 0x002DFE18; // type:func
+sceMcRename = 0x002DFFF0; // type:func
+sceMcUnformat = 0x002E0158; // type:func
+sceMcGetEntSpace = 0x002E0220; // type:func
 // Sony libcdvd: SIF RPC clients, named from the IOP server each binds (0x80000592 init,
 // 0x80000593 S-commands, 0x80000595 N-commands, 0x80000597 file search, 0x8000059A disk ready)
 // and the function number it passes to sceSifCallRpc. Inferred: the server IDs and numbers are in
@@ -358,6 +385,9 @@ sceCdInitEeCB = 0x002E0580; // type:func
 // sceCdPOffCallback: inferred: two arguments (function, its argument) stored with interrupts off,
 // returns the previous function
 sceCdPOffCallback = 0x002E0810; // type:func
+// sceCdCallback: inferred: one argument; returns 0 if sceCdSync(1) reports busy, else stores the
+// function with interrupts off and returns the previous one
+sceCdCallback = 0x002E03C8; // type:func
 
 // D_00186B00: data inside .text: an 8x8 1-bit font (glyph rows read as ASCII from blank, !, ", #),
 // 0x5E4 bytes, addressed from 0x15A54C; 256-byte aligned, zero padding before and after.
@@ -10544,35 +10574,16 @@ func_002DE9E0 = 0x002DE9E0; // type:func
 func_002DEA48 = 0x002DEA48; // type:func
 func_002DEAB0 = 0x002DEAB0; // type:func
 func_002DEB18 = 0x002DEB18; // type:func
-func_002DEB80 = 0x002DEB80; // type:func
 func_002DED38 = 0x002DED38; // type:func
 func_002DED68 = 0x002DED68; // type:func
 func_002DEE20 = 0x002DEE20; // type:func
-func_002DEEE0 = 0x002DEEE0; // type:func
-func_002DF018 = 0x002DF018; // type:func
-func_002DF050 = 0x002DF050; // type:func
-func_002DF108 = 0x002DF108; // type:func
 func_002DF1E0 = 0x002DF1E0; // type:func
-func_002DF270 = 0x002DF270; // type:func
-func_002DF390 = 0x002DF390; // type:func
 func_002DF510 = 0x002DF510; // type:func
 func_002DF538 = 0x002DF538; // type:func
-func_002DF580 = 0x002DF580; // type:func
 func_002DF660 = 0x002DF660; // type:func
-func_002DF6B8 = 0x002DF6B8; // type:func
-func_002DF840 = 0x002DF840; // type:func
 func_002DF998 = 0x002DF998; // type:func
-func_002DFA20 = 0x002DFA20; // type:func
-func_002DFB70 = 0x002DFB70; // type:func
-func_002DFC38 = 0x002DFC38; // type:func
-func_002DFD60 = 0x002DFD60; // type:func
-func_002DFE18 = 0x002DFE18; // type:func
-func_002DFFF0 = 0x002DFFF0; // type:func
-func_002E0158 = 0x002E0158; // type:func
-func_002E0220 = 0x002E0220; // type:func
 func_002E0338 = 0x002E0338; // type:func
 func_002E0360 = 0x002E0360; // type:func
-func_002E03C8 = 0x002E03C8; // type:func
 func_002E0420 = 0x002E0420; // type:func
 func_002E04C0 = 0x002E04C0; // type:func
 func_002E0658 = 0x002E0658; // type:func
