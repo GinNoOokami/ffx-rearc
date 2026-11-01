@@ -11,6 +11,10 @@
 #define DBG_LINE_SIZE 40
 #define DBG_LINE_COUNT 128
 
+#define TBL_ENTRY_SIZE_MASK 0x3FFFFF
+#define TBL_ENTRY_COMPRESSED_FLAG 0x400000
+#define TBL_ENTRY_EMPTY_FLAG 0x800000
+
 typedef enum {
     DBG_OUT_NONE,
     DBG_OUT_LOG_FILE,
@@ -107,10 +111,11 @@ extern char D_0056B940[]; // "host:printf.log"
 extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
 extern char* D_00595AD0;
-extern s32 D_00595AD4;          // sectorNum
-extern s32 D_00595AD8;          // size
-extern void* D_00595ADC;        // buffer
-extern sceCdRMode D_00595AE0;   // mode
+extern s32 D_00595AD4;        // sectorNum
+extern s32 D_00595AD8;        // size
+extern void* D_00595ADC;      // buffer
+extern sceCdRMode D_00595AE0; // mode
+extern u8* D_00595AE8;
 extern Unk00595AEC* D_00595AEC; // D_0030DAB0 entries, 512 allocated
 extern char D_00595AF0[];
 
@@ -178,13 +183,35 @@ void func_00162E48(void) {
     func_0015B330();
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162EB8);
+s32 func_00162EB8(s32 id) {
+    s32 index = D_0078DF98.unk20 + id;
+    s32 offset = index * 3;
+    s32 size;
+    u8* data;
+
+    size = func_00165D70(D_0078DF98.unk24, id);
+    if (size == 0) {
+        u32 entry = D_0078DF98.unk28[index];
+        if (!(entry & TBL_ENTRY_EMPTY_FLAG)) {
+            if (entry & TBL_ENTRY_COMPRESSED_FLAG) {
+                data = D_00595AE8 + offset;
+                size = data[0];
+                size += data[1] << 8;
+                size += data[2] << 16;
+                size *= 8;
+            } else {
+                u32 curr = entry & TBL_ENTRY_SIZE_MASK;
+                u32 next = D_0078DF98.unk28[index + 1] & TBL_ENTRY_SIZE_MASK;
+                size = ((next - curr) * 2048) - ((entry >> 24) * 8);
+            }
+        }
+        return size;
+    }
+    // No return when the override hook returns nonzero: the hook's result is still in v0, so callers
+    // get it anyway. Adding `return size;` here changes register allocation and breaks the match.
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162FA0);
-
-#define TBL_ENTRY_SIZE_MASK 0x3FFFFF
-#define TBL_ENTRY_COMPRESSED_FLAG 0x400000
-#define TBL_ENTRY_EMPTY_FLAG 0x800000
 
 s32 func_00163090(s32 id) {
     s32 index = D_0078DF98.unk20 + id;
