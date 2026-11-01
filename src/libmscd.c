@@ -24,11 +24,13 @@ extern s32 D_0030DA80;
 extern s32 D_0030DA84;
 extern sceCdRMode D_0030DA98;
 extern sceCdRMode D_0030DAA0;
+
 extern s32 D_0030DAAC;
 extern s8 D_0030DAA4;
 extern s8 D_0030DAA5;
 extern s32 D_0030DAA8;
 extern s32 D_0030DAB0;
+extern s8 D_0030DAC1;
 extern char D_0056B720[]; // "libmscd.c"
 extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
@@ -375,7 +377,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A10);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A20);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A50);
+void func_00164A50(s8 arg0) { D_0030DAC1 = arg0; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A60);
 
