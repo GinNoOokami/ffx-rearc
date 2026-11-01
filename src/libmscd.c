@@ -25,6 +25,7 @@ void func_00166878();
  * v0 from fn passes through. */
 void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a function on the given stack
 
+/*?*/ s32 func_0020D378();
 void func_002D1C70(void (*)());
 
 extern s32 D_0030DA80;
@@ -138,7 +139,12 @@ s32 func_001631D0(s32 arg0, s32 size, void* buffer, sceCdRMode* mode) {
     return sceCdRead(arg0, sectors, buffer, mode);
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163290);
+s32 func_00163290(void) {
+    if (D_0030DAA4 != 0) {
+        return func_0020D378();
+    }
+    // no return on this path: a void function or a return value here compiles to a tail jump
+}
 
 u32 func_00163168(/*?*/ s32, /*?*/ s32); /* extern */
 extern s8 D_0030DAA5;
