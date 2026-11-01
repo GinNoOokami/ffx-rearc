@@ -35,6 +35,7 @@ void FlushCache(s32);
 void func_00125B40(void);
 sceCdRMode* func_0015B320();
 void func_0015B330(void);
+/*?*/ void func_00164820();
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
 void func_001656E0(const char* str, u32 len);
 s32 func_00165EB8(void);
@@ -59,6 +60,7 @@ void func_002D1C70(void (*)());
 // them in D_0078AC00) have passed since the last call, then resets the count and runs the
 // per-frame TK updates.
 /*?*/ void func_002D3C80(s32);
+s32 func_002D6478(void);
 void func_002D8E20(const char* ch, const char* str, u32 len);
 
 extern char D_0056B950[];                              // "FFXDEBUG"
@@ -93,6 +95,7 @@ extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
 extern char D_0056B778[]; // "sa_file_read_init!=0"
+extern char D_0056B818[]; // "0"
 extern char D_0056B940[]; // "host:printf.log"
 extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
@@ -501,7 +504,29 @@ s32 func_001648F8(s32 arg0, s32 arg1) {
     return 0;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164970);
+s32 func_00164970(s32 arg0) {
+    s32 i;
+
+    switch (arg0) {
+    default:
+    case 0:
+        func_00164820();
+        break;
+
+    case 1:
+        for (i = 0; i < READ_Q_CNT; i++) {
+            if (D_0078E030[i].unk31 != 0) {
+                if (func_002D6478() != 0) {
+                    dbgAssert(D_0056B818, D_0056B720, 0x67E);
+                }
+                return 1;
+            }
+        }
+        break;
+    }
+
+    return 0;
+}
 
 const char* func_00164A10(void) { return D_0030DAB8; }
 
