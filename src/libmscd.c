@@ -24,6 +24,11 @@ void func_00166878();
  * Saves ra/sp/s0 at stack[0..2], runs fn(arg) with sp = stack + size - 0x10, then restores them;
  * v0 from fn passes through. */
 void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a function on the given stack
+/* Hand-written (`addu rd,$0,rs` moves, $1 as scratch, no frame). Patches printf to jump to fn:
+ * copies printf's first two instructions to func_001715A0, which then jumps to printf+8 (so it
+ * acts as the original printf), and overwrites printf's first two with `j fn; nop`.
+ * The caller must flush the caches afterwards. */
+void func_00171548(void (*fn)()); // redirects printf to fn
 
 /*?*/ s32 func_0020D378();
 void func_002D1C70(void (*)());
@@ -451,7 +456,13 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165A50);
 
 void func_00165AE0(void) {}
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165AE8);
+// Silences printf: redirects it to the empty func_00165AE0, then writes back the data cache (0)
+// and invalidates the instruction cache (2) so the patched code is fetched.
+void func_00165AE8(void) {
+    func_00171548(func_00165AE0);
+    FlushCache(0);
+    FlushCache(2);
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165B18);
 
