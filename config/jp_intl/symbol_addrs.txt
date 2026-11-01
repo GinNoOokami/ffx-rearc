@@ -5,6 +5,17 @@ Sg_AnalysysELFformat = 0x00119F90; // type:func
 // main: called by entry; calls 0x11BE48, then calls the frame function forever
 main = 0x0011B9D8; // type:func
 dbgAssert = 0x00157788; // type:func
+D_0030DA98 = 0x0030DA98; // size:0x4
+D_0030DAA0 = 0x0030DAA0; // size:0x4
+D_00595AE0 = 0x00595AE0; // size:0x4
+D_0078DF98 = 0x0078DF98; // size:0x98
+D_0078E030 = 0x0078E030; // size:0xE00
+D_0078EE30 = 0x0078EE30; // size:0x2000
+// Not a symbol: .data holds ascending 16-bit ID lists (0x15, 0x16, ... 0x78, 0x79, ...) and a pair
+// packs into a word in the .bss range, so splat takes it for a pointer (0x337C08 and five more).
+// Same lists also make D_00750074, D_00770076, D_00780077, D_00670066, D_00680067: probably fake
+// too, not checked for code references yet.
+D_00790078 = 0x00790078; // ignore:true
 // Sg_PcReadL: inferred: passes "Sg_PcReadL" as the 2nd argument of the assert function 0x179058
 Sg_PcReadL = 0x0011EE60; // type:func
 // Sg_PcRead: inferred: passes "Sg_PcRead" as the 2nd argument of the assert function 0x179058

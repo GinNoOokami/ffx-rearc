@@ -127,17 +127,15 @@ const char* func_00254AD0(s32 index) {
 
 const char* func_00254DA8(s32 arg0) { return func_00254AD0(func_00162DD0()->unk20 + arg0); }
 
-extern s16* D_0078DFC4;
 
-const char* func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(D_0078DFC4[arg0] + arg1); }
+const char* func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(D_0078DF98.unk2C[arg0] + arg1); }
 
 s32 func_00162EB8(s32);
 s32 func_00165D70(s32, s32);
-extern s32 D_0078DFBC;
 
 s32 func_00254E08(s32 id) {
     ArchiveState* state = func_00162DD0();
-    s32 size = func_00165D70(D_0078DFBC, id);
+    s32 size = func_00165D70(D_0078DF98.unk24, id);
     s32 index;
     s32 fd;
 
@@ -165,9 +163,8 @@ s32 func_00254E08(s32 id) {
 }
 
 /*?*/ s32 func_00163138(s32); /* extern */
-extern s32 D_0078DFB8;
 
-s32 func_00254EF0(s32 arg0) { return func_00163138(D_0078DFB8 + arg0); }
+s32 func_00254EF0(s32 arg0) { return func_00163138(D_0078DF98.unk20 + arg0); }
 
 INCLUDE_RODATA("asm/jp_intl/nonmatchings/dbg/read_debug", D_00573400);
 

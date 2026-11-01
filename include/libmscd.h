@@ -62,7 +62,7 @@ typedef struct {
     /* 0x8C */ s32 (*unk8C)();                    // func_00165528 / func_002558A8
     /* 0x90 */ s32 (*unk90)();                    // func_00164320
     /* 0x94 */ s32 unk94;
-} ArchiveState;
+} ArchiveState; // size: 0x98
 
 /* Entries of the table at *D_00595AEC (D_0030DAB0 entries, 512 allocated), found by func_00165D00. */
 typedef struct {

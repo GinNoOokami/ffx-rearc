@@ -42,8 +42,6 @@ extern sceCdRMode D_00595AE0; // mode
 extern Unk00595AEC* D_00595AEC;
 extern char D_00595AF0[];
 
-extern s32 D_0078DFB0;
-extern s32 D_0078DFC0;
 
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
