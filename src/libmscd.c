@@ -496,7 +496,22 @@ void func_001656B8(void) { D_00595AE4->unk0(); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001656E0);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001657A8);
+void func_001657A8(const char* str, s8 filter) {
+    s32 i;
+
+    D_0030DACE = filter;
+    if (str == NULL) {
+        D_00596FF0[0] = '\0';
+        return;
+    }
+    
+    for (i = 0;; i++) {
+        D_00596FF0[i] = str[i];
+        if (str[i] == '\0') {
+            break;
+        }
+    }
+}
 
 void func_00165808(const char* fmt, va_list ap) {
     char text[0x200];
