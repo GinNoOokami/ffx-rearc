@@ -14,6 +14,7 @@ typedef struct {
 
 void FlushCache(s32);
 void func_00125B40(void);
+/*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
 s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
 void func_00166878();
@@ -416,7 +417,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001653A0);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001653E8);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165528);
+s32 func_00165528(s32 arg0) { return func_001653E8(arg0, 0, 0); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165548);
 
