@@ -114,11 +114,25 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162EB8);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162FA0);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163090);
+#define TBL_ENTRY_SIZE_MASK 0x3FFFFF
+#define TBL_ENTRY_EMPTY_FLAG 0x800000
+
+s32 func_00163090(s32 id) {
+    s32 index = D_0078DF98.unk20 + id;
+    u32 entry = D_0078DF98.unk28[index];
+    s32 size = 0;
+
+    if (!(entry & TBL_ENTRY_EMPTY_FLAG)) {
+        u32 curr = entry & TBL_ENTRY_SIZE_MASK;
+        u32 next = D_0078DF98.unk28[index + 1] & TBL_ENTRY_SIZE_MASK;
+        size = ((next - curr) * 2048) - ((entry >> 24) * 8);
+    }
+    return size;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001630F0);
 
-s32 func_00163138(s32 arg0) { return (D_0078DF98.unk28[arg0] & 0x3FFFFF) + D_0030DAAC; }
+s32 func_00163138(s32 arg0) { return (D_0078DF98.unk28[arg0] & TBL_ENTRY_SIZE_MASK) + D_0030DAAC; }
 
 u32 func_00163168(s32 arg0, s32 arg1) { return func_00163138(D_0078DF98.unk2C[arg0] + arg1); }
 

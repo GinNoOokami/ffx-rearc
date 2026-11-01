@@ -41,7 +41,7 @@ typedef struct {
     /* 0x1C */ s32 (*unk1C)();    // func_00165300
     /* 0x20 */ s32 unk20;
     /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32* unk28;  // cdrom.mdg
+    /* 0x28 */ u32* unk28;  // cdrom.mdg
     /* 0x2C */ s16* unk2C;  // cdrom.fid
     /* 0x30 */ void* unk30; // cdrom.fnd (host mode)
     /* 0x34 */ u8 pad34[0x54 - 0x34];
