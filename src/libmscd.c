@@ -31,13 +31,19 @@ typedef struct {
     /* 0x1C */ s32 unk1C;
 } Unk0057C71C;
 
+/* Task object from sa_task.c (D_00595AE4, read_task_buff); stub, only slot 0 so far.
+ * Known from its fill: +0x0/+0x4/+0x8 are per-group function slots, +0x8 starts a task. */
+typedef struct {
+    /* 0x00 */ void (*unk0)(void); // called with no args, then func_002D3C80(0) in the wait loop
+} Unk00595AE4;
+
+extern Unk00595AE4* D_00595AE4;
+
 void FlushCache(s32);
 void func_00125B40(void);
 sceCdRMode* func_0015B320();
 void func_0015B330(void);
-/*?*/ void func_00164820();
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
-void func_001656E0(const char* str, u32 len);
 s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
 void func_00166878();
@@ -95,6 +101,7 @@ extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
 extern char D_0056B778[]; // "sa_file_read_init!=0"
+extern char D_0056B800[]; // "read_task_buff != NULL"
 extern char D_0056B818[]; // "0"
 extern char D_0056B940[]; // "host:printf.log"
 extern Unk0057C71C* D_0057C71C;
@@ -487,7 +494,31 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164320);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164628);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164820);
+void func_00164820(void) {
+    char* msg;
+    s32 i;
+
+    if (D_00595AE4 == NULL) {
+        dbgAssert(D_0056B800, D_0056B720, 0x63B);
+    }
+
+    // Waits until no queue entry is active: the task step and frame wait sit in the for's
+    // increment, so they run only between searches (the target jumps straight to the first search)
+    for (;; D_00595AE4->unk0(), func_002D3C80(0)) {
+        for (i = 0; i < READ_Q_CNT; i++) {
+            if (D_0078E030[i].unk31 != 0) {
+                if (func_002D6478() != 0) {
+                    dbgAssert(D_0056B818, D_0056B720, 0x642);
+                }
+                break;
+            }
+        }
+
+        if (i == READ_Q_CNT) {
+            break;
+        }
+    }
+}
 
 s32 func_001648F8(s32 arg0, s32 arg1) {
     s32 i;
@@ -592,14 +623,6 @@ s32 func_00165528(s32 arg0) { return func_001653E8(arg0, 0, 0); }
 s32 func_00165548(s32 arg0, s32 arg1) { return func_001653E8(func_00163168(arg0, arg1), arg0, arg1); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165588);
-
-/* Task object from sa_task.c (D_00595AE4, read_task_buff); stub, only slot 0 so far.
- * Known from its fill: +0x0/+0x4/+0x8 are per-group function slots, +0x8 starts a task. */
-typedef struct {
-    /* 0x00 */ void (*unk0)(void); // called with no args, then func_002D3C80(0) in the wait loop
-} Unk00595AE4;
-
-extern Unk00595AE4* D_00595AE4;
 
 void func_001656B8(void) { D_00595AE4->unk0(); }
 
