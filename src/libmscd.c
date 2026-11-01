@@ -486,7 +486,20 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164628);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164820);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001648F8);
+s32 func_001648F8(s32 arg0, s32 arg1) {
+    s32 i;
+
+    for (i = 0; i < READ_Q_CNT; i++) {
+        if (D_0078E030[i].unk31 != 0 && D_0078E030[i].unk28 == arg0 && D_0078E030[i].unk8 == arg1) {
+            if (D_0078DF98.unk70 != 0 && D_0078DF98.unk74 == i) {
+                return 2;
+            }
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164970);
 
