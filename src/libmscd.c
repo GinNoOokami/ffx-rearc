@@ -11,6 +11,14 @@
 #define DBG_LINE_SIZE 40
 #define DBG_LINE_COUNT 128
 
+typedef enum {
+    DBG_OUT_NONE,
+    DBG_OUT_LOG_FILE,
+    DBG_OUT_LOG_MEMORY,
+    DBG_OUT_STREAM_FFXDEBUG,
+    DBG_OUT_STREAM_FILE
+} DebugOutLogMode;
+
 typedef struct {
     /* 0x00 */ u8 pad0[0x1C];
     /* 0x1C */ s32 unk1C;
@@ -59,7 +67,7 @@ extern char D_0030DAB8[];
 extern s8 D_0030DAC1;
 extern s32 D_0030DAC4;
 extern s32 D_0030DAC8; // ring buffer index
-extern s8 D_0030DACC;
+extern s8 D_0030DACC;  // isDirty log msg pending flag
 extern s8 D_0030DACD;
 extern s8 D_0030DACE; // 1: print only lines starting with the filter D_00596FF0; 0: only lines that don't
 extern s8 D_0030DACF;
@@ -68,6 +76,7 @@ extern char D_0056B720[]; // "libmscd.c"
 extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
+extern char D_0056B940[]; // "host:printf.log"
 extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
 extern char* D_00595AD0;
@@ -494,7 +503,27 @@ extern Unk00595AE4* D_00595AE4;
 
 void func_001656B8(void) { D_00595AE4->unk0(); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001656E0);
+// Used by func_00165808, creates a new file the first call and appends thereafter
+void func_001656E0(const char* str, u32 len) {
+    s32 fd;
+
+    if (D_0030DACC == 0) {
+        fd = sceOpen(D_0056B940, SCE_TRUNC | SCE_WRONLY | SCE_CREAT);
+        if (fd < 0) {
+            return;
+        }
+        sceLseek(fd, 0, SCE_SEEK_SET);
+    } else {
+        fd = sceOpen(D_0056B940, SCE_TRUNC | SCE_WRONLY);
+        if (fd < 0) {
+            return;
+        }
+        sceLseek(fd, 0, SCE_SEEK_END);
+    }
+
+    sceWrite(fd, str, len);
+    sceClose(fd);
+}
 
 void func_001657A8(const char* str, s8 filter) {
     s32 i;
@@ -504,7 +533,7 @@ void func_001657A8(const char* str, s8 filter) {
         D_00596FF0[0] = '\0';
         return;
     }
-    
+
     for (i = 0;; i++) {
         D_00596FF0[i] = str[i];
         if (str[i] == '\0') {
@@ -565,13 +594,13 @@ void func_00165808(const char* fmt, va_list ap) {
     }
 
     switch (D_0030DACD) {
-    case 3:
+    case DBG_OUT_STREAM_FFXDEBUG:
         len = strlen(line);
         if (len != 0) {
             func_002D8E20(D_0056B950, line, len);
         }
         break;
-    case 4:
+    case DBG_OUT_STREAM_FILE:
         if (func_002D93E8() == 1) {
             len = strlen(line);
             if (len != 0) {
@@ -589,8 +618,8 @@ void func_00165A18(const char* fmt, ...) {
     func_00165808(fmt, ap);
 }
 
-void func_00165A50(s32 arg0) {
-    if (arg0 != 0) {
+void func_00165A50(s32 mode) {
+    if (mode != DBG_OUT_NONE) {
         if (D_0030DACF == 0) {
             memset(D_00595BF0, 0, DBG_LINE_SIZE * DBG_LINE_COUNT);
 
@@ -603,7 +632,7 @@ void func_00165A50(s32 arg0) {
             FlushCache(2);
         }
     }
-    D_0030DACD = arg0;
+    D_0030DACD = mode;
 }
 
 void func_00165AE0(void) {}
@@ -616,7 +645,74 @@ void func_00165AE8(void) {
     FlushCache(2);
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165B18);
+void func_00165B18(void) {
+    char* buffer;
+    char* cursor;
+    char* line;
+    s32 fd;
+    s32 index;
+    s32 len;
+    s32 i;
+
+    if (func_002D93E8() != 1 || D_0030DACC == 0) {
+        return;
+    }
+
+    switch (D_0030DACD) {
+    case DBG_OUT_NONE:
+        break;
+
+    case DBG_OUT_LOG_FILE:
+        index = D_0030DAC8;
+        fd = sceOpen(D_0056B940, SCE_TRUNC | SCE_WRONLY | SCE_CREAT);
+        if (fd < 0) {
+            return;
+        }
+
+        for (i = 0; i < DBG_LINE_COUNT; i++) {
+            line = D_00595BF0[index];
+            len = strlen(line);
+            if (len != 0) {
+                sceWrite(fd, line, len);
+            }
+            index++;
+            index &= DBG_LINE_COUNT - 1;
+        }
+
+        sceClose(fd);
+        break;
+
+    case DBG_OUT_LOG_MEMORY:
+        index = D_0030DAC8;
+        len = 0;
+        for (i = 0; i < DBG_LINE_COUNT; i++) {
+            len += strlen(D_00595BF0[index]);
+            index++;
+            index &= DBG_LINE_COUNT - 1;
+        }
+
+        if (len != 0) {
+            buffer = func_0011D370(len, 10, D_0056B720, 0x928);
+
+            index = D_0030DAC8;
+            cursor = buffer;
+            for (i = 0; i < DBG_LINE_COUNT; i++) {
+                line = D_00595BF0[index];
+                len = strlen(line);
+                if (len != 0) {
+                    strncpy(cursor, line, len);
+                    cursor += len;
+                }
+                index++;
+                index &= DBG_LINE_COUNT - 1;
+            }
+
+            func_0011D590(buffer, 10);
+        }
+        break;
+    }
+    D_0030DAC8 = 0;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165D00);
 
