@@ -423,7 +423,15 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165548);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165588);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001656B8);
+/* Task object from sa_task.c (D_00595AE4, read_task_buff); stub, only slot 0 so far.
+ * Known from its fill: +0x0/+0x4/+0x8 are per-group function slots, +0x8 starts a task. */
+typedef struct {
+    /* 0x00 */ void (*unk0)(void); // called with no args, then func_002D3C80(0) in the wait loop
+} Unk00595AE4;
+
+extern Unk00595AE4* D_00595AE4;
+
+void func_001656B8(void) { D_00595AE4->unk0(); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001656E0);
 
