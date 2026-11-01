@@ -5,6 +5,8 @@
 
 #include "common.h"
 
+#define READ_Q_CNT 64
+
 /* Read queue entry: 64 entries at D_0078E030 (= archive state +0x98), stride 0x38. */
 typedef struct {
     /* 0x00 */ u32 unk0; // read size (sceRead); compared unsigned with unk2C
@@ -102,7 +104,7 @@ s32 func_002D93E8();
 extern volatile u8 D_0030DAB4;
 extern Unk0078E030* D_0057C700;
 extern ArchiveState D_0078DF98;
-extern Unk0078E030 D_0078E030[];
-extern char D_0078EE30[64][128];
+extern Unk0078E030 D_0078E030[READ_Q_CNT];
+extern char D_0078EE30[READ_Q_CNT][128];
 
 #endif

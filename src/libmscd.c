@@ -505,7 +505,23 @@ void func_00164A60(s32 arg0) { D_0030DAC4 = arg0; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A70);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165300);
+void func_00165300(s32 arg0) {
+    s32 i;
+
+    if (arg0 <= 0) {
+        for (i = 0; i < READ_Q_CNT; i++) {
+            if (D_0078E030[i].unk31 != 0) {
+                D_0078E030[i].unk32 = 1;
+            }
+        }
+    } else {
+        for (i = 0; i < READ_Q_CNT; i++) {
+            if (D_0078E030[i].unk31 != 0 && D_0078E030[i].unk24 == arg0) {
+                D_0078E030[i].unk32 = 1;
+            }
+        }
+    }
+}
 
 void func_00165378(s32 arg0) {
     switch (arg0) {
