@@ -419,7 +419,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001653E8);
 
 s32 func_00165528(s32 arg0) { return func_001653E8(arg0, 0, 0); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165548);
+s32 func_00165548(s32 arg0, s32 arg1) { return func_001653E8(func_00163168(arg0, arg1), arg0, arg1); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165588);
 
