@@ -378,7 +378,12 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164970);
 
 const char* func_00164A10(void) { return D_0030DAB8; }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A20);
+void func_00164A20(void) {
+    while (1) {
+        D_0078DF98.unk68();
+        func_0017133C(1);
+    }
+}
 
 void func_00164A50(s8 arg0) { D_0030DAC1 = arg0; }
 
