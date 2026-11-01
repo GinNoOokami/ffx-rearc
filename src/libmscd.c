@@ -15,6 +15,7 @@ typedef struct {
 
 void FlushCache(s32);
 void func_00125B40(void);
+sceCdRMode* func_0015B320();
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
 s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
@@ -448,7 +449,17 @@ void func_00165378(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001653A0);
+void func_001653A0(s32 arg0) {
+    switch (arg0) {
+    default:
+    case 0:
+        func_0015B320()->spindlctrl = SCECdSpinNom;
+        break;
+    case 1:
+        func_0015B320()->spindlctrl = SCECdSpinMax;
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001653E8);
 
