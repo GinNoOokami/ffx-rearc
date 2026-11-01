@@ -34,16 +34,16 @@ void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a funct
  * copies printf's first two instructions to func_001715A0, which then jumps to printf+8 (so it
  * acts as the original printf), and overwrites printf's first two with `j fn; nop`.
  * The caller must flush the caches afterwards. */
-void func_00171548(void (*fn)()); // redirects printf to fn
+void func_00171548(void* fn); // redirects printf to fn
 s32 func_001715A0(const char* fmt, ...);
 
 /*?*/ s32 func_0020D378();
 void func_002D1C70(void (*)());
 void func_002D8E20(const char* channel, const char* str, u32 len);
 
-extern char D_0056B950[];                                    // "FFXDEBUG"
-extern /*?*/ char D_00595BF0[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
-extern s8 D_00596FF0[];
+extern char D_0056B950[];                              // "FFXDEBUG"
+extern char D_00595BF0[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
+extern char D_00596FF0[];
 
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
@@ -62,6 +62,7 @@ extern s32 D_0030DAC8; // ring buffer index
 extern s8 D_0030DACC;
 extern s8 D_0030DACD;
 extern s8 D_0030DACE; // 1: print only lines starting with the filter D_00596FF0; 0: only lines that don't
+extern s8 D_0030DACF;
 
 extern char D_0056B720[]; // "libmscd.c"
 extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
@@ -511,12 +512,12 @@ void func_00165808(const char* fmt, va_list ap) {
     D_0030DAC8 = (D_0030DAC8 + 1) & (DBG_LINE_COUNT - 1);
 
     if (func_002D93E8() == 1) {
-        if (D_00596FF0[0] == 0) {
+        if (D_00596FF0[0] == '\0') {
             func_001715A0(text);
         } else {
             match = 0;
             for (i = 0; line[i] != 0; i++) {
-                if (D_00596FF0[i] == 0) {
+                if (D_00596FF0[i] == '\0') {
                     match = 1;
                     break;
                 }
@@ -529,12 +530,12 @@ void func_00165808(const char* fmt, va_list ap) {
             }
         }
     } else if (func_001244D0()->unkB != 0) {
-        if (D_00596FF0[0] == 0) {
+        if (D_00596FF0[0] == '\0') {
             func_001715A0(text);
         } else {
             match = 0;
             for (i = 0; line[i] != 0; i++) {
-                if (D_00596FF0[i] == 0) {
+                if (D_00596FF0[i] == '\0') {
                     match = 1;
                     break;
                 }
@@ -573,7 +574,22 @@ void func_00165A18(const char* fmt, ...) {
     func_00165808(fmt, ap);
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165A50);
+void func_00165A50(s32 arg0) {
+    if (arg0 != 0) {
+        if (D_0030DACF == 0) {
+            memset(D_00595BF0, 0, DBG_LINE_SIZE * DBG_LINE_COUNT);
+
+            D_00596FF0[0] = '\0';
+            D_0030DACE = 0;
+            D_0030DACF = 1;
+
+            func_00171548(func_00165A18);
+            FlushCache(0);
+            FlushCache(2);
+        }
+    }
+    D_0030DACD = arg0;
+}
 
 void func_00165AE0(void) {}
 
