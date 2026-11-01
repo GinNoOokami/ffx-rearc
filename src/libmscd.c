@@ -714,7 +714,23 @@ void func_00165B18(void) {
     D_0030DAC8 = 0;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165D00);
+Unk00595AEC* func_00165D00(s32 arg0, s32 arg1) {
+    Unk00595AEC* entry;
+    s32 i;
+
+    if (D_0030DAB0 == 0 || arg0 == -1 || arg1 == -1) {
+        return NULL;
+    }
+
+    entry = D_00595AEC;
+    for (i = 0; i < D_0030DAB0; i++) {
+        if (entry->unk0 == arg0 && entry->unk8 == arg1) {
+            return entry;
+        }
+        entry++;
+    }
+    return NULL;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165D70);
 
