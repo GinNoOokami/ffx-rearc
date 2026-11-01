@@ -127,7 +127,6 @@ const char* func_00254AD0(s32 index) {
 
 const char* func_00254DA8(s32 arg0) { return func_00254AD0(func_00162DD0()->unk20 + arg0); }
 
-
 const char* func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(D_0078DF98.unk2C[arg0] + arg1); }
 
 s32 func_00162EB8(s32);

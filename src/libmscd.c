@@ -42,7 +42,6 @@ extern sceCdRMode D_00595AE0; // mode
 extern Unk00595AEC* D_00595AEC;
 extern char D_00595AF0[];
 
-
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
 void func_00162CC8(void) {
@@ -101,11 +100,9 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001630F0);
 
 s32 func_00163138(s32 arg0) { return (D_0078DF98.unk28[arg0] & 0x3FFFFF) + D_0030DAAC; }
 
-u32 func_00163168(s32 arg0, s32 arg1) {
-    return func_00163138(D_0078DF98.unk2C[arg0] + arg1);
-}
+u32 func_00163168(s32 arg0, s32 arg1) { return func_00163138(D_0078DF98.unk2C[arg0] + arg1); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163198);
+s32 func_00163198(s32 arg0) { return func_00163138(D_0078DF98.unk20 + arg0); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001631C0);
 
