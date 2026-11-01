@@ -2,6 +2,7 @@
 #include <string.h>
 #include <sifdev.h>
 #include <libcdvd.h>
+#include <stdarg.h>
 
 #include "common.h"
 #include "libmscd.h"
@@ -450,7 +451,13 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001657A8);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165808);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165A18);
+void func_00165808(const char* fmt, va_list ap);
+
+void func_00165A18(const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    func_00165808(fmt, ap);
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165A50);
 
