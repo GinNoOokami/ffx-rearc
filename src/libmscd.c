@@ -67,6 +67,7 @@ extern char D_00596FF0[];
 
 extern s32 D_0030DA78;
 extern s8 D_0030DA7C;
+extern s8 D_0030DA7D;
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
 extern Unk0030DA88 D_0030DA88;
@@ -91,6 +92,7 @@ extern char D_0056B720[]; // "libmscd.c"
 extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
+extern char D_0056B778[]; // "sa_file_read_init!=0"
 extern char D_0056B940[]; // "host:printf.log"
 extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
@@ -459,7 +461,22 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163D20);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163E90);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163FD0);
+s16 func_00163FD0(s32 arg0) {
+    s16 fid;
+
+    if (D_0030DA7D == 0) {
+        dbgAssert(D_0056B778, D_0056B720, 0x534);
+    }
+
+    fid = D_0078DF98.unk2C[arg0];
+    D_0078DF98.unk24 = arg0;
+    D_0078DF98.unk20 = fid;
+    if (fid < 0) {
+        D_0078DF98.unk20 = 0;
+        fid = -1;
+    }
+    return fid;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164040);
 
