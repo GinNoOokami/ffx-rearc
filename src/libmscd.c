@@ -104,7 +104,7 @@ u32 func_00163168(s32 arg0, s32 arg1) { return func_00163138(D_0078DF98.unk2C[ar
 
 s32 func_00163198(s32 arg0) { return func_00163138(D_0078DF98.unk20 + arg0); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001631C0);
+void func_001631C0(s8 arg0) { D_0030DAA4 = arg0; }
 
 void func_0015B330(void);
 
