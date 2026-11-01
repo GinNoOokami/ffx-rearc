@@ -34,6 +34,7 @@ typedef struct {
 void FlushCache(s32);
 void func_00125B40(void);
 sceCdRMode* func_0015B320();
+void func_0015B330(void);
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
 void func_001656E0(const char* str, u32 len);
 s32 func_00165EB8(void);
@@ -64,6 +65,8 @@ extern char D_0056B950[];                              // "FFXDEBUG"
 extern char D_00595BF0[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
 extern char D_00596FF0[];
 
+extern s32 D_0030DA78;
+extern s8 D_0030DA7C;
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
 extern Unk0030DA88 D_0030DA88;
@@ -92,10 +95,10 @@ extern char D_0056B940[]; // "host:printf.log"
 extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
 extern char* D_00595AD0;
-extern s32 D_00595AD4;        // sectorNum
-extern s32 D_00595AD8;        // size
-extern void* D_00595ADC;      // buffer
-extern sceCdRMode D_00595AE0; // mode
+extern s32 D_00595AD4;          // sectorNum
+extern s32 D_00595AD8;          // size
+extern void* D_00595ADC;        // buffer
+extern sceCdRMode D_00595AE0;   // mode
 extern Unk00595AEC* D_00595AEC; // D_0030DAB0 entries, 512 allocated
 extern char D_00595AF0[];
 
@@ -145,7 +148,23 @@ void func_00162DE0(s32 arg0) {
     D_0078E030[arg0].unk33 = 0;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162E48);
+void func_00162E48(void) {
+    s32 i;
+
+    for (i = 0; i < 64; i++) {
+        func_00162DE0(i);
+    }
+
+    D_0030DA7C = 0;
+    D_00595AD4 = 0;
+    D_00595AD8 = 0;
+    D_0030DA80 = 0;
+    D_0030DA84 = 0;
+    D_00595ADC = NULL;
+    D_0030DA78 = 0;
+
+    func_0015B330();
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162EB8);
 
@@ -185,8 +204,6 @@ u32 func_00163168(s32 arg0, s32 arg1) { return func_00163138(D_0078DF98.unk2C[ar
 s32 func_00163198(s32 arg0) { return func_00163138(D_0078DF98.unk20 + arg0); }
 
 void func_001631C0(s8 arg0) { D_0030DAA4 = arg0; }
-
-void func_0015B330(void);
 
 s32 func_001631D0(s32 arg0, s32 size, void* buffer, sceCdRMode* mode) {
     s32 sectors;
