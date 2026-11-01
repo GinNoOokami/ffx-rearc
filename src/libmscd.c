@@ -207,11 +207,35 @@ s32 func_00162EB8(s32 id) {
         }
         return size;
     }
-    // No return when the override hook returns nonzero: the hook's result is still in v0, so callers
-    // get it anyway. Adding `return size;` here changes register allocation and breaks the match.
+    // No return when the override hook returns nonzero: its result is still in v0
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162FA0);
+s32 func_00162FA0(s32 arg0, s32 id) {
+    s32 index = D_0078DF98.unk2C[arg0] + id;
+    s32 offset = index * 3;
+    s32 size;
+    u8* data;
+
+    size = func_00165D70(arg0, id);
+    if (size == 0) {
+        u32 entry = D_0078DF98.unk28[index];
+        if (!(entry & TBL_ENTRY_EMPTY_FLAG)) {
+            if (entry & TBL_ENTRY_COMPRESSED_FLAG) {
+                data = D_00595AE8 + offset;
+                size = data[0];
+                size += data[1] << 8;
+                size += data[2] << 16;
+                size *= 8;
+            } else {
+                u32 curr = entry & TBL_ENTRY_SIZE_MASK;
+                u32 next = D_0078DF98.unk28[index + 1] & TBL_ENTRY_SIZE_MASK;
+                size = ((next - curr) * 2048) - ((entry >> 24) * 8);
+            }
+        }
+        return size;
+    }
+    // No return when the override hook returns nonzero: its result is still in v0
+}
 
 s32 func_00163090(s32 id) {
     s32 index = D_0078DF98.unk20 + id;
