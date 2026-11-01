@@ -376,9 +376,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001648F8);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164970);
 
-const char* func_00164A10(void) {
-    return D_0030DAB8;
-}
+const char* func_00164A10(void) { return D_0030DAB8; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A20);
 
@@ -390,7 +388,17 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A70);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165300);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165378);
+void func_00165378(s32 arg0) {
+    switch (arg0) {
+    default:
+    case 0:
+        D_0030DA98.spindlctrl = SCECdSpinNom;
+        break;
+    case 1:
+        D_0030DA98.spindlctrl = SCECdSpinMax;
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001653A0);
 

@@ -32,6 +32,11 @@ typedef struct {
     u_char pad;
 } sceCdRMode;
 
+/* sceCdRMode spindlctrl values */
+#define SCECdSpinMax 0
+#define SCECdSpinNom 1 /* fastest speed the drive can read at */
+#define SCECdSpinStm 0 /* recommended speed for streaming */
+
 /* sceCdSearchFile result: FFX copies 0x24 bytes back, so it has the 2.4.2 flag field
    (2.0's struct ends at date) */
 typedef struct {
