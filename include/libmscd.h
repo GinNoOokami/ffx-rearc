@@ -97,6 +97,7 @@ void func_00163450(s32, s32, void*, sceCdRMode*, s32);
 void func_00163768(Unk0078E030*);
 void func_00163938(Unk0078E030*);
 Unk00595AEC* func_00165D00(s32, s32);
+s32 func_002D93E8();
 
 extern volatile u8 D_0030DAB4;
 extern Unk0078E030* D_0057C700;

@@ -204,7 +204,6 @@ void* func_00254F40(const char* path, s32* arg1) {
 }
 
 void* func_0011D420(s32, s32, const char*, s32); // Mem_AllocDebug
-s32 func_002D93E8(void);
 extern s8 D_00565DF0;
 
 void* func_00255020(const char* path, s32* arg1) {

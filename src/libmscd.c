@@ -8,6 +8,9 @@
 #include "libmscd.h"
 #include "mem.h"
 
+#define DBG_LINE_SIZE 40
+#define DBG_LINE_COUNT 128
+
 typedef struct {
     /* 0x00 */ u8 pad0[0x1C];
     /* 0x1C */ s32 unk1C;
@@ -17,6 +20,7 @@ void FlushCache(s32);
 void func_00125B40(void);
 sceCdRMode* func_0015B320();
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
+void func_001656E0(const char* str, u32 len);
 s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
 void func_00166878();
@@ -31,9 +35,15 @@ void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a funct
  * acts as the original printf), and overwrites printf's first two with `j fn; nop`.
  * The caller must flush the caches afterwards. */
 void func_00171548(void (*fn)()); // redirects printf to fn
+s32 func_001715A0(const char* fmt, ...);
 
 /*?*/ s32 func_0020D378();
 void func_002D1C70(void (*)());
+void func_002D8E20(const char* channel, const char* str, u32 len);
+
+extern char D_0056B950[];                                    // "FFXDEBUG"
+extern /*?*/ char D_00595BF0[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
+extern s8 D_00596FF0[];
 
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
@@ -48,6 +58,10 @@ extern s32 D_0030DAB0;
 extern char D_0030DAB8[];
 extern s8 D_0030DAC1;
 extern s32 D_0030DAC4;
+extern s32 D_0030DAC8; // ring buffer index
+extern s8 D_0030DACC;
+extern s8 D_0030DACD;
+extern s8 D_0030DACE; // 1: print only lines starting with the filter D_00596FF0; 0: only lines that don't
 
 extern char D_0056B720[]; // "libmscd.c"
 extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
@@ -483,9 +497,75 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001656E0);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001657A8);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165808);
+void func_00165808(const char* fmt, va_list ap) {
+    char text[0x200];
+    char* line;
+    u32 len;
+    s32 match;
+    s32 i;
 
-void func_00165808(const char* fmt, va_list ap);
+    vsprintf(text, fmt, ap);
+    line = D_00595BF0[D_0030DAC8];
+    strncpy(line, text, sizeof(D_00595BF0[0]) - 1);
+    line[sizeof(D_00595BF0[0]) - 1] = '\0';
+    D_0030DAC8 = (D_0030DAC8 + 1) & (DBG_LINE_COUNT - 1);
+
+    if (func_002D93E8() == 1) {
+        if (D_00596FF0[0] == 0) {
+            func_001715A0(text);
+        } else {
+            match = 0;
+            for (i = 0; line[i] != 0; i++) {
+                if (D_00596FF0[i] == 0) {
+                    match = 1;
+                    break;
+                }
+                if (line[i] != D_00596FF0[i]) {
+                    break;
+                }
+            }
+            if (D_0030DACE == match) {
+                func_001715A0(text);
+            }
+        }
+    } else if (func_001244D0()->unkB != 0) {
+        if (D_00596FF0[0] == 0) {
+            func_001715A0(text);
+        } else {
+            match = 0;
+            for (i = 0; line[i] != 0; i++) {
+                if (D_00596FF0[i] == 0) {
+                    match = 1;
+                    break;
+                }
+                if (line[i] != D_00596FF0[i]) {
+                    break;
+                }
+            }
+            if (D_0030DACE == match) {
+                func_001715A0(text);
+            }
+        }
+    }
+
+    switch (D_0030DACD) {
+    case 3:
+        len = strlen(line);
+        if (len != 0) {
+            func_002D8E20(D_0056B950, line, len);
+        }
+        break;
+    case 4:
+        if (func_002D93E8() == 1) {
+            len = strlen(line);
+            if (len != 0) {
+                func_001656E0(line, len);
+            }
+        }
+        break;
+    }
+    D_0030DACC = 1;
+}
 
 void func_00165A18(const char* fmt, ...) {
     va_list ap;
