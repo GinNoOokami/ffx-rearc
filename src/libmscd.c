@@ -20,6 +20,13 @@ typedef enum {
 } DebugOutLogMode;
 
 typedef struct {
+    /* 0x0 */ u32 unk0; // CDROM.MDG LSN
+    /* 0x4 */ u32 unk4; // CDROM.MDG size
+    /* 0x8 */ u32 unk8; // CDROM.FID LSN
+    /* 0xC */ u32 unkC; // CDROM.FID size
+} Unk0030DA88;
+
+typedef struct {
     /* 0x00 */ u8 pad0[0x1C];
     /* 0x1C */ s32 unk1C;
 } Unk0057C71C;
@@ -45,9 +52,13 @@ void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a funct
 void func_00171548(void* fn); // redirects printf to fn
 s32 func_001715A0(const char* fmt, ...);
 
-/*?*/ s32 func_0020D378();
 void func_002D1C70(void (*)());
-void func_002D8E20(const char* channel, const char* str, u32 len);
+/*?*/ s32 func_0020D378();
+// TK frame wait: blocks until at least max(n, 1) VBlanks (INTC 2 handler func_002D3B08 counts
+// them in D_0078AC00) have passed since the last call, then resets the count and runs the
+// per-frame TK updates.
+/*?*/ void func_002D3C80(s32);
+void func_002D8E20(const char* ch, const char* str, u32 len);
 
 extern char D_0056B950[];                              // "FFXDEBUG"
 extern char D_00595BF0[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
@@ -55,14 +66,15 @@ extern char D_00596FF0[];
 
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
+extern Unk0030DA88 D_0030DA88;
 extern sceCdRMode D_0030DA98;
 extern sceCdRMode D_0030DAA0;
 
-extern s32 D_0030DAAC;
 extern s8 D_0030DAA4;
 extern s8 D_0030DAA5;
 extern s32 D_0030DAA8;
-extern s32 D_0030DAB0;
+extern s32 D_0030DAAC; // lsn
+extern s32 D_0030DAB0; // Entry count
 extern char D_0030DAB8[];
 extern s8 D_0030DAC1;
 extern s32 D_0030DAC4;
@@ -84,7 +96,7 @@ extern s32 D_00595AD4;        // sectorNum
 extern s32 D_00595AD8;        // size
 extern void* D_00595ADC;      // buffer
 extern sceCdRMode D_00595AE0; // mode
-extern Unk00595AEC* D_00595AEC;
+extern Unk00595AEC* D_00595AEC; // D_0030DAB0 entries, 512 allocated
 extern char D_00595AF0[];
 
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
@@ -750,4 +762,24 @@ s32 func_00165D70(s32 arg0, s32 arg1) {
     return 0;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165DD0);
+void func_00165DD0(const char** arg0) {
+    sceCdlFILE fp;
+    if (arg0 != NULL) {
+        while (sceCdSearchFile(&fp, arg0[0]) == 0) {
+            func_002D3C80(1);
+        }
+        D_0030DAAC = fp.lsn;
+
+        while (sceCdSearchFile(&fp, arg0[1]) == 0) {
+            func_002D3C80(1);
+        }
+        D_0030DA88.unk0 = fp.lsn;
+        D_0030DA88.unk4 = fp.size;
+
+        while (sceCdSearchFile(&fp, arg0[2]) == 0) {
+            func_002D3C80(1);
+        }
+        D_0030DA88.unk8 = fp.lsn;
+        D_0030DA88.unkC = fp.size;
+    }
+}
