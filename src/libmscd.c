@@ -18,6 +18,12 @@ s32 func_00165EB8(void);
 void func_00166798(char*, void*, s32, s32);
 void func_00166878();
 
+/* Hand-written: moves are `addu rd,$0,rs` (compiled code here uses `daddu rd,rs,$0`), it calls
+ * through $1 (gcc never allocates `at`), has no frame, and switches sp to a caller-supplied buffer.
+ * Saves ra/sp/s0 at stack[0..2], runs fn(arg) with sp = stack + size - 0x10, then restores them;
+ * v0 from fn passes through. */
+void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a function on the given stack
+
 void func_002D1C70(void (*)());
 
 extern s32 D_0030DA80;
@@ -39,6 +45,7 @@ extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
 extern Unk0057C71C* D_0057C71C;
+extern u8 D_00591AD0[0x4000];
 extern char* D_00595AD0;
 extern s32 D_00595AD4;        // sectorNum
 extern s32 D_00595AD8;        // size
@@ -222,7 +229,7 @@ s32 func_001636F0(void) {
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163768);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163938);
+void func_00163938(Unk0078E030* arg0) { func_00171510(D_00591AD0, 0x4000, arg0->unk20, arg0); }
 
 // Not matching yet. For compressed entries (entry->unk33, unk0 < size) the function reads the first
 // sectors, tests the first data byte and, if it is nonzero, carries on with the generic read code:

@@ -7,6 +7,7 @@ main = 0x0011B9D8; // type:func
 dbgAssert = 0x00157788; // type:func
 D_0030DA98 = 0x0030DA98; // size:0x4
 D_0030DAA0 = 0x0030DAA0; // size:0x4
+D_00591AD0 = 0x00591AD0; // size:0x4000
 D_00595AE0 = 0x00595AE0; // size:0x4
 D_0078DF98 = 0x0078DF98; // size:0x98
 D_0078E030 = 0x0078E030; // size:0xE00
