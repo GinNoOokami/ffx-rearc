@@ -48,10 +48,14 @@ void FlushCache(s32);
 void func_00125B40(void);
 sceCdRMode* func_0015B320();
 void func_0015B330(void);
+s32 func_0015B830(void);
+s32 func_001636F0(void);
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
 s32 func_00165EB8(void);
+s32 func_00165F30(s32);
+void func_00166650(s32, void*, s32, s32);
 void func_00166798(char*, void*, s32, s32);
-void func_00166878();
+void func_00166878(void);
 
 /* Hand-written: moves are `addu rd,$0,rs` (compiled code here uses `daddu rd,rs,$0`), it calls
  * through $1 (gcc never allocates `at`), has no frame, and switches sp to a caller-supplied buffer.
@@ -71,6 +75,7 @@ void func_002D1C70(void (*)());
 // them in D_0078AC00) have passed since the last call, then resets the count and runs the
 // per-frame TK updates.
 /*?*/ void func_002D3C80(s32);
+s32 func_002D6418(void);
 s32 func_002D6478(void);
 void func_002D8E20(const char* ch, const char* str, u32 len);
 
@@ -644,9 +649,92 @@ s32 func_001632B8(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163450);
+s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) {
+    s32 sectors;
+    s32 found;
+    s32 retry;
+    s32 tries;
+    s32 wait;
+    s32 i;
 
-s32 func_0015B830(); /* extern */
+    while (func_002D6418() != 0) {
+        func_0017133C(1);
+    }
+
+    cd_read_lsn = lsn;
+    cd_read_size = size;
+    cd_read_buff = buffer;
+    cd_read_mode = *mode;
+    sectors = size / 2048;
+    found = func_00165F30(group);
+
+    if (D_00565DF4 != 0 && found != 0) {
+        func_0015B330();
+        func_00166650(lsn, buffer, sectors * 2048, group);
+        if (func_00165EB8() == 0) {
+            return 1;
+        }
+
+        D_00565DF4 = 0;
+        func_00125B40();
+    }
+
+    D_0030DAA8 = 0;
+    D_0030DAA4 = 0;
+    retry = 0;
+    tries = 60;
+    wait = 450;
+
+    while (1) {
+        for (i = 0; i < tries; i++) {
+            if (sceCdDiskReady(1) == SCECdComplete) {
+                func_0015B330();
+                FlushCache(0);
+
+                if (sceCdRead(lsn, sectors, buffer, mode) == 1) {
+                    for (i = 0; i < wait; i++) {
+                        if (func_001636F0() == 0) {
+                            return 1;
+                        }
+                        func_0017133C(1);
+                    }
+                    break;
+                }
+            }
+            func_001632B8();
+            D_0030DAA8++;
+            D_0030DAA4 = 2;
+            func_0017133C(1);
+        }
+
+        sceCdBreak();
+        D_0030DAA4 = 2;
+        func_0017133C(1);
+
+        if (retry > 2) {
+            wait = 600;
+            tries = 120;
+
+            for (i = 0; i < 60; i++) {
+                if (sceCdStandby() != 0) {
+                    break;
+                }
+                func_0017133C(1);
+            }
+
+            for (i = 0; i < 120; i++) {
+                if (sceCdSync(1) == 0) {
+                    break;
+                }
+                func_0017133C(1);
+            }
+
+            mode = &D_0030DAA0;
+            continue;
+        }
+        retry++;
+    }
+}
 
 s32 func_001636F0(void) {
     s32 status = func_0015B830();

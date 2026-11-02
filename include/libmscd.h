@@ -89,7 +89,7 @@ typedef struct {
 } Unk00588A00;
 
 Unk00588A00* func_001244D0(void);
-void func_0017133C(s32);
+void func_0017133C(s32); // sleep?
 s32 func_002D1C60(void);
 
 extern s8 D_00565DF4;
@@ -97,7 +97,7 @@ extern s8 D_00565DF4;
 SaFile* SaFileGet(void);
 char* func_00162D48(void);
 void func_00162DE0(s32);
-void func_00163450(s32, s32, void*, sceCdRMode*, s32);
+s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group);
 void func_00163768(ReadQEntry*);
 void ReadQCallbackCall(ReadQEntry*);
 ExFile* ExFileFind(s32, s32);
