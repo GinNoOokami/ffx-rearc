@@ -13,7 +13,7 @@ extern const char* D_006A2C90[FILE_NAME_CHG_TBL_CNT];
 extern const char* D_006A2CD0[FILE_NAME_CHG_TBL_CNT];
 
 extern char D_00573400[]; // "read_debug.c", emitted by INCLUDE_RODATA
-extern ArchiveState D_0078DF98;
+extern SaFile sa_file;
 
 void func_00254958(void) {
     s32 i;
@@ -53,10 +53,10 @@ void func_00254A88(s32 arg0) {
 }
 
 // getFileTbl
-void* func_00254AB0(void) { return func_00162DD0()->unk30; }
+void* func_00254AB0(void) { return SaFileGet()->name_tbl; }
 
-const char* func_0011A480(void); // returns "sugimoto"
-extern char D_006A2D10[0x200];   // name buffer, size inferred
+const char* func_0011A480(void);   // returns "sugimoto"
+extern char file_name_buff[0x200]; // name buffer, size inferred
 
 // Returns file `index`'s name from the cdrom.fnd table, expanded into a static buffer:
 // "$USER$" becomes func_0011A480()'s string, and a prefix found in the name-change table
@@ -85,12 +85,12 @@ const char* func_00254AD0(s32 index) {
 
     if (name != NULL) {
         user = func_0011A480();
-        for (j = 0, i = 0; D_006A2D10[j] = name[i], name[i] != '\0'; i++, j++) {
+        for (j = 0, i = 0; file_name_buff[j] = name[i], name[i] != '\0'; i++, j++) {
             const char* p = &name[i];
 
             if (p[0] == '$' && p[1] == 'U' && p[2] == 'S' && p[3] == 'E' && p[4] == 'R' && p[5] == '$') {
                 if (user != NULL) {
-                    for (k = 0; D_006A2D10[j++] = user[k], user[k] != '\0'; k++) {
+                    for (k = 0; file_name_buff[j++] = user[k], user[k] != '\0'; k++) {
                     }
                     // The copy leaves j past the '\0'; back up so the loop's j++ lands on it.
                     j -= 2;
@@ -110,7 +110,7 @@ const char* func_00254AD0(s32 index) {
 
                     if (str[k] == '\0') {
                         str = D_006A2CD0[n];
-                        for (m = 0; D_006A2D10[j++] = str[m], str[m] != '\0'; m++) {
+                        for (m = 0; file_name_buff[j++] = str[m], str[m] != '\0'; m++) {
                         }
                         j -= 2;
                         i += k - 1;
@@ -119,22 +119,22 @@ const char* func_00254AD0(s32 index) {
             }
         }
 
-        name = D_006A2D10;
+        name = file_name_buff;
     }
 
     return name;
 }
 
-const char* func_00254DA8(s32 arg0) { return func_00254AD0(func_00162DD0()->unk20 + arg0); }
+const char* func_00254DA8(s32 arg0) { return func_00254AD0(SaFileGet()->id_base + arg0); }
 
-const char* func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(D_0078DF98.unk2C[arg0] + arg1); }
+const char* func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(sa_file.group_tbl[arg0] + arg1); }
 
-s32 func_00162EB8(s32);
-s32 func_00165D70(s32, s32);
+s32 FileSizeGet(s32);
+s32 ExFileSizeGet(s32, s32);
 
 s32 func_00254E08(s32 id) {
-    ArchiveState* state = func_00162DD0();
-    s32 size = func_00165D70(D_0078DF98.unk24, id);
+    SaFile* state = SaFileGet();
+    s32 size = ExFileSizeGet(sa_file.group, id);
     s32 index;
     s32 fd;
 
@@ -142,9 +142,9 @@ s32 func_00254E08(s32 id) {
         return size;
     }
     if (D_00565DF4 != 0) {
-        size = func_00162EB8(id);
+        size = FileSizeGet(id);
     } else {
-        index = state->unk20 + id;
+        index = state->id_base + id;
         if (func_00254AB0() != NULL) {
             const char* name = func_00254AD0(index);
             if (name != 0) {
@@ -161,9 +161,9 @@ s32 func_00254E08(s32 id) {
     return size;
 }
 
-/*?*/ s32 func_00163138(s32); /* extern */
+/*?*/ s32 TblLsnGet(s32); /* extern */
 
-s32 func_00254EF0(s32 arg0) { return func_00163138(D_0078DF98.unk20 + arg0); }
+s32 func_00254EF0(s32 arg0) { return TblLsnGet(sa_file.id_base + arg0); }
 
 INCLUDE_RODATA("asm/jp_intl/nonmatchings/dbg/read_debug", D_00573400);
 
@@ -240,13 +240,13 @@ extern char D_006A2F10[];
 // Not matching yet. With NON_MATCHING the C below is one instruction off, but only because of
 // three changes that steer the compiler and are unlikely to be in the original:
 // - `goto copy`: the target shares one FlushCache/memcpy tail between the two reads of the
-//   unk2C block. Written as plain if/else, the first scheduler moves `rest = size & 0x7FF`
+//   disc_size block. Written as plain if/else, the first scheduler moves `rest = size & 0x7FF`
 //   above the secs == 0 read call (the target keeps it after); the call then ends its basic
 //   block, flow inserts a (use (const_int 0)) after it, and cross-jumping no longer merges
 //   the two identical tails.
 // - the empty `do {} while (0)` at the end of the D_00565DF4 != 0 branch: without it there
 //   is an extra jump at the end of that branch.
-// - `one`: the ex-file waits pass a local set to 1. It makes `archive->unk70 = 1` use a0 and
+// - `one`: the ex-file waits pass a local set to 1. It makes `archive->busy = 1` use a0 and
 //   keeps the D_0030DAB4 = 1 / D_0057C700 = entry store order, as in the target.
 // Still different: in the secs == 0 read, `rest` lands in the call's delay slot; the target
 // sets a3 = sp there and computes rest after the call. The same C without the three changes
@@ -257,10 +257,10 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00255158);
 void func_00255158(void) {
     sceCdRMode mode;
     s32 stat;
-    ArchiveState* archive;
+    SaFile* archive;
     char* buf;
-    Unk0078E030* entry;
-    Unk00595AEC* exFile;
+    ReadQEntry* entry;
+    ExFile* exFile;
     s32 fd;
     s32 size;
     s32 secs;
@@ -268,24 +268,24 @@ void func_00255158(void) {
     s32 i;
     s32 one;
 
-    archive = func_00162DD0();
+    archive = SaFileGet();
     buf = func_00162D48();
 
     for (i = 0; i < 64; i++) {
-        entry = &D_0078E030[i];
-        if (entry->unk31 == 0) {
+        entry = &read_q[i];
+        if (entry->active == 0) {
             continue;
         }
-        if (entry->unk32 != 0) {
+        if (entry->cancel != 0) {
             func_00162DE0(i);
             continue;
         }
 
-        archive->unk74 = i;
-        archive->unk70 = 1;
-        exFile = func_00165D00(entry->unk28, entry->unk8);
+        archive->busy_index = i;
+        archive->busy = 1;
+        exFile = ExFileFind(entry->group, entry->no);
         if (exFile != NULL) {
-            sprintf(D_006A2F10, "pfs0:/ex/%s", exFile->unk24);
+            sprintf(D_006A2F10, "pfs0:/ex/%s", exFile->name);
             one = 1;
             fd = sceOpen(D_006A2F10, SCE_RDONLY | SCE_NOWAIT);
             if (fd < 0) {
@@ -294,54 +294,54 @@ void func_00255158(void) {
             while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                 func_0017133C(one);
             }
-            sceLseek(fd, exFile->unkC, SCE_SEEK_SET);
+            sceLseek(fd, exFile->offset, SCE_SEEK_SET);
             while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                 func_0017133C(one);
             }
             FlushCache(0);
-            sceRead(fd, entry->unk4.p, exFile->unk10);
+            sceRead(fd, entry->buff.p, exFile->size);
             while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                 func_0017133C(one);
             }
             sceClose(fd);
             FlushCache(0);
         } else if (D_00565DF4 != 0) {
-            size = entry->unk2C;
-            if (entry->unk33 != 0 && entry->unk0 < size) {
-                size = entry->unk0 + 5;
+            size = entry->disc_size;
+            if (entry->compressed != 0 && entry->size < size) {
+                size = entry->size + 5;
                 secs = size / 2048;
                 if (secs != 0 && size > 0) {
                     rest = secs * 2048;
-                    func_00163450(entry->unk1C, size, entry->unk4.p, &mode, entry->unk28);
+                    func_00163450(entry->lsn, size, entry->buff.p, &mode, entry->group);
                     FlushCache(0);
-                    memcpy(entry->unk4.p, (char*)entry->unk4.p + 5, rest);
-                    func_00163450(entry->unk1C + secs, 0x800, buf, &mode, entry->unk28);
+                    memcpy(entry->buff.p, (char*)entry->buff.p + 5, rest);
+                    func_00163450(entry->lsn + secs, 0x800, buf, &mode, entry->group);
                     FlushCache(0);
                     size -= rest;
-                    memcpy((char*)entry->unk4.p + rest, buf, size - 5);
+                    memcpy((char*)entry->buff.p + rest, buf, size - 5);
                 } else {
-                    func_00163450(entry->unk1C, 0x800, buf, &mode, entry->unk28);
+                    func_00163450(entry->lsn, 0x800, buf, &mode, entry->group);
                     FlushCache(0);
-                    memcpy(entry->unk4.p, buf + 5, size - 5);
+                    memcpy(entry->buff.p, buf + 5, size - 5);
                 }
             } else {
                 secs = size / 2048;
                 if (secs != 0) {
-                    func_00163450(entry->unk1C, entry->unk2C, entry->unk4.p, &mode, entry->unk28);
+                    func_00163450(entry->lsn, entry->disc_size, entry->buff.p, &mode, entry->group);
                     rest = size & 0x7FF;
                     if (rest != 0) {
-                        func_00163450(entry->unk1C + secs, 0x800, buf, &mode, entry->unk28);
+                        func_00163450(entry->lsn + secs, 0x800, buf, &mode, entry->group);
                         goto copy;
                     }
                     FlushCache(0);
                 } else {
-                    func_00163450(entry->unk1C, 0x800, buf, &mode, entry->unk28);
+                    func_00163450(entry->lsn, 0x800, buf, &mode, entry->group);
                     rest = size & 0x7FF;
                 copy:
                     FlushCache(0);
-                    memcpy((char*)entry->unk4.p + size - rest, buf, rest);
+                    memcpy((char*)entry->buff.p + size - rest, buf, rest);
                 }
-                if (entry->unk33 != 0) {
+                if (entry->compressed != 0) {
                     if (func_001244D0()->unk10 != 0) {
                         while (D_0030DAB4 != 0) {
                             func_0017133C(1);
@@ -360,34 +360,34 @@ void func_00255158(void) {
             do {
             } while (0);
         } else {
-            if (entry->unk1C != 0) {
-                archive->unk5C = sceOpen(D_0078EE30[i], SCE_RDONLY);
-                func_00254F18(archive->unk5C, D_0078EE30[i]);
-                sceLseek(archive->unk5C, entry->unk1C << 11, SCE_SEEK_SET);
+            if (entry->lsn != 0) {
+                archive->host_fd = sceOpen(read_q_path[i], SCE_RDONLY);
+                func_00254F18(archive->host_fd, read_q_path[i]);
+                sceLseek(archive->host_fd, entry->lsn << 11, SCE_SEEK_SET);
                 FlushCache(0);
-                sceRead(archive->unk5C, entry->unk4.p, entry->unk0);
-                sceClose(archive->unk5C);
+                sceRead(archive->host_fd, entry->buff.p, entry->size);
+                sceClose(archive->host_fd);
                 FlushCache(0);
             } else {
-                archive->unk5C = sceOpen(D_0078EE30[i], SCE_RDONLY | SCE_NOWAIT);
-                func_00254F18(archive->unk5C, D_0078EE30[i]);
+                archive->host_fd = sceOpen(read_q_path[i], SCE_RDONLY | SCE_NOWAIT);
+                func_00254F18(archive->host_fd, read_q_path[i]);
                 FlushCache(0);
-                sceRead(archive->unk5C, entry->unk4.p, entry->unk0);
-                while (sceIoctl(archive->unk5C, SCE_FS_EXECUTING, &stat), stat != 0) {
+                sceRead(archive->host_fd, entry->buff.p, entry->size);
+                while (sceIoctl(archive->host_fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                     func_0017133C(1);
                 }
-                sceClose(archive->unk5C);
+                sceClose(archive->host_fd);
                 FlushCache(0);
             }
         }
 
-        if (entry->unk20 != NULL) {
-            func_00163938(entry);
+        if (entry->callback != NULL) {
+            ReadQCallbackCall(entry);
         }
-        archive->unk70 = 0;
-        archive->unk74 = -1;
-        archive->unk5C = -1;
-        entry->unk31 = 0;
+        archive->busy = 0;
+        archive->busy_index = -1;
+        archive->host_fd = -1;
+        entry->active = 0;
     }
 }
 #endif
@@ -396,18 +396,18 @@ void func_0011D590(void*, /*?*/ s32);
 
 // Debug PcFileTblSet
 void func_002556A0(const char* path) {
-    if (D_0078DF98.unk30 != NULL) {
-        func_0011D590(D_0078DF98.unk30, 10);
+    if (sa_file.name_tbl != NULL) {
+        func_0011D590(sa_file.name_tbl, 10);
     }
-    D_0078DF98.unk30 = func_00255020(path, NULL);
+    sa_file.name_tbl = func_00255020(path, NULL);
 }
 
 /*?*/ s32 func_001ACEE8(char*); // getRegionCode?
-extern char D_00326CE0[];       // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
-extern char D_00326D10[];       // host:/ffx/proj/battle/jp/cddata/cdrom.fid
-extern char D_00326D40[];       // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
-extern char D_00326D70[];       // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
-extern char D_00326D98[];       // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
+extern char cddata_mdg_path[];  // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
+extern char cddata_fid_path[];  // host:/ffx/proj/battle/jp/cddata/cdrom.fid
+extern char cddata_fnd_path[];  // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
+extern char cdidx_mdg_path[];   // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
+extern char cdidx_fid_path[];   // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
 
 void func_002556F8(void) {
     char region[2];
@@ -415,52 +415,52 @@ void func_002556F8(void) {
     func_001ACEE8(region);
 
     if (D_00565DF4 == 0) {
-        D_00326CE0[0x16] = region[0];
-        D_00326CE0[0x17] = region[1];
-        D_00326D10[0x16] = region[0];
-        D_00326D10[0x17] = region[1];
-        D_00326D40[0x16] = region[0];
-        D_00326D40[0x17] = region[1];
+        cddata_mdg_path[0x16] = region[0];
+        cddata_mdg_path[0x17] = region[1];
+        cddata_fid_path[0x16] = region[0];
+        cddata_fid_path[0x17] = region[1];
+        cddata_fnd_path[0x16] = region[0];
+        cddata_fnd_path[0x17] = region[1];
 
-        D_0078DF98.unk28 = func_00254F40(D_00326CE0, NULL);
-        D_0078DF98.unk2C = func_00254F40(D_00326D10, NULL);
-        D_0078DF98.unk30 = func_00255020(D_00326D40, NULL);
+        sa_file.file_tbl = func_00254F40(cddata_mdg_path, NULL);
+        sa_file.group_tbl = func_00254F40(cddata_fid_path, NULL);
+        sa_file.name_tbl = func_00255020(cddata_fnd_path, NULL);
     } else {
-        D_00326D70[0x1A] = region[0];
-        D_00326D70[0x1B] = region[1];
-        D_00326D98[0x1A] = region[0];
-        D_00326D98[0x1B] = region[1];
+        cdidx_mdg_path[0x1A] = region[0];
+        cdidx_mdg_path[0x1B] = region[1];
+        cdidx_fid_path[0x1A] = region[0];
+        cdidx_fid_path[0x1B] = region[1];
 
-        D_0078DF98.unk28 = func_00254F40(D_00326D70, NULL);
-        D_0078DF98.unk2C = func_00254F40(D_00326D98, NULL);
-        D_0078DF98.unk30 = 0;
+        sa_file.file_tbl = func_00254F40(cdidx_mdg_path, NULL);
+        sa_file.group_tbl = func_00254F40(cdidx_fid_path, NULL);
+        sa_file.name_tbl = 0;
     }
 }
 
-extern char D_00326DC0[]; // host:/ffx/proj/prog/cdidx/jp/sizetbl.bin
+extern char cdidx_sizetbl_path[]; // host:/ffx/proj/prog/cdidx/jp/sizetbl.bin
 
 void* func_00255800(void) {
     char region[2];
 
     func_001ACEE8(region);
 
-    D_00326DC0[0x1A] = region[0];
-    D_00326DC0[0x1B] = region[1];
+    cdidx_sizetbl_path[0x1A] = region[0];
+    cdidx_sizetbl_path[0x1B] = region[1];
 
-    return func_00254F40(D_00326DC0, NULL);
+    return func_00254F40(cdidx_sizetbl_path, NULL);
 }
 
-extern char D_00326DF0[]; // host:/ffx/proj/prog/cdidx/jp/modulesize.bin
+extern char cdidx_modulesize_path[]; // host:/ffx/proj/prog/cdidx/jp/modulesize.bin
 
 void* func_00255840(void) {
     char region[2];
 
     func_001ACEE8(region);
 
-    D_00326DF0[0x1A] = region[0];
-    D_00326DF0[0x1B] = region[1];
+    cdidx_modulesize_path[0x1A] = region[0];
+    cdidx_modulesize_path[0x1B] = region[1];
 
-    return func_00254F40(D_00326DF0, NULL);
+    return func_00254F40(cdidx_modulesize_path, NULL);
 }
 
 /*?*/ s32 func_00164628(); /* extern */
@@ -473,13 +473,13 @@ s32 func_002558A8(void) { return -1; }
 
 /*?*/ void func_00255158();
 
-// Installs this file's loader functions into the archive state (D_0078DF98).
+// Installs this file's loader functions into the archive state (sa_file).
 // func_00165588(arg) stores arg at +0x18; with arg == 0 it calls this function,
 // otherwise it stores the release versions into the same nine slots:
 //
 //   slot   debug (here)    release         type (from the debug versions)
-//   +0x04  func_00254EF0   func_00163198   s32 (*)(s32)
-//   +0x14  func_00254E08   func_00162EB8   s32 (*)(s32)
+//   +0x04  func_00254EF0   FileLsnGet   s32 (*)(s32)
+//   +0x14  func_00254E08   FileSizeGet   s32 (*)(s32)
 //   +0x54  func_00254F40   func_00162D30   void* (*)(const char*, s32*)
 //   +0x58  func_00254DA8   func_00164A10   const char* (*)(s32)
 //   +0x60  func_002556A0   func_00162D18   void (*)(const char*)
@@ -493,13 +493,13 @@ s32 func_002558A8(void) { return -1; }
 // so their parameters, if any, are not visible here.
 
 void func_002558B0(void) {
-    D_0078DF98.unk14 = func_00254E08;
-    D_0078DF98.unk58 = func_00254DA8;
-    D_0078DF98.unk54 = func_00254F40;
-    D_0078DF98.unk68 = func_00255158;
-    D_0078DF98.unk60 = func_002556A0;
-    D_0078DF98.unk78 = func_00255880;
-    D_0078DF98.unk88 = func_002558A0;
-    D_0078DF98.unk8C = func_002558A8;
-    D_0078DF98.unk4 = func_00254EF0;
+    sa_file.unk14 = func_00254E08;
+    sa_file.unk58 = func_00254DA8;
+    sa_file.unk54 = func_00254F40;
+    sa_file.unk68 = func_00255158;
+    sa_file.unk60 = func_002556A0;
+    sa_file.unk78 = func_00255880;
+    sa_file.unk88 = func_002558A0;
+    sa_file.unk8C = func_002558A8;
+    sa_file.unk4 = func_00254EF0;
 }

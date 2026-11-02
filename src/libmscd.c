@@ -24,10 +24,10 @@ typedef enum {
 } DebugOutLogMode;
 
 typedef struct {
-    /* 0x0 */ u32 unk0; // CDROM.MDG LSN
-    /* 0x4 */ u32 unk4; // CDROM.MDG size
-    /* 0x8 */ u32 unk8; // CDROM.FID LSN
-    /* 0xC */ u32 unkC; // CDROM.FID size
+    /* 0x0 */ u32 file_tbl_lsn;   // CDROM.MDG LSN
+    /* 0x4 */ u32 file_tbl_size;  // CDROM.MDG size
+    /* 0x8 */ u32 group_tbl_lsn;  // CDROM.FID LSN
+    /* 0xC */ u32 group_tbl_size; // CDROM.FID size
 } Unk0030DA88;
 
 typedef struct {
@@ -35,13 +35,14 @@ typedef struct {
     /* 0x1C */ s32 unk1C;
 } Unk0057C71C;
 
-/* Task object from sa_task.c (D_00595AE4, read_task_buff); stub, only slot 0 so far.
+/* Task object from sa_task.c (read_task_buff): a buffer allocated and set up by
+ * func_00171C78(1) in func_00164A70; stub, only slot 0 so far.
  * Known from its fill: +0x0/+0x4/+0x8 are per-group function slots, +0x8 starts a task. */
 typedef struct {
     /* 0x00 */ void (*unk0)(void); // called with no args, then func_002D3C80(0) in the wait loop
-} Unk00595AE4;
+} SaTask;
 
-extern Unk00595AE4* D_00595AE4;
+extern SaTask* read_task_buff;
 
 void FlushCache(s32);
 void func_00125B40(void);
@@ -73,33 +74,30 @@ void func_002D1C70(void (*)());
 s32 func_002D6478(void);
 void func_002D8E20(const char* ch, const char* str, u32 len);
 
-extern char D_0056B950[];                              // "FFXDEBUG"
-extern char D_00595BF0[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
-extern char D_00596FF0[];
-
 extern s32 D_0030DA78;
 extern s8 D_0030DA7C;
-extern s8 D_0030DA7D;
+extern s8 sa_file_read_init;
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
-extern Unk0030DA88 D_0030DA88;
+extern Unk0030DA88 demo_desc;
 extern sceCdRMode D_0030DA98;
 extern sceCdRMode D_0030DAA0;
 
 extern s8 D_0030DAA4;
 extern s8 D_0030DAA5;
 extern s32 D_0030DAA8;
-extern s32 D_0030DAAC; // lsn
-extern s32 D_0030DAB0; // Entry count
+extern s32 lsn_base;
+extern s32 ex_file_cnt;
 extern char D_0030DAB8[];
 extern s8 D_0030DAC1;
 extern s32 D_0030DAC4;
-extern s32 D_0030DAC8; // ring buffer index
-extern s8 D_0030DACC;  // isDirty log msg pending flag
-extern s8 D_0030DACD;
-extern s8 D_0030DACE; // 1: print only lines starting with the filter D_00596FF0; 0: only lines that don't
+extern s32 dbg_line_index; // ring buffer index
+extern s8 dbg_pending;     // dirty flag
+extern s8 dbg_out_mode;
+extern s8 dbg_filter_mode; // 1: print only lines starting with dbg_filter; 0: only lines that don't
 extern s8 D_0030DACF;
 
+// rodata string literals
 extern char D_0056B720[]; // "libmscd.c"
 extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
@@ -108,23 +106,27 @@ extern char D_0056B778[]; // "sa_file_read_init!=0"
 extern char D_0056B800[]; // "read_task_buff != NULL"
 extern char D_0056B818[]; // "0"
 extern char D_0056B940[]; // "host:printf.log"
+extern char D_0056B950[]; // "FFXDEBUG"
+
 extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
 extern char* D_00595AD0;
-extern s32 D_00595AD4;        // sectorNum
-extern s32 D_00595AD8;        // size
-extern void* D_00595ADC;      // buffer
-extern sceCdRMode D_00595AE0; // mode
-extern u8* D_00595AE8;
-extern Unk00595AEC* D_00595AEC; // D_0030DAB0 entries, 512 allocated
+extern s32 cd_read_lsn;
+extern s32 cd_read_size;
+extern void* cd_read_buff;
+extern sceCdRMode cd_read_mode;
+extern u8* size_tbl;
+extern ExFile* ex_file_tbl; // 512 allocated
 extern char D_00595AF0[];
+extern char dbg_line_buff[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
+extern char dbg_filter[];
 
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
 void func_00162CC8(void) {
-    D_0030DAB0 = 0;
-    D_00595AEC = (Unk00595AEC*)func_0011D370(512 * sizeof(Unk00595AEC), 10, D_0056B720, 0x203);
-    memset(D_00595AEC, 0, 512 * sizeof(Unk00595AEC));
+    ex_file_cnt = 0;
+    ex_file_tbl = (ExFile*)func_0011D370(512 * sizeof(ExFile), 10, D_0056B720, 0x203);
+    memset(ex_file_tbl, 0, 512 * sizeof(ExFile));
 }
 
 void func_00162D18(const char* path) { dbgAssert(D_0056B730, D_0056B720, 0x20C); }
@@ -148,21 +150,21 @@ void func_00162D58(void) {
 
 void func_00162DC0(void) { func_002D1C70(func_00162D58); }
 
-ArchiveState* func_00162DD0(void) { return &D_0078DF98; }
+SaFile* SaFileGet(void) { return &sa_file; }
 
 void func_00162DE0(s32 arg0) {
-    if (D_0078DF98.unk18 == 0) {
-        *D_0078EE30[arg0] = 0;
+    if (sa_file.mode == 0) {
+        *read_q_path[arg0] = 0;
     }
 
-    D_0078E030[arg0].unk8 = 0;
-    D_0078E030[arg0].unk4.p = NULL;
-    D_0078E030[arg0].unk0 = 0;
-    D_0078E030[arg0].unk30 = 0;
-    D_0078E030[arg0].unk31 = 0;
-    D_0078E030[arg0].unk24 = 0;
-    D_0078E030[arg0].unk32 = 0;
-    D_0078E030[arg0].unk33 = 0;
+    read_q[arg0].no = 0;
+    read_q[arg0].buff.p = NULL;
+    read_q[arg0].size = 0;
+    read_q[arg0].unk30 = 0;
+    read_q[arg0].active = 0;
+    read_q[arg0].req_no = 0;
+    read_q[arg0].cancel = 0;
+    read_q[arg0].compressed = 0;
 }
 
 void func_00162E48(void) {
@@ -173,35 +175,35 @@ void func_00162E48(void) {
     }
 
     D_0030DA7C = 0;
-    D_00595AD4 = 0;
-    D_00595AD8 = 0;
+    cd_read_lsn = 0;
+    cd_read_size = 0;
     D_0030DA80 = 0;
     D_0030DA84 = 0;
-    D_00595ADC = NULL;
+    cd_read_buff = NULL;
     D_0030DA78 = 0;
 
     func_0015B330();
 }
 
-s32 func_00162EB8(s32 id) {
-    s32 index = D_0078DF98.unk20 + id;
+s32 FileSizeGet(s32 id) {
+    s32 index = sa_file.id_base + id;
     s32 offset = index * 3;
     s32 size;
     u8* data;
 
-    size = func_00165D70(D_0078DF98.unk24, id);
+    size = ExFileSizeGet(sa_file.group, id);
     if (size == 0) {
-        u32 entry = D_0078DF98.unk28[index];
+        u32 entry = sa_file.file_tbl[index];
         if (!(entry & TBL_ENTRY_EMPTY_FLAG)) {
             if (entry & TBL_ENTRY_COMPRESSED_FLAG) {
-                data = D_00595AE8 + offset;
+                data = size_tbl + offset;
                 size = data[0];
                 size += data[1] << 8;
                 size += data[2] << 16;
                 size *= 8;
             } else {
                 u32 curr = entry & TBL_ENTRY_SIZE_MASK;
-                u32 next = D_0078DF98.unk28[index + 1] & TBL_ENTRY_SIZE_MASK;
+                u32 next = sa_file.file_tbl[index + 1] & TBL_ENTRY_SIZE_MASK;
                 size = ((next - curr) * 2048) - ((entry >> 24) * 8);
             }
         }
@@ -210,25 +212,25 @@ s32 func_00162EB8(s32 id) {
     // No return when the override hook returns nonzero: its result is still in v0
 }
 
-s32 func_00162FA0(s32 arg0, s32 id) {
-    s32 index = D_0078DF98.unk2C[arg0] + id;
+s32 GroupFileSizeGet(s32 arg0, s32 id) {
+    s32 index = sa_file.group_tbl[arg0] + id;
     s32 offset = index * 3;
     s32 size;
     u8* data;
 
-    size = func_00165D70(arg0, id);
+    size = ExFileSizeGet(arg0, id);
     if (size == 0) {
-        u32 entry = D_0078DF98.unk28[index];
+        u32 entry = sa_file.file_tbl[index];
         if (!(entry & TBL_ENTRY_EMPTY_FLAG)) {
             if (entry & TBL_ENTRY_COMPRESSED_FLAG) {
-                data = D_00595AE8 + offset;
+                data = size_tbl + offset;
                 size = data[0];
                 size += data[1] << 8;
                 size += data[2] << 16;
                 size *= 8;
             } else {
                 u32 curr = entry & TBL_ENTRY_SIZE_MASK;
-                u32 next = D_0078DF98.unk28[index + 1] & TBL_ENTRY_SIZE_MASK;
+                u32 next = sa_file.file_tbl[index + 1] & TBL_ENTRY_SIZE_MASK;
                 size = ((next - curr) * 2048) - ((entry >> 24) * 8);
             }
         }
@@ -237,21 +239,21 @@ s32 func_00162FA0(s32 arg0, s32 id) {
     // No return when the override hook returns nonzero: its result is still in v0
 }
 
-s32 func_00163090(s32 id) {
-    s32 index = D_0078DF98.unk20 + id;
-    u32 entry = D_0078DF98.unk28[index];
+s32 FileDiscSizeGet(s32 id) {
+    s32 index = sa_file.id_base + id;
+    u32 entry = sa_file.file_tbl[index];
     s32 size = 0;
 
     if (!(entry & TBL_ENTRY_EMPTY_FLAG)) {
         u32 curr = entry & TBL_ENTRY_SIZE_MASK;
-        u32 next = D_0078DF98.unk28[index + 1] & TBL_ENTRY_SIZE_MASK;
+        u32 next = sa_file.file_tbl[index + 1] & TBL_ENTRY_SIZE_MASK;
         size = ((next - curr) * 2048) - ((entry >> 24) * 8);
     }
     return size;
 }
 
-s32 func_001630F0(s32 id) {
-    u32 entry = D_0078DF98.unk28[D_0078DF98.unk20 + id];
+s32 FileCompressedGet(s32 id) {
+    u32 entry = sa_file.file_tbl[sa_file.id_base + id];
     if (!(entry & TBL_ENTRY_EMPTY_FLAG)) {
         if (entry & TBL_ENTRY_COMPRESSED_FLAG) {
             return 1;
@@ -260,11 +262,11 @@ s32 func_001630F0(s32 id) {
     return 0;
 }
 
-s32 func_00163138(s32 arg0) { return (D_0078DF98.unk28[arg0] & TBL_ENTRY_SIZE_MASK) + D_0030DAAC; }
+s32 TblLsnGet(s32 arg0) { return (sa_file.file_tbl[arg0] & TBL_ENTRY_SIZE_MASK) + lsn_base; }
 
-u32 func_00163168(s32 arg0, s32 arg1) { return func_00163138(D_0078DF98.unk2C[arg0] + arg1); }
+u32 GroupFileLsnGet(s32 arg0, s32 arg1) { return TblLsnGet(sa_file.group_tbl[arg0] + arg1); }
 
-s32 func_00163198(s32 arg0) { return func_00163138(D_0078DF98.unk20 + arg0); }
+s32 FileLsnGet(s32 arg0) { return TblLsnGet(sa_file.id_base + arg0); }
 
 void func_001631C0(s8 arg0) { D_0030DAA4 = arg0; }
 
@@ -273,10 +275,10 @@ s32 func_001631D0(s32 arg0, s32 size, void* buffer, sceCdRMode* mode) {
     D_0030DAA4 = 0;
     D_0030DAA8 = 0;
 
-    D_00595AD4 = arg0;
-    D_00595AD8 = size;
-    D_00595ADC = buffer;
-    D_00595AE0 = *mode;
+    cd_read_lsn = arg0;
+    cd_read_size = size;
+    cd_read_buff = buffer;
+    cd_read_mode = *mode;
 
     func_0015B330();
 
@@ -292,7 +294,7 @@ s32 func_00163290(void) {
     // no return on this path: a void function or a return value here compiles to a tail jump
 }
 
-u32 func_00163168(/*?*/ s32, /*?*/ s32); /* extern */
+u32 GroupFileLsnGet(/*?*/ s32, /*?*/ s32); /* extern */
 extern s8 D_0030DAA5;
 extern char* D_0030DCD8;
 
@@ -319,7 +321,7 @@ s32 func_001632B8(void) {
                 func_0017133C(1);
                 func_0015B330();
 
-                lsn = func_00163168(1, 1);
+                lsn = GroupFileLsnGet(1, 1);
                 FlushCache(0);
                 if (sceCdRead(lsn, 1, D_00595AD0, &D_0030DA98) == 0) {
                     goto restart;
@@ -376,15 +378,15 @@ s32 func_001636F0(void) {
     }
 
     sceCdBreak();
-    func_001631D0(D_00595AD4, D_00595AD8, D_00595ADC, &D_0030DAA0);
+    func_001631D0(cd_read_lsn, cd_read_size, cd_read_buff, &D_0030DAA0);
     return 1;
 }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163768);
 
-void func_00163938(Unk0078E030* arg0) { func_00171510(D_00591AD0, 0x4000, arg0->unk20, arg0); }
+void ReadQCallbackCall(ReadQEntry* arg0) { func_00171510(D_00591AD0, 0x4000, arg0->callback, arg0); }
 
-// Not matching yet. For compressed entries (entry->unk33, unk0 < size) the function reads the first
+// Not matching yet. For compressed entries (entry->compressed, entry->size < size) the function reads the first
 // sectors, tests the first data byte and, if it is nonzero, carries on with the generic read code:
 // the long read joins at the `rest` test (0x163B68), the one-sector read at the FlushCache/memcpy
 // tail, so that path runs FlushCache twice (0x163AFC, 0x163BE8). The PC port's version (0x76E1C0)
@@ -403,27 +405,27 @@ void func_00163938(Unk0078E030* arg0) { func_00171510(D_00591AD0, 0x4000, arg0->
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163950);
 #else
-void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
-    Unk00595AEC* exFile;
+void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
+    ExFile* exFile;
     s32 start;
     s32 size;
     s32 secs;
     s32 rest;
 
-    if (archive->unk70 != 0) {
+    if (archive->busy != 0) {
         return;
     }
 
-    archive->unk74 = index;
-    archive->unk70 = 1;
-    archive->unk5C = 0;
+    archive->busy_index = index;
+    archive->busy = 1;
+    archive->host_fd = 0;
     start = D_0057C71C->unk1C;
-    size = entry->unk2C;
-    exFile = func_00165D00(entry->unk28, entry->unk8);
+    size = entry->disc_size;
+    exFile = ExFileFind(entry->group, entry->no);
 
     if (exFile != NULL) {
-        sprintf(D_00595AF0, D_0056B768, exFile->unk24);
-        func_00166798(D_00595AF0, entry->unk4.p, exFile->unk10, exFile->unkC);
+        sprintf(D_00595AF0, D_0056B768, exFile->name);
+        func_00166798(D_00595AF0, entry->buff.p, exFile->size, exFile->offset);
         if (func_00165EB8() == 0) {
             goto end;
         }
@@ -431,63 +433,63 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
         func_00125B40();
     }
 
-    if (entry->unk33 != 0 && entry->unk0 < size) {
-        size = entry->unk0 + 5;
+    if (entry->compressed != 0 && entry->size < size) {
+        size = entry->size + 5;
         secs = size / 2048;
         if (secs != 0 && size > 0) {
-            func_00163450(entry->unk1C, size, entry->unk4.p, &D_0030DA98, entry->unk28);
+            func_00163450(entry->lsn, size, entry->buff.p, &D_0030DA98, entry->group);
             FlushCache(0);
 
-            if (*(char*)entry->unk4.p == 0) {
-                memcpy(entry->unk4.p, (char*)entry->unk4.p + 5, secs * 2048);
+            if (*(char*)entry->buff.p == 0) {
+                memcpy(entry->buff.p, (char*)entry->buff.p + 5, secs * 2048);
                 size -= secs * 2048;
-                func_00163450(entry->unk1C + secs, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
+                func_00163450(entry->lsn + secs, 0x800, D_00595AD0, &D_0030DA98, entry->group);
                 FlushCache(0);
-                memcpy((char*)entry->unk4.p + secs * 2048, D_00595AD0, size - 5);
+                memcpy((char*)entry->buff.p + secs * 2048, D_00595AD0, size - 5);
                 goto end;
             }
 
             if (size & 0x7FF) {
-                func_00163450(entry->unk1C + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
+                func_00163450(entry->lsn + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->group);
                 rest = size & 0x7FF;
                 FlushCache(0);
-                memcpy((char*)entry->unk4.p + size - rest, D_00595AD0, rest);
+                memcpy((char*)entry->buff.p + size - rest, D_00595AD0, rest);
             } else {
                 FlushCache(0);
             }
         } else {
-            func_00163450(entry->unk1C, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
+            func_00163450(entry->lsn, 0x800, D_00595AD0, &D_0030DA98, entry->group);
             FlushCache(0);
 
             if (*D_00595AD0 == 0) {
-                memcpy(entry->unk4.p, D_00595AD0 + 5, size - 5);
+                memcpy(entry->buff.p, D_00595AD0 + 5, size - 5);
                 goto end;
             }
 
             rest = size & 0x7FF;
             FlushCache(0);
-            memcpy((char*)entry->unk4.p + size - rest, D_00595AD0, rest);
+            memcpy((char*)entry->buff.p + size - rest, D_00595AD0, rest);
         }
     } else {
         if (size / 2048 != 0) {
-            func_00163450(entry->unk1C, entry->unk2C, entry->unk4.p, &D_0030DA98, entry->unk28);
+            func_00163450(entry->lsn, entry->disc_size, entry->buff.p, &D_0030DA98, entry->group);
             if (size & 0x7FF) {
-                func_00163450(entry->unk1C + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
+                func_00163450(entry->lsn + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->group);
                 rest = size & 0x7FF;
                 FlushCache(0);
-                memcpy((char*)entry->unk4.p + size - rest, D_00595AD0, rest);
+                memcpy((char*)entry->buff.p + size - rest, D_00595AD0, rest);
             } else {
                 FlushCache(0);
             }
         } else {
-            func_00163450(entry->unk1C, 0x800, D_00595AD0, &D_0030DA98, entry->unk28);
+            func_00163450(entry->lsn, 0x800, D_00595AD0, &D_0030DA98, entry->group);
             rest = size & 0x7FF;
             FlushCache(0);
-            memcpy((char*)entry->unk4.p + size - rest, D_00595AD0, rest);
+            memcpy((char*)entry->buff.p + size - rest, D_00595AD0, rest);
         }
     }
 
-    if (entry->unk33 != 0) {
+    if (entry->compressed != 0) {
         if (func_001244D0()->unk10 != 0) {
             while (D_0030DAB4 != 0) {
                 func_0017133C(1);
@@ -504,17 +506,17 @@ void func_00163950(ArchiveState* archive, Unk0078E030* entry, s32 index) {
     }
 
 end:
-    D_0030DA84 = D_00595AD8;
+    D_0030DA84 = cd_read_size;
     D_0030DA80 = D_0057C71C->unk1C - start;
-    if (entry->unk20 != NULL) {
-        func_00163938(entry);
+    if (entry->callback != NULL) {
+        ReadQCallbackCall(entry);
     }
 
-    archive->unk70 = 0;
-    archive->unk5C = -1;
-    archive->unk74 = -1;
-    entry->unk31 = 0;
-    entry->unk24 = 0;
+    archive->busy = 0;
+    archive->host_fd = -1;
+    archive->busy_index = -1;
+    entry->active = 0;
+    entry->req_no = 0;
 }
 #endif
 
@@ -525,15 +527,15 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163E90);
 s16 func_00163FD0(s32 arg0) {
     s16 fid;
 
-    if (D_0030DA7D == 0) {
+    if (sa_file_read_init == 0) {
         dbgAssert(D_0056B778, D_0056B720, 0x534);
     }
 
-    fid = D_0078DF98.unk2C[arg0];
-    D_0078DF98.unk24 = arg0;
-    D_0078DF98.unk20 = fid;
+    fid = sa_file.group_tbl[arg0];
+    sa_file.group = arg0;
+    sa_file.id_base = fid;
     if (fid < 0) {
-        D_0078DF98.unk20 = 0;
+        sa_file.id_base = 0;
         fid = -1;
     }
     return fid;
@@ -545,19 +547,19 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164320);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164628);
 
-void func_00164820(void) {
+void ReadQWait(void) {
     char* msg;
     s32 i;
 
-    if (D_00595AE4 == NULL) {
+    if (read_task_buff == NULL) {
         dbgAssert(D_0056B800, D_0056B720, 0x63B);
     }
 
     // Waits until no queue entry is active: the task step and frame wait sit in the for's
     // increment, so they run only between searches (the target jumps straight to the first search)
-    for (;; D_00595AE4->unk0(), func_002D3C80(0)) {
+    for (;; read_task_buff->unk0(), func_002D3C80(0)) {
         for (i = 0; i < READ_Q_CNT; i++) {
-            if (D_0078E030[i].unk31 != 0) {
+            if (read_q[i].active != 0) {
                 if (func_002D6478() != 0) {
                     dbgAssert(D_0056B818, D_0056B720, 0x642);
                 }
@@ -571,12 +573,12 @@ void func_00164820(void) {
     }
 }
 
-s32 func_001648F8(s32 arg0, s32 arg1) {
+s32 ReadQFileStatGet(s32 arg0, s32 arg1) {
     s32 i;
 
     for (i = 0; i < READ_Q_CNT; i++) {
-        if (D_0078E030[i].unk31 != 0 && D_0078E030[i].unk28 == arg0 && D_0078E030[i].unk8 == arg1) {
-            if (D_0078DF98.unk70 != 0 && D_0078DF98.unk74 == i) {
+        if (read_q[i].active != 0 && read_q[i].group == arg0 && read_q[i].no == arg1) {
+            if (sa_file.busy != 0 && sa_file.busy_index == i) {
                 return 2;
             }
             return 1;
@@ -586,18 +588,18 @@ s32 func_001648F8(s32 arg0, s32 arg1) {
     return 0;
 }
 
-s32 func_00164970(s32 arg0) {
+s32 ReadQSync(s32 arg0) {
     s32 i;
 
     switch (arg0) {
     default:
     case 0:
-        func_00164820();
+        ReadQWait();
         break;
 
     case 1:
         for (i = 0; i < READ_Q_CNT; i++) {
-            if (D_0078E030[i].unk31 != 0) {
+            if (read_q[i].active != 0) {
                 if (func_002D6478() != 0) {
                     dbgAssert(D_0056B818, D_0056B720, 0x67E);
                 }
@@ -612,9 +614,9 @@ s32 func_00164970(s32 arg0) {
 
 const char* func_00164A10(void) { return D_0030DAB8; }
 
-void func_00164A20(void) {
+void ReadTask(void) {
     while (1) {
-        D_0078DF98.unk68();
+        sa_file.unk68();
         func_0017133C(1);
     }
 }
@@ -625,19 +627,19 @@ void func_00164A60(s32 arg0) { D_0030DAC4 = arg0; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A70);
 
-void func_00165300(s32 arg0) {
+void ReadQCancel(s32 arg0) {
     s32 i;
 
     if (arg0 <= 0) {
         for (i = 0; i < READ_Q_CNT; i++) {
-            if (D_0078E030[i].unk31 != 0) {
-                D_0078E030[i].unk32 = 1;
+            if (read_q[i].active != 0) {
+                read_q[i].cancel = 1;
             }
         }
     } else {
         for (i = 0; i < READ_Q_CNT; i++) {
-            if (D_0078E030[i].unk31 != 0 && D_0078E030[i].unk24 == arg0) {
-                D_0078E030[i].unk32 = 1;
+            if (read_q[i].active != 0 && read_q[i].req_no == arg0) {
+                read_q[i].cancel = 1;
             }
         }
     }
@@ -671,17 +673,17 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001653E8);
 
 s32 func_00165528(s32 arg0) { return func_001653E8(arg0, 0, 0); }
 
-s32 func_00165548(s32 arg0, s32 arg1) { return func_001653E8(func_00163168(arg0, arg1), arg0, arg1); }
+s32 func_00165548(s32 arg0, s32 arg1) { return func_001653E8(GroupFileLsnGet(arg0, arg1), arg0, arg1); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165588);
 
-void func_001656B8(void) { D_00595AE4->unk0(); }
+void func_001656B8(void) { read_task_buff->unk0(); }
 
 // Used by func_00165808, creates a new file the first call and appends thereafter
 void func_001656E0(const char* str, u32 len) {
     s32 fd;
 
-    if (D_0030DACC == 0) {
+    if (dbg_pending == 0) {
         fd = sceOpen(D_0056B940, SCE_TRUNC | SCE_WRONLY | SCE_CREAT);
         if (fd < 0) {
             return;
@@ -699,17 +701,17 @@ void func_001656E0(const char* str, u32 len) {
     sceClose(fd);
 }
 
-void func_001657A8(const char* str, s8 filter) {
+void func_001657A8(const char* str, s8 filter_mode) {
     s32 i;
 
-    D_0030DACE = filter;
+    dbg_filter_mode = filter_mode;
     if (str == NULL) {
-        D_00596FF0[0] = '\0';
+        dbg_filter[0] = '\0';
         return;
     }
 
     for (i = 0;; i++) {
-        D_00596FF0[i] = str[i];
+        dbg_filter[i] = str[i];
         if (str[i] == '\0') {
             break;
         }
@@ -724,50 +726,50 @@ void func_00165808(const char* fmt, va_list ap) {
     s32 i;
 
     vsprintf(text, fmt, ap);
-    line = D_00595BF0[D_0030DAC8];
-    strncpy(line, text, sizeof(D_00595BF0[0]) - 1);
-    line[sizeof(D_00595BF0[0]) - 1] = '\0';
-    D_0030DAC8 = (D_0030DAC8 + 1) & (DBG_LINE_COUNT - 1);
+    line = dbg_line_buff[dbg_line_index];
+    strncpy(line, text, sizeof(dbg_line_buff[0]) - 1);
+    line[sizeof(dbg_line_buff[0]) - 1] = '\0';
+    dbg_line_index = (dbg_line_index + 1) & (DBG_LINE_COUNT - 1);
 
     if (func_002D93E8() == 1) {
-        if (D_00596FF0[0] == '\0') {
+        if (dbg_filter[0] == '\0') {
             func_001715A0(text);
         } else {
             match = 0;
             for (i = 0; line[i] != 0; i++) {
-                if (D_00596FF0[i] == '\0') {
+                if (dbg_filter[i] == '\0') {
                     match = 1;
                     break;
                 }
-                if (line[i] != D_00596FF0[i]) {
+                if (line[i] != dbg_filter[i]) {
                     break;
                 }
             }
-            if (D_0030DACE == match) {
+            if (dbg_filter_mode == match) {
                 func_001715A0(text);
             }
         }
     } else if (func_001244D0()->unkB != 0) {
-        if (D_00596FF0[0] == '\0') {
+        if (dbg_filter[0] == '\0') {
             func_001715A0(text);
         } else {
             match = 0;
             for (i = 0; line[i] != 0; i++) {
-                if (D_00596FF0[i] == '\0') {
+                if (dbg_filter[i] == '\0') {
                     match = 1;
                     break;
                 }
-                if (line[i] != D_00596FF0[i]) {
+                if (line[i] != dbg_filter[i]) {
                     break;
                 }
             }
-            if (D_0030DACE == match) {
+            if (dbg_filter_mode == match) {
                 func_001715A0(text);
             }
         }
     }
 
-    switch (D_0030DACD) {
+    switch (dbg_out_mode) {
     case DBG_OUT_STREAM_FFXDEBUG:
         len = strlen(line);
         if (len != 0) {
@@ -783,7 +785,7 @@ void func_00165808(const char* fmt, va_list ap) {
         }
         break;
     }
-    D_0030DACC = 1;
+    dbg_pending = 1;
 }
 
 void func_00165A18(const char* fmt, ...) {
@@ -795,10 +797,10 @@ void func_00165A18(const char* fmt, ...) {
 void func_00165A50(s32 mode) {
     if (mode != DBG_OUT_NONE) {
         if (D_0030DACF == 0) {
-            memset(D_00595BF0, 0, DBG_LINE_SIZE * DBG_LINE_COUNT);
+            memset(dbg_line_buff, 0, DBG_LINE_SIZE * DBG_LINE_COUNT);
 
-            D_00596FF0[0] = '\0';
-            D_0030DACE = 0;
+            dbg_filter[0] = '\0';
+            dbg_filter_mode = 0;
             D_0030DACF = 1;
 
             func_00171548(func_00165A18);
@@ -806,7 +808,7 @@ void func_00165A50(s32 mode) {
             FlushCache(2);
         }
     }
-    D_0030DACD = mode;
+    dbg_out_mode = mode;
 }
 
 void func_00165AE0(void) {}
@@ -828,23 +830,23 @@ void func_00165B18(void) {
     s32 len;
     s32 i;
 
-    if (func_002D93E8() != 1 || D_0030DACC == 0) {
+    if (func_002D93E8() != 1 || dbg_pending == 0) {
         return;
     }
 
-    switch (D_0030DACD) {
+    switch (dbg_out_mode) {
     case DBG_OUT_NONE:
         break;
 
     case DBG_OUT_LOG_FILE:
-        index = D_0030DAC8;
+        index = dbg_line_index;
         fd = sceOpen(D_0056B940, SCE_TRUNC | SCE_WRONLY | SCE_CREAT);
         if (fd < 0) {
             return;
         }
 
         for (i = 0; i < DBG_LINE_COUNT; i++) {
-            line = D_00595BF0[index];
+            line = dbg_line_buff[index];
             len = strlen(line);
             if (len != 0) {
                 sceWrite(fd, line, len);
@@ -857,10 +859,10 @@ void func_00165B18(void) {
         break;
 
     case DBG_OUT_LOG_MEMORY:
-        index = D_0030DAC8;
+        index = dbg_line_index;
         len = 0;
         for (i = 0; i < DBG_LINE_COUNT; i++) {
-            len += strlen(D_00595BF0[index]);
+            len += strlen(dbg_line_buff[index]);
             index++;
             index &= DBG_LINE_COUNT - 1;
         }
@@ -868,10 +870,10 @@ void func_00165B18(void) {
         if (len != 0) {
             buffer = func_0011D370(len, 10, D_0056B720, 0x928);
 
-            index = D_0030DAC8;
+            index = dbg_line_index;
             cursor = buffer;
             for (i = 0; i < DBG_LINE_COUNT; i++) {
-                line = D_00595BF0[index];
+                line = dbg_line_buff[index];
                 len = strlen(line);
                 if (len != 0) {
                     strncpy(cursor, line, len);
@@ -885,20 +887,20 @@ void func_00165B18(void) {
         }
         break;
     }
-    D_0030DAC8 = 0;
+    dbg_line_index = 0;
 }
 
-Unk00595AEC* func_00165D00(s32 arg0, s32 arg1) {
-    Unk00595AEC* entry;
+ExFile* ExFileFind(s32 arg0, s32 arg1) {
+    ExFile* entry;
     s32 i;
 
-    if (D_0030DAB0 == 0 || arg0 == -1 || arg1 == -1) {
+    if (ex_file_cnt == 0 || arg0 == -1 || arg1 == -1) {
         return NULL;
     }
 
-    entry = D_00595AEC;
-    for (i = 0; i < D_0030DAB0; i++) {
-        if (entry->unk0 == arg0 && entry->unk8 == arg1) {
+    entry = ex_file_tbl;
+    for (i = 0; i < ex_file_cnt; i++) {
+        if (entry->group == arg0 && entry->no == arg1) {
             return entry;
         }
         entry++;
@@ -906,42 +908,42 @@ Unk00595AEC* func_00165D00(s32 arg0, s32 arg1) {
     return NULL;
 }
 
-s32 func_00165D70(s32 arg0, s32 arg1) {
-    Unk00595AEC* entry;
+s32 ExFileSizeGet(s32 arg0, s32 arg1) {
+    ExFile* entry;
     s32 i;
 
-    if (D_0030DAB0 == 0) {
+    if (ex_file_cnt == 0) {
         return 0;
     }
 
-    entry = D_00595AEC;
-    for (i = 0; i < D_0030DAB0; i++) {
-        if (entry->unk0 == arg0 && entry->unk8 == arg1) {
-            return entry->unk10;
+    entry = ex_file_tbl;
+    for (i = 0; i < ex_file_cnt; i++) {
+        if (entry->group == arg0 && entry->no == arg1) {
+            return entry->size;
         }
         entry++;
     }
     return 0;
 }
 
-void func_00165DD0(const char** arg0) {
+void DemoDescSet(const char** arg0) {
     sceCdlFILE fp;
     if (arg0 != NULL) {
         while (sceCdSearchFile(&fp, arg0[0]) == 0) {
             func_002D3C80(1);
         }
-        D_0030DAAC = fp.lsn;
+        lsn_base = fp.lsn;
 
         while (sceCdSearchFile(&fp, arg0[1]) == 0) {
             func_002D3C80(1);
         }
-        D_0030DA88.unk0 = fp.lsn;
-        D_0030DA88.unk4 = fp.size;
+        demo_desc.file_tbl_lsn = fp.lsn;
+        demo_desc.file_tbl_size = fp.size;
 
         while (sceCdSearchFile(&fp, arg0[2]) == 0) {
             func_002D3C80(1);
         }
-        D_0030DA88.unk8 = fp.lsn;
-        D_0030DA88.unkC = fp.size;
+        demo_desc.group_tbl_lsn = fp.lsn;
+        demo_desc.group_tbl_size = fp.size;
     }
 }
