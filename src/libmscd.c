@@ -50,6 +50,10 @@ sceCdRMode* func_0015B320();
 void func_0015B330(void);
 s32 func_0015B830(void);
 s32 func_001636F0(void);
+void func_00163E90();
+s32 func_00164040();
+s32 func_00164320();
+s32 func_00164628();
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
 s32 func_00165EB8(void);
 s32 func_00165F30(s32);
@@ -71,6 +75,7 @@ s32 func_001715A0(const char* fmt, ...);
 
 void func_002D1C70(void (*)());
 /*?*/ s32 func_0020D378();
+void func_002558B0();
 // TK frame wait: blocks until at least max(n, 1) VBlanks (INTC 2 handler func_002D3B08 counts
 // them in D_0078AC00) have passed since the last call, then resets the count and runs the
 // per-frame TK updates.
@@ -101,6 +106,7 @@ extern s8 dbg_pending;     // dirty flag
 extern s8 dbg_out_mode;
 extern s8 dbg_filter_mode; // 1: print only lines starting with dbg_filter; 0: only lines that don't
 extern s8 D_0030DACF;
+extern char* D_0030DCD8;
 
 // rodata string literals
 extern char D_0056B720[]; // "libmscd.c"
@@ -422,7 +428,7 @@ void func_00162CC8(void) {
 
 void func_00162D18(const char* path) { dbgAssert(D_0056B730, D_0056B720, 0x20C); }
 
-void func_00162D30(const char* path) { dbgAssert(D_0056B750, D_0056B720, 0x211); }
+void* func_00162D30(const char* path, s32* unused) { dbgAssert(D_0056B750, D_0056B720, 0x211); }
 
 char* func_00162D48(void) { return D_00595AD0; }
 
@@ -584,10 +590,6 @@ s32 func_00163290(void) {
     }
     // no return on this path: a void function or a return value here compiles to a tail jump
 }
-
-u32 GroupFileLsnGet(/*?*/ s32, /*?*/ s32); /* extern */
-extern s8 D_0030DAA5;
-extern char* D_0030DCD8;
 
 // After the disc lid was opened: waits for the drive, then re-reads a sector until its first 32 bytes
 // match D_0030DCD8 (same disc). Returns 1 if the lid wasn't opened or there is no ID, else 0.
@@ -986,7 +988,7 @@ s32 ReadQSync(s32 arg0) {
     return 0;
 }
 
-const char* func_00164A10(void) { return D_0030DAB8; }
+const char* func_00164A10(s32 unused) { return D_0030DAB8; }
 
 void ReadTask(void) {
     while (1) {
@@ -1049,7 +1051,35 @@ s32 func_00165528(s32 arg0) { return func_001653E8(arg0, 0, 0); }
 
 s32 func_00165548(s32 arg0, s32 arg1) { return func_001653E8(GroupFileLsnGet(arg0, arg1), arg0, arg1); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00165588);
+void func_00165588(s32 mode) {
+    sa_file.mode = mode;
+
+    if (mode == 0) {
+        func_002558B0();
+    } else {
+        sa_file.unk14 = FileSizeGet;
+        sa_file.unk58 = func_00164A10;
+        sa_file.unk68 = func_00163E90;
+        sa_file.unk54 = func_00162D30;
+        sa_file.unk60 = func_00162D18;
+        sa_file.unk4 = FileLsnGet;
+        sa_file.unk78 = func_00164628;
+        sa_file.unk88 = func_00165548;
+        sa_file.unk8C = func_00165528;
+    }
+
+    sa_file.unk8 = ReadQSync;
+    sa_file.unk1C = ReadQCancel;
+    sa_file.unk0 = func_00164040;
+    sa_file.unk90 = func_00164320;
+    sa_file.unk64 = func_00162E48;
+    sa_file.unkC = func_00165588;
+    sa_file.unk10 = func_00163FD0;
+    sa_file.unk7C = func_00165378;
+    sa_file.unk84 = func_001653A0;
+    sa_file.unk80 = ReadQFileStatGet;
+    sa_file.unk6C = GroupFileLsnGet;
+}
 
 void func_001656B8(void) { read_task_buff->unk0(); }
 

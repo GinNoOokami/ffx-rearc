@@ -33,14 +33,14 @@ typedef struct {
    comments give the release function, and the host one from read_debug.c where
    func_002558B0 overrides the slot. "()" = parameters not known yet. */
 typedef struct {
-    /* 0x00 */ s32 (*unk0)();     // func_00164040
-    /* 0x04 */ s32 (*unk4)(s32);  // FileLsnGet / func_00254EF0
-    /* 0x08 */ s32 (*unk8)();     // ReadQSync
-    /* 0x0C */ void (*unkC)(s32); // func_00165588 (this table's own init)
-    /* 0x10 */ s32 (*unk10)();    // func_00163FD0
-    /* 0x14 */ s32 (*unk14)(s32); // FileSizeGet / func_00254E08
-    /* 0x18 */ s32 mode;          // func_00165588's argument; 0 = host mode
-    /* 0x1C */ s32 (*unk1C)();    // ReadQCancel
+    /* 0x00 */ s32 (*unk0)();      // func_00164040
+    /* 0x04 */ s32 (*unk4)(s32);   // FileLsnGet / func_00254EF0
+    /* 0x08 */ s32 (*unk8)();      // ReadQSync
+    /* 0x0C */ void (*unkC)(s32);  // func_00165588 (this table's own init)
+    /* 0x10 */ s16 (*unk10)(s32);  // func_00163FD0
+    /* 0x14 */ s32 (*unk14)(s32);  // FileSizeGet / func_00254E08
+    /* 0x18 */ s32 mode;           // func_00165588's argument; 0 = host mode
+    /* 0x1C */ void (*unk1C)(s32); // ReadQCancel
     /* 0x20 */ s32 id_base;
     /* 0x24 */ s32 group;
     /* 0x28 */ u32* file_tbl;  // cdrom.mdg
@@ -51,15 +51,15 @@ typedef struct {
     /* 0x58 */ const char* (*unk58)(s32);         // func_00164A10 / func_00254DA8
     /* 0x5C */ s32 host_fd;                       // file descriptor during a host read (func_00255158); -1 when idle
     /* 0x60 */ void (*unk60)(const char*);        // func_00162D18 / func_002556A0
-    /* 0x64 */ s32 (*unk64)();                    // func_00162E48
+    /* 0x64 */ void (*unk64)();                   // func_00162E48
     /* 0x68 */ void (*unk68)();                   // func_00163E90 / func_00255158
-    /* 0x6C */ s32 (*unk6C)();                    // GroupFileLsnGet
+    /* 0x6C */ u32 (*unk6C)(s32, s32);            // GroupFileLsnGet
     /* 0x70 */ s32 busy;                          // 1 while an entry is being processed, 0 after
     /* 0x74 */ s32 busy_index;                    // index of that entry in read_q, -1 after
     /* 0x78 */ s32 (*unk78)(void);                // func_00164628 / func_00255880
-    /* 0x7C */ s32 (*unk7C)();                    // func_00165378
+    /* 0x7C */ void (*unk7C)(s32);                // func_00165378
     /* 0x80 */ s32 (*unk80)();                    // ReadQFileStatGet
-    /* 0x84 */ s32 (*unk84)();                    // func_001653A0
+    /* 0x84 */ void (*unk84)(s32);                // func_001653A0
     /* 0x88 */ s32 (*unk88)();                    // func_00165548 / func_002558A0
     /* 0x8C */ s32 (*unk8C)();                    // func_00165528 / func_002558A8
     /* 0x90 */ s32 (*unk90)();                    // func_00164320
