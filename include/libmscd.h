@@ -16,7 +16,10 @@ typedef struct {
         void* p;
     } buff;            // destination buffer (sceRead, memcpy)
     /* 0x08 */ s32 no; // ExFileFind's second argument
-    /* 0x0C */ u8 padC[0x1C - 0xC];
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
     /* 0x1C */ s32 lsn;        // sector: lsn << 11 is the seek offset
     /* 0x20 */ void* callback; // nonzero: ReadQCallbackCall(entry) is called
     /* 0x24 */ s32 req_no;
@@ -26,7 +29,8 @@ typedef struct {
     /* 0x31 */ s8 active;     // 0: entry skipped; cleared at the end
     /* 0x32 */ s8 cancel;     // nonzero: func_00162DE0(index) instead
     /* 0x33 */ s8 compressed; // selects the copy path
-    /* 0x34 */ u8 pad34[0x38 - 0x34];
+    /* 0x34 */ s8 unk34;
+    /* 0x35 */ u8 pad35[0x38 - 0x35];
 } ReadQEntry; // size: 0x38
 
 /* Archive state (sa_file). Function slots are filled by func_00165588; the

@@ -22,6 +22,7 @@ ReadQCancel = 0x00165300; // type:func
 ExFileFind = 0x00165D00; // type:func
 ExFileSizeGet = 0x00165D70; // type:func
 DemoDescSet = 0x00165DD0; // type:func
+read_q_req_no = 0x0030DA78; // size:0x4
 sa_file_read_init = 0x0030DA7D; // size:0x1
 demo_desc = 0x0030DA88; // size:0x10
 D_0030DA98 = 0x0030DA98; // size:0x4

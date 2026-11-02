@@ -84,7 +84,7 @@ s32 func_002D6418(void);
 s32 func_002D6478(void);
 void func_002D8E20(const char* ch, const char* str, u32 len);
 
-extern s32 D_0030DA78;
+extern s32 read_q_req_no;
 extern s8 D_0030DA7C;
 extern s8 sa_file_read_init;
 extern s32 D_0030DA80;
@@ -114,6 +114,7 @@ extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
 extern char D_0056B778[]; // "sa_file_read_init!=0"
+extern char D_0056B790[]; // "q_cnt != READ_Q_CNT"
 extern char D_0056B800[]; // "read_task_buff != NULL"
 extern char D_0056B818[]; // "0"
 extern char D_0056B940[]; // "host:printf.log"
@@ -477,7 +478,7 @@ void func_00162E48(void) {
     D_0030DA80 = 0;
     D_0030DA84 = 0;
     cd_read_buff = NULL;
-    D_0030DA78 = 0;
+    read_q_req_no = 0;
 
     func_0015B330();
 }
@@ -1045,7 +1046,48 @@ void func_001653A0(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001653E8);
+// Takes a free read-queue slot and resets it for a read of lsn (group/no for the ExFile lookup).
+// Returns the request's number: counts 1..0xFFFF and wraps back to 1, so 0 is never issued
+s32 func_001653E8(s32 lsn, s32 group, s32 no) {
+    ReadQEntry* entry;
+    s32 q_cnt;
+
+    for (q_cnt = 0; q_cnt < READ_Q_CNT; q_cnt++) {
+        if (read_q[q_cnt].active == 0) {
+            break;
+        }
+    }
+
+    if (q_cnt == READ_Q_CNT) {
+        dbgAssert(D_0056B790, D_0056B720, 0x816);
+    }
+
+    entry = &read_q[q_cnt];
+    entry->active = 1;
+    entry->no = no;
+    entry->group = group;
+    entry->buff.p = NULL;
+    entry->unkC = 0;
+    entry->unk10 = 0;
+    entry->unk14 = 0;
+    entry->unk18 = 0;
+    entry->size = 0;
+    entry->callback = NULL;
+
+    // Unsure why 0 is not considered a valid
+    if (++read_q_req_no > 0xFFFF) {
+        read_q_req_no = 1;
+    }
+
+    entry->lsn = lsn;
+    entry->req_no = read_q_req_no;
+    entry->compressed = 0;
+    entry->unk34 = 0;
+    entry->disc_size = 0;
+    entry->unk30 = 1;
+
+    return read_q_req_no;
+}
 
 s32 func_00165528(s32 arg0) { return func_001653E8(arg0, 0, 0); }
 
