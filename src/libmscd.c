@@ -5,11 +5,14 @@
 #include <stdarg.h>
 
 #include "common.h"
+#include "decode.h"
 #include "libmscd.h"
 #include "mem.h"
 
 #define DBG_LINE_SIZE 40
 #define DBG_LINE_COUNT 128
+
+#define SCRATCH_BUFF_SIZE 0x1800
 
 #define TBL_ENTRY_SIZE_MASK 0x3FFFFF
 #define TBL_ENTRY_COMPRESSED_FLAG 0x400000
@@ -760,7 +763,41 @@ s32 func_001636F0(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163768);
+// Unpacks a compressed entry in place: byte 0 = method (1/2), bytes 1-4 = unpacked size (LE).
+// Input over 0x1800 bytes keeps its tail in D_00595AD0 and moves the rest to the end of the output.
+void func_00163768(ReadQEntry* entry) {
+    u8* buff = entry->buff.p;
+    u32 packedSize = entry->disc_size;
+    s32 unpackedSize = DECODE_SIZE(buff);
+    s32 headSize;
+    u8* dst;
+    s32 i;
+
+    if (packedSize <= SCRATCH_BUFF_SIZE) {
+        memcpy(D_00595AD0, buff, packedSize);
+        func_002548A0(buff, D_00595AD0);
+        return;
+    }
+
+    headSize = packedSize - SCRATCH_BUFF_SIZE;
+    memcpy(D_00595AD0, buff + headSize, SCRATCH_BUFF_SIZE);
+    dst = buff + unpackedSize - 1;
+    for (i = 0; i < headSize; i++) {
+        *dst-- = buff[headSize - 1 - i];
+    }
+
+    dst++;
+    switch (*dst) {
+    case 1: // lz decoder, 2kb window
+        func_00255C18(dst, buff, headSize, D_00595AD0);
+        return;
+    case 2: // lz decoder, 4kb window
+        func_00255DE8(dst, buff, headSize, D_00595AD0);
+        return;
+    default:
+        return;
+    }
+}
 
 void ReadQCallbackCall(ReadQEntry* arg0) { func_00171510(D_00591AD0, 0x4000, arg0->callback, arg0); }
 
