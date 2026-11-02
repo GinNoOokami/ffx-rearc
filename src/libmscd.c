@@ -216,7 +216,36 @@ s32 func_00162778(void) {
     return func_00171DF0();
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162838);
+/*?*/ s32 func_00171CD8();
+/*?*/ s32 func_00171D20();
+/*?*/ s32 func_00171D68();
+/*?*/ s32 func_00171DB0();
+/*?*/ s32 func_00171DF8();
+/*?*/ s32 func_00171E40();
+/*?*/ s32 func_00171E88();
+
+s32 func_00162838(void) {
+    if (func_001BD228() == 0) {
+        switch (func_002D9460()) {
+        case 2:
+            return func_00171E40();
+        case 3:
+            return func_00171CD8();
+        case 4:
+            return func_00171D20();
+        case 5:
+            return func_00171E88();
+        case 6:
+            return func_00171DB0();
+        default:
+        case 0:
+            return func_00171D68();
+        case 1:
+            return func_00171DF8();
+        }
+    }
+    return func_00171DF8();
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001628F8);
 
