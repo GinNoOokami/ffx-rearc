@@ -121,6 +121,24 @@ extern char D_00595AF0[];
 extern char dbg_line_buff[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
 extern char dbg_filter[];
 
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001625F8);
+
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001626B8);
+
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162778);
+
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162838);
+
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001628F8);
+
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_001629B8);
+
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162A78);
+
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162B38);
+
+INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00162BF8);
+
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
 void func_00162CC8(void) {

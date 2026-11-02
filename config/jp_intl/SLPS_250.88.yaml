@@ -56,7 +56,7 @@ segments:
     - [0x000000, asm, text]
     - [0x01D230, c, main/11D230]
     - [0x01D740, asm, 11D740]
-    - [0x062CB8, c, libmscd]
+    - [0x0625F8, c, libmscd]
     - [0x065E98, asm, 165E98]
     - [0x154830, c, archive/decode]
     - [0x154958, c, dbg/read_debug]
@@ -68,6 +68,8 @@ segments:
     - [0x226E20, data, 326E20]
     - [0x4698E8, .rodata, main/11D230]
     - [0x469950, rodata, 569950]
+    - [0x46B600, .rodata, libmscd] # covers just jmptbl data for now til file matches
+    - [0x46B720, rodata, 56B720]
     - [0x4733C8, .rodata, archive/decode]
     - [0x4733E0, .rodata, dbg/read_debug]
     - [0x473430, rodata, 573430]
