@@ -6,6 +6,7 @@
 #include "common.h"
 
 #define READ_Q_CNT 64
+#define READ_Q_PATH_SIZE 128
 
 /* Read queue entry: 64 entries at read_q (= archive state +0x98), stride 0x38. */
 typedef struct {
@@ -60,13 +61,13 @@ typedef struct {
     /* 0x6C */ u32 (*unk6C)(s32, s32);            // GroupFileLsnGet
     /* 0x70 */ s32 busy;                          // 1 while an entry is being processed, 0 after
     /* 0x74 */ s32 busy_index;                    // index of that entry in read_q, -1 after
-    /* 0x78 */ s32 (*unk78)(void);                // func_00164628 / func_00255880
-    /* 0x7C */ void (*unk7C)(s32);                // func_00165378
-    /* 0x80 */ s32 (*unk80)();                    // ReadQFileStatGet
-    /* 0x84 */ void (*unk84)(s32);                // func_001653A0
-    /* 0x88 */ s32 (*unk88)();                    // func_00165548 / func_002558A0
-    /* 0x8C */ s32 (*unk8C)();                    // func_00165528 / func_002558A8
-    /* 0x90 */ s32 (*unk90)();                    // func_00164320
+    /* 0x78 */ s32 (*unk78)(s32, void*, u32, void*, ReadQEntry*); // func_00164628 / func_00255880
+    /* 0x7C */ void (*unk7C)(s32);                                // func_00165378
+    /* 0x80 */ s32 (*unk80)();                                    // ReadQFileStatGet
+    /* 0x84 */ void (*unk84)(s32);                                // func_001653A0
+    /* 0x88 */ s32 (*unk88)();                                    // func_00165548 / func_002558A0
+    /* 0x8C */ s32 (*unk8C)();                                    // func_00165528 / func_002558A8
+    /* 0x90 */ s32 (*unk90)();                                    // func_00164320
     /* 0x94 */ s32 unk94;
 } SaFile; // size: 0x98
 
@@ -111,6 +112,6 @@ extern volatile u8 D_0030DAB4;
 extern ReadQEntry* D_0057C700;
 extern SaFile sa_file;
 extern ReadQEntry read_q[READ_Q_CNT];
-extern char read_q_path[READ_Q_CNT][128];
+extern char read_q_path[READ_Q_CNT][READ_Q_PATH_SIZE];
 
 #endif

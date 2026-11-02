@@ -114,6 +114,7 @@ extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
 extern char D_0056B778[]; // "sa_file_read_init!=0"
+extern char D_0056B7B8[]; // "DVD FILE"
 extern char D_0056B790[]; // "q_cnt != READ_Q_CNT"
 extern char D_0056B800[]; // "read_task_buff != NULL"
 extern char D_0056B818[]; // "0"
@@ -922,7 +923,69 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164040);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164320);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164628);
+// Queues a read of size bytes at lsn into buffer; callback (if set) runs when it completes.
+// The entry's unkC..unk18 are copied from arg4, or zeroed if NULL. In mode 0 its path reads
+// "DVD FILE", as it has no file name. Returns the request number.
+s32 func_00164628(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) {
+    ReadQEntry* entry;
+    char* src;
+    s32 q_cnt;
+    s32 i;
+
+    for (q_cnt = 0; q_cnt < READ_Q_CNT; q_cnt++) {
+        if (read_q[q_cnt].active == 0) {
+            break;
+        }
+    }
+
+    if (q_cnt == READ_Q_CNT) {
+        dbgAssert(D_0056B790, D_0056B720, 0x604);
+    }
+
+    entry = &read_q[q_cnt];
+    entry->active = 1;
+    entry->buff.p = buffer;
+    entry->no = -1;
+    entry->group = -1;
+
+    if (arg4 == NULL) {
+        entry->unkC = 0;
+        entry->unk10 = 0;
+        entry->unk14 = 0;
+        entry->unk18 = 0;
+    } else {
+        entry->unkC = arg4->unkC;
+        entry->unk10 = arg4->unk10;
+        entry->unk14 = arg4->unk14;
+        entry->unk18 = arg4->unk18;
+    }
+
+    entry->callback = callback;
+
+    if (++read_q_req_no > 0xFFFF) {
+        read_q_req_no = 1;
+    }
+
+    entry->req_no = read_q_req_no;
+    entry->size = size;
+    entry->disc_size = size;
+    entry->lsn = lsn;
+
+    src = D_0056B7B8;
+
+    if (sa_file.mode == 0) { // developer mode only
+        for (i = 0; i < READ_Q_PATH_SIZE; i++) {
+            if ((read_q_path[q_cnt][i] = src[i]) == '\0') {
+                break;
+            }
+        }
+    }
+
+    entry->compressed = 0;
+    entry->unk34 = 0;
+
+    return read_q_req_no;
+}
 
 void ReadQWait(void) {
     char* msg;

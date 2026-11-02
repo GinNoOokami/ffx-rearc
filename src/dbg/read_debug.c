@@ -465,7 +465,7 @@ void* func_00255840(void) {
 
 /*?*/ s32 func_00164628(); /* extern */
 
-s32 func_00255880(void) { return func_00164628(); }
+s32 func_00255880(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) { return func_00164628(); }
 
 s32 func_002558A0(void) { return -1; }
 
