@@ -54,7 +54,8 @@ sceCdRMode* func_0015B320();
 void func_0015B330(void);
 s32 func_0015B830(void);
 s32 func_001636F0(void);
-void func_00163E90();
+void func_00163950(SaFile*, ReadQEntry*, s32);
+void func_00163D20(SaFile*, ReadQEntry*, s32);
 s32 func_00164320();
 s32 func_00164628();
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
@@ -943,7 +944,58 @@ end:
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163D20);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163E90);
+// Release read loop (sa_file.unk68): serves the read queue forever, passing each active entry to func_00163950
+// (unk30 == 0: read, or cancel if flagged) or func_00163D20 (unk30 == 1), then waiting a frame.
+void func_00163E90(void) {
+    SaFile* archive = SaFileGet();
+    ReadQEntry* entry;
+    s32 i;
+    s32 j;
+
+    while (1) {
+        for (i = 0; i < READ_Q_CNT; i++) {
+            entry = &read_q[i];
+
+            if (entry->active == 0) {
+                continue;
+            }
+
+            switch (entry->unk30) {
+            case 0:
+                if (entry->cancel != 0) {
+                    while (sceCdBreak() == 0) {
+                        func_0017133C(1);
+                    }
+
+                    entry->cancel = 0;
+                    func_00162DE0(archive->busy_index);
+
+                    for (j = 0; j < READ_Q_CNT; j++) {
+                        if (read_q[j].active != 0) {
+                            break;
+                        }
+                    }
+
+                    if (j == READ_Q_CNT) {
+                        archive->busy = 0;
+                        archive->host_fd = -1;
+                        func_0015B330();
+                    }
+                    archive->busy_index = -1;
+                } else {
+                    func_00163950(archive, entry, i);
+                }
+                break;
+
+            case 1:
+                func_00163D20(archive, entry, i);
+                break;
+            }
+        }
+
+        func_0017133C(1);
+    }
+}
 
 s16 func_00163FD0(s32 arg0) {
     s16 fid;

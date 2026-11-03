@@ -26,7 +26,7 @@ typedef struct {
     /* 0x24 */ s32 req_no;
     /* 0x28 */ s32 group;     // ExFileFind's first argument; func_00163450's fifth
     /* 0x2C */ u32 disc_size; // size: rounded to and masked by 0x800
-    /* 0x30 */ u8 unk30;
+    /* 0x30 */ s8 unk30;
     /* 0x31 */ s8 active;     // 0: entry skipped; cleared at the end
     /* 0x32 */ s8 cancel;     // nonzero: func_00162DE0(index) instead
     /* 0x33 */ s8 compressed; // selects the copy path
