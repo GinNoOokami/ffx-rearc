@@ -8,6 +8,9 @@
 #define READ_Q_CNT 64
 #define READ_Q_PATH_SIZE 128
 
+/* Request type of a read queue entry: read data, or only seek to its LSN. */
+typedef enum { READ_Q_TYPE_READ, READ_Q_TYPE_SEEK } ReadQType;
+
 /* Read queue entry: 64 entries at read_q (= archive state +0x98), stride 0x38. */
 typedef struct {
     /* 0x00 */ u32 size;     // read size (sceRead); compared unsigned with disc_size
@@ -20,27 +23,27 @@ typedef struct {
     /* 0x1C */ s32 lsn;        // sector: lsn << 11 is the seek offset
     /* 0x20 */ void* callback; // nonzero: ReadQCallbackCall(entry) is called
     /* 0x24 */ s32 req_no;
-    /* 0x28 */ s32 group;     // ExFileFind's first argument; func_00163450's fifth
+    /* 0x28 */ s32 group;     // ExFileFind's first argument; CdReadRetry's fifth
     /* 0x2C */ u32 disc_size; // size: rounded to and masked by 0x800
-    /* 0x30 */ s8 unk30;
+    /* 0x30 */ s8 type;       // ReadQType
     /* 0x31 */ s8 active;     // 0: entry skipped; cleared at the end
-    /* 0x32 */ s8 cancel;     // nonzero: func_00162DE0(index) instead
+    /* 0x32 */ s8 cancel;     // nonzero: ReadQEntryClear(index) instead
     /* 0x33 */ s8 compressed; // selects the copy path
     /* 0x34 */ s8 unk34;
     /* 0x35 */ u8 pad35[0x38 - 0x35];
 } ReadQEntry; // size: 0x38
 
-/* Archive state (sa_file). Function slots are filled by func_00165588; the
+/* Archive state (sa_file). Function slots are filled by SaFileModeSet; the
    comments give the release function, and the host one from read_debug.c where
-   func_002558B0 overrides the slot. "()" = parameters not known yet. */
+   HostModeSet overrides the slot. "()" = parameters not known yet. */
 typedef struct {
-    /* 0x00 */ s32 (*unk0)();      // func_00164040
-    /* 0x04 */ s32 (*unk4)(s32);   // FileLsnGet / func_00254EF0
+    /* 0x00 */ s32 (*unk0)();      // ReadQFileAdd
+    /* 0x04 */ s32 (*unk4)(s32);   // FileLsnGet / HostFileLsnGet
     /* 0x08 */ s32 (*unk8)();      // ReadQSync
-    /* 0x0C */ void (*unkC)(s32);  // func_00165588 (this table's own init)
-    /* 0x10 */ s16 (*unk10)(s32);  // func_00163FD0
-    /* 0x14 */ s32 (*unk14)(s32);  // FileSizeGet / func_00254E08
-    /* 0x18 */ s32 mode;           // func_00165588's argument; 0 = host mode
+    /* 0x0C */ void (*unkC)(s32);  // SaFileModeSet (this table's own init)
+    /* 0x10 */ s16 (*unk10)(s32);  // GroupSet
+    /* 0x14 */ s32 (*unk14)(s32);  // FileSizeGet / HostFileSizeGet
+    /* 0x18 */ s32 mode;           // SaFileModeSet's argument; 0 = host mode
     /* 0x1C */ void (*unk1C)(s32); // ReadQCancel
     /* 0x20 */ s32 id_base;
     /* 0x24 */ s32 group;
@@ -55,22 +58,22 @@ typedef struct {
     /* 0x48 */ s32 unk48;      // func_00162B38 (130): cdrom.fid's size?
     /* 0x4C */ s32 unk4C;      // func_00162BF8 (2)
     /* 0x50 */ s32 unk50;
-    /* 0x54 */ void* (*unk54)(const char*, s32*); // func_00162D30 / func_00254F40
-    /* 0x58 */ const char* (*unk58)(s32);         // func_00164A10 / func_00254DA8
-    /* 0x5C */ s32 host_fd;                       // file descriptor during a host read (func_00255158); -1 when idle
-    /* 0x60 */ void (*unk60)(const char*);        // func_00162D18 / func_002556A0
-    /* 0x64 */ void (*unk64)(void);               // func_00162E48
-    /* 0x68 */ void (*unk68)();                   // func_00163E90 / func_00255158
-    /* 0x6C */ u32 (*unk6C)(s32, s32);            // GroupFileLsnGet
-    /* 0x70 */ s32 busy;                          // 1 while an entry is being processed, 0 after
-    /* 0x74 */ s32 busy_index;                    // index of that entry in read_q, -1 after
-    /* 0x78 */ s32 (*unk78)(s32, void*, u32, void*, ReadQEntry*); // func_00164628 / func_00255880
+    /* 0x54 */ void* (*pc_load)(const char*, s32*); // func_00162D30 / HostPcLoad
+    /* 0x58 */ const char* (*unk58)(s32);           // func_00164A10 / FileNameGet
+    /* 0x5C */ s32 host_fd;                         // file descriptor during a host read (HostReadQServe); -1 when idle
+    /* 0x60 */ void (*pc_file_tbl_set)(const char*);              // func_00162D18 / HostPcFileTblSet
+    /* 0x64 */ void (*unk64)(void);                               // ReadQInit
+    /* 0x68 */ void (*unk68)();                                   // ReadQServe / HostReadQServe
+    /* 0x6C */ u32 (*unk6C)(s32, s32);                            // GroupFileLsnGet
+    /* 0x70 */ s32 busy;                                          // 1 while an entry is being processed, 0 after
+    /* 0x74 */ s32 busy_index;                                    // index of that entry in read_q, -1 after
+    /* 0x78 */ s32 (*unk78)(s32, void*, u32, void*, ReadQEntry*); // ReadQLsnAdd / HostReadQLsnAdd
     /* 0x7C */ void (*unk7C)(s32);                                // func_00165378
     /* 0x80 */ s32 (*unk80)();                                    // ReadQFileStatGet
     /* 0x84 */ void (*unk84)(s32);                                // func_001653A0
-    /* 0x88 */ s32 (*unk88)();                                    // func_00165548 / func_002558A0
-    /* 0x8C */ s32 (*unk8C)();                                    // func_00165528 / func_002558A8
-    /* 0x90 */ s32 (*unk90)();                                    // func_00164320
+    /* 0x88 */ s32 (*unk88)();                                    // ReadQFileSeekAdd / HostReadQFileSeekAdd
+    /* 0x8C */ s32 (*unk8C)();                                    // ReadQLsnSeekAdd / HostReadQLsnSeekAdd
+    /* 0x90 */ s32 (*unk90)();                                    // ReadQFilePartAdd
     /* 0x94 */ s32 unk94;
 } SaFile; // size: 0x98
 
@@ -88,14 +91,14 @@ typedef struct {
 } ExFile;                       // size: 0x34
 
 SaFile* SaFileGet(void);
-char* func_00162D48(void);
-void func_00162DE0(s32);
+char* ScratchBuffGet(void);
+void ReadQEntryClear(s32);
 s32 FileSizeGet(s32);
 s32 TblLsnGet(s32);
-s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group);
-void func_00163768(ReadQEntry*);
+s32 CdReadRetry(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group);
+void ReadQEntryUnpack(ReadQEntry*);
 void ReadQCallbackCall(ReadQEntry*);
-s32 func_00164628(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4);
+s32 ReadQLsnAdd(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4);
 ExFile* ExFileFind(s32, s32);
 s32 ExFileSizeGet(s32, s32);
 

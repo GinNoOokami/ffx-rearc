@@ -16,7 +16,7 @@ extern fnDecodeHandler func_00255928;
 extern fnDecodeHandler func_00255AA0;
 
 // The same decoders with an end-of-input check, for input split between src (len bytes) and
-// tail; used by func_00163768:
+// tail; used by ReadQEntryUnpack:
 void func_00255C18(u8* src, void* dst, s32 len, char* tail);
 void func_00255DE8(u8* src, void* dst, s32 len, char* tail);
 

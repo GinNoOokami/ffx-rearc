@@ -3,12 +3,12 @@
 
 #include "common.h"
 
-void func_00254958(void);
-const char* func_00254DA8(s32);
-s32 func_00254E08(s32);
-void func_002556F8(void);
-u8* func_00255800(void);
-void* func_00255840(void);
-void func_002558B0(void);
+void FileNameChgInit(void);
+const char* FileNameGet(s32);
+s32 HostFileSizeGet(s32);
+void HostIndexLoad(void);
+u8* HostSizeTblLoad(void);
+void* HostModuleSizeTblLoad(void);
+void HostModeSet(void);
 
 #endif

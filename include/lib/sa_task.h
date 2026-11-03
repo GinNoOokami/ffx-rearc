@@ -4,7 +4,7 @@
 #include "common.h"
 
 /* Task object from sa_task.c (read_task_buff): a buffer allocated and set up by
- * func_00171C78(1) in func_00164A70; stub, only slot 0 so far.
+ * func_00171C78(1) in SaFileReadInit; stub, only slot 0 so far.
  * Known from its fill: +0x0/+0x4/+0x8 are per-group function slots, +0x8 starts a task. */
 typedef struct {
     /* 0x00 */ void (*unk0)(void); // called with no args, then func_002D3C80(0) in the wait loop

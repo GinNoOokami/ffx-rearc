@@ -10,58 +10,73 @@
 
 #define FILE_NAME_CHG_TBL_CNT 16
 
-extern s8 D_00326E1C;
-extern const char* D_006A2C90[FILE_NAME_CHG_TBL_CNT];
-extern const char* D_006A2CD0[FILE_NAME_CHG_TBL_CNT];
+extern char cddata_mdg_path[];       // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
+extern char cddata_fid_path[];       // host:/ffx/proj/battle/jp/cddata/cdrom.fid
+extern char cddata_fnd_path[];       // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
+extern char cdidx_mdg_path[];        // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
+extern char cdidx_fid_path[];        // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
+extern char cdidx_sizetbl_path[];    // host:/ffx/proj/prog/cdidx/jp/sizetbl.bin
+extern char cdidx_modulesize_path[]; // host:/ffx/proj/prog/cdidx/jp/modulesize.bin
+extern s8 file_name_chg_init;
+extern s8 D_00565DF0;
+extern const char* file_name_chg_from[FILE_NAME_CHG_TBL_CNT];
+extern const char* file_name_chg_to[FILE_NAME_CHG_TBL_CNT];
+extern char file_name_buff[0x200]; // name buffer, size inferred
+extern char D_006A2F10[];
 
+// rodata string literals
 extern char D_00573400[]; // "read_debug.c", emitted by INCLUDE_RODATA
 
-void func_00254958(void) {
+void HostReadQServe(void);
+
+// Clears the file-name change table, the first time only (file_name_chg_init).
+void FileNameChgInit(void) {
     s32 i;
 
-    if (D_00326E1C == 0) {
-        D_00326E1C = 1;
-        for (i = 0; i < 16; i++) {
-            D_006A2C90[i] = 0;
-            D_006A2CD0[i] = 0;
+    if (file_name_chg_init == 0) {
+        file_name_chg_init = 1;
+        for (i = 0; i < FILE_NAME_CHG_TBL_CNT; i++) {
+            file_name_chg_from[i] = NULL;
+            file_name_chg_to[i] = NULL;
         }
     }
 }
 
-s32 func_002549A8(const char* arg0, const char* arg1) {
+// Adds a name change: text matching arg0 in a name from TblNameGet is replaced by arg1.
+// Returns its slot.
+s32 FileNameChgAdd(const char* arg0, const char* arg1) {
     s32 i = 0;
 
-    if (D_006A2C90[0] != NULL) {
-        for (i = 0; i < 16; i++) {
-            if (D_006A2C90[i] == 0) {
+    if (file_name_chg_from[0] != NULL) {
+        for (i = 0; i < FILE_NAME_CHG_TBL_CNT; i++) {
+            if (file_name_chg_from[i] == NULL) {
                 break;
             }
         }
     }
 
-    if (i == 16) {
+    if (i == FILE_NAME_CHG_TBL_CNT) {
         dbgAssert("i!=FILE_NAME_CHG_TBL_CNT", D_00573400, 0x50);
     }
 
-    D_006A2C90[i] = arg0;
-    D_006A2CD0[i] = arg1;
+    file_name_chg_from[i] = arg0;
+    file_name_chg_to[i] = arg1;
     return i;
 }
 
-void func_00254A88(s32 arg0) {
-    D_006A2C90[arg0] = 0;
-    D_006A2CD0[arg0] = 0;
+// Removes name change arg0.
+void FileNameChgDel(s32 arg0) {
+    file_name_chg_from[arg0] = NULL;
+    file_name_chg_to[arg0] = NULL;
 }
 
-// getFileTbl
-void* func_00254AB0(void) { return SaFileGet()->name_tbl; }
-
-extern char file_name_buff[0x200]; // name buffer, size inferred
+// Returns the cdrom.fnd name table (sa_file.name_tbl), NULL if none is loaded.
+void* NameTblGet(void) { return SaFileGet()->name_tbl; }
 
 // Returns file `index`'s name from the cdrom.fnd table, expanded into a static buffer:
 // "$USER$" becomes func_0011A480()'s string, and a prefix found in the name-change table
-// (func_002549A8) becomes its replacement. NULL if there is no table or no such name.
-const char* func_00254AD0(s32 index) {
+// (FileNameChgAdd) becomes its replacement. NULL if there is no table or no such name.
+const char* TblNameGet(s32 index) {
     const char* name = NULL;
     const char* user;
     const char* str;
@@ -74,7 +89,7 @@ const char* func_00254AD0(s32 index) {
 
     // fileTbl[0] = entry count, fileTbl[1 + n] = offset of name n from the table start; a name
     // runs to the next offset, and an entry with no length has no name.
-    fileTbl = func_00254AB0();
+    fileTbl = NameTblGet();
     if (fileTbl != NULL && index < fileTbl[0]) {
         s32 offset = fileTbl[index + 1];
 
@@ -100,16 +115,16 @@ const char* func_00254AD0(s32 index) {
                 // A match doesn't end the search: later entries are tried at the new position,
                 // and a second match overwrites the last character of the first replacement.
                 for (n = 0; n < FILE_NAME_CHG_TBL_CNT; n++) {
-                    if (D_006A2C90[n] == NULL) {
+                    if (file_name_chg_from[n] == NULL) {
                         continue;
                     }
 
-                    str = D_006A2C90[n];
+                    str = file_name_chg_from[n];
                     for (k = 0; name[i + k] != '\0' && str[k] != '\0' && name[i + k] == str[k]; k++) {
                     }
 
                     if (str[k] == '\0') {
-                        str = D_006A2CD0[n];
+                        str = file_name_chg_to[n];
                         for (m = 0; file_name_buff[j++] = str[m], str[m] != '\0'; m++) {
                         }
                         j -= 2;
@@ -125,11 +140,15 @@ const char* func_00254AD0(s32 index) {
     return name;
 }
 
-const char* func_00254DA8(s32 arg0) { return func_00254AD0(SaFileGet()->id_base + arg0); }
+// Name of file id in the current group (TblNameGet).
+const char* FileNameGet(s32 arg0) { return TblNameGet(SaFileGet()->id_base + arg0); }
 
-const char* func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(sa_file.group_tbl[arg0] + arg1); }
+// Name of file arg1 in group arg0 (TblNameGet).
+const char* GroupFileNameGet(s32 arg0, s32 arg1) { return TblNameGet(sa_file.group_tbl[arg0] + arg1); }
 
-s32 func_00254E08(s32 id) {
+// Host slot +0x14: the ex-file size if there is one; else FileSizeGet when D_00565DF4 is set,
+// else the host file's size rounded up to 16 bytes.
+s32 HostFileSizeGet(s32 id) {
     SaFile* state = SaFileGet();
     s32 size = ExFileSizeGet(sa_file.group, id);
     s32 index;
@@ -142,9 +161,9 @@ s32 func_00254E08(s32 id) {
         size = FileSizeGet(id);
     } else {
         index = state->id_base + id;
-        if (func_00254AB0() != NULL) {
-            const char* name = func_00254AD0(index);
-            if (name != 0) {
+        if (NameTblGet() != NULL) {
+            const char* name = TblNameGet(index);
+            if (name != NULL) {
                 fd = sceOpen(name, SCE_RDONLY);
                 if (fd < 0) {
                     return 0;
@@ -158,25 +177,26 @@ s32 func_00254E08(s32 id) {
     return size;
 }
 
-s32 func_00254EF0(s32 arg0) { return TblLsnGet(sa_file.id_base + arg0); }
+// Host slot +0x04: the same lookup as FileLsnGet.
+s32 HostFileLsnGet(s32 arg0) { return TblLsnGet(sa_file.id_base + arg0); }
 
 INCLUDE_RODATA("asm/jp_intl/nonmatchings/lib/read_debug", D_00573400);
 
 // Assert an invalid fd
-void func_00254F18(s32 fd, const char* path) {
+void FdCheck(s32 fd, const char* path) {
     if (fd < 0) {
         dbgAssert("fd >= 0", D_00573400, 0x14D);
     }
 }
 
 // Debug PCload
-void* func_00254F40(const char* path, s32* arg1) {
+void* HostPcLoad(const char* path, s32* arg1) {
     void* block;
     s32 size;
     s32 fd;
 
     fd = sceOpen(path, SCE_RDONLY);
-    func_00254F18(fd, path);
+    FdCheck(fd, path);
 
     size = sceLseek(fd, 0, SCE_SEEK_END);
     sceLseek(fd, 0, SCE_SEEK_SET);
@@ -196,15 +216,13 @@ void* func_00254F40(const char* path, s32* arg1) {
     return block;
 }
 
-extern s8 D_00565DF0;
-
 void* func_00255020(const char* path, s32* arg1) {
     s32 size;
     s32 fd;
     void* block;
 
     fd = sceOpen(path, SCE_RDONLY);
-    func_00254F18(fd, path);
+    FdCheck(fd, path);
 
     size = sceLseek(fd, 0, SCE_SEEK_END);
     sceLseek(fd, 0, SCE_SEEK_SET);
@@ -227,8 +245,6 @@ void* func_00255020(const char* path, s32* arg1) {
     return block;
 }
 
-extern char D_006A2F10[];
-
 // Not matching yet. With NON_MATCHING the C below is one instruction off, but only because of
 // three changes that steer the compiler and are unlikely to be in the original:
 // - `goto copy`: the target shares one FlushCache/memcpy tail between the two reads of the
@@ -242,11 +258,11 @@ extern char D_006A2F10[];
 //   keeps the D_0030DAB4 = 1 / D_0057C700 = entry store order, as in the target.
 // Still different: in the secs == 0 read, `rest` lands in the call's delay slot; the target
 // sets a3 = sp there and computes rest after the call. The same C without the three changes
-// is 23 instructions off. The release counterpart func_00163950 has the same read logic.
+// is 23 instructions off. The release counterpart ReadQEntryRead has the same read logic.
 #ifndef NON_MATCHING
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/read_debug", func_00255158);
+INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/read_debug", HostReadQServe);
 #else
-void func_00255158(void) {
+void HostReadQServe(void) {
     sceCdRMode mode;
     s32 stat;
     SaFile* archive;
@@ -261,7 +277,7 @@ void func_00255158(void) {
     s32 one;
 
     archive = SaFileGet();
-    buf = func_00162D48();
+    buf = ScratchBuffGet();
 
     for (i = 0; i < 64; i++) {
         entry = &read_q[i];
@@ -269,7 +285,7 @@ void func_00255158(void) {
             continue;
         }
         if (entry->cancel != 0) {
-            func_00162DE0(i);
+            ReadQEntryClear(i);
             continue;
         }
 
@@ -304,30 +320,30 @@ void func_00255158(void) {
                 secs = size / 2048;
                 if (secs != 0 && size > 0) {
                     rest = secs * 2048;
-                    func_00163450(entry->lsn, size, entry->buffer, &mode, entry->group);
+                    CdReadRetry(entry->lsn, size, entry->buffer, &mode, entry->group);
                     FlushCache(0);
                     memcpy(entry->buffer, (char*)entry->buffer + 5, rest);
-                    func_00163450(entry->lsn + secs, 0x800, buf, &mode, entry->group);
+                    CdReadRetry(entry->lsn + secs, 0x800, buf, &mode, entry->group);
                     FlushCache(0);
                     size -= rest;
                     memcpy((char*)entry->buffer + rest, buf, size - 5);
                 } else {
-                    func_00163450(entry->lsn, 0x800, buf, &mode, entry->group);
+                    CdReadRetry(entry->lsn, 0x800, buf, &mode, entry->group);
                     FlushCache(0);
                     memcpy(entry->buffer, buf + 5, size - 5);
                 }
             } else {
                 secs = size / 2048;
                 if (secs != 0) {
-                    func_00163450(entry->lsn, entry->disc_size, entry->buffer, &mode, entry->group);
+                    CdReadRetry(entry->lsn, entry->disc_size, entry->buffer, &mode, entry->group);
                     rest = size & 0x7FF;
                     if (rest != 0) {
-                        func_00163450(entry->lsn + secs, 0x800, buf, &mode, entry->group);
+                        CdReadRetry(entry->lsn + secs, 0x800, buf, &mode, entry->group);
                         goto copy;
                     }
                     FlushCache(0);
                 } else {
-                    func_00163450(entry->lsn, 0x800, buf, &mode, entry->group);
+                    CdReadRetry(entry->lsn, 0x800, buf, &mode, entry->group);
                     rest = size & 0x7FF;
                 copy:
                     FlushCache(0);
@@ -345,7 +361,7 @@ void func_00255158(void) {
                             func_0017133C(1);
                         }
                     } else {
-                        func_00163768(entry);
+                        ReadQEntryUnpack(entry);
                     }
                 }
             }
@@ -354,7 +370,7 @@ void func_00255158(void) {
         } else {
             if (entry->lsn != 0) {
                 archive->host_fd = sceOpen(read_q_path[i], SCE_RDONLY);
-                func_00254F18(archive->host_fd, read_q_path[i]);
+                FdCheck(archive->host_fd, read_q_path[i]);
                 sceLseek(archive->host_fd, entry->lsn << 11, SCE_SEEK_SET);
                 FlushCache(0);
                 sceRead(archive->host_fd, entry->buffer, entry->size);
@@ -362,7 +378,7 @@ void func_00255158(void) {
                 FlushCache(0);
             } else {
                 archive->host_fd = sceOpen(read_q_path[i], SCE_RDONLY | SCE_NOWAIT);
-                func_00254F18(archive->host_fd, read_q_path[i]);
+                FdCheck(archive->host_fd, read_q_path[i]);
                 FlushCache(0);
                 sceRead(archive->host_fd, entry->buffer, entry->size);
                 while (sceIoctl(archive->host_fd, SCE_FS_EXECUTING, &stat), stat != 0) {
@@ -385,20 +401,16 @@ void func_00255158(void) {
 #endif
 
 // Debug PcFileTblSet
-void func_002556A0(const char* path) {
+void HostPcFileTblSet(const char* path) {
     if (sa_file.name_tbl != NULL) {
         func_0011D590(sa_file.name_tbl, 10);
     }
     sa_file.name_tbl = func_00255020(path, NULL);
 }
 
-extern char cddata_mdg_path[]; // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
-extern char cddata_fid_path[]; // host:/ffx/proj/battle/jp/cddata/cdrom.fid
-extern char cddata_fnd_path[]; // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
-extern char cdidx_mdg_path[];  // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
-extern char cdidx_fid_path[];  // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
-
-void func_002556F8(void) {
+// Loads the index tables from host paths with the region code patched in: cdrom.mdg/.fid/.fnd from
+// cddata, or with D_00565DF4 set cdrom.mdg/.fid from cdidx and no name table.
+void HostIndexLoad(void) {
     char region[2];
 
     func_001ACEE8(region);
@@ -411,8 +423,8 @@ void func_002556F8(void) {
         cddata_fnd_path[0x16] = region[0];
         cddata_fnd_path[0x17] = region[1];
 
-        sa_file.file_tbl = func_00254F40(cddata_mdg_path, NULL);
-        sa_file.group_tbl = func_00254F40(cddata_fid_path, NULL);
+        sa_file.file_tbl = HostPcLoad(cddata_mdg_path, NULL);
+        sa_file.group_tbl = HostPcLoad(cddata_fid_path, NULL);
         sa_file.name_tbl = func_00255020(cddata_fnd_path, NULL);
     } else {
         cdidx_mdg_path[0x1A] = region[0];
@@ -420,15 +432,14 @@ void func_002556F8(void) {
         cdidx_fid_path[0x1A] = region[0];
         cdidx_fid_path[0x1B] = region[1];
 
-        sa_file.file_tbl = func_00254F40(cdidx_mdg_path, NULL);
-        sa_file.group_tbl = func_00254F40(cdidx_fid_path, NULL);
-        sa_file.name_tbl = 0;
+        sa_file.file_tbl = HostPcLoad(cdidx_mdg_path, NULL);
+        sa_file.group_tbl = HostPcLoad(cdidx_fid_path, NULL);
+        sa_file.name_tbl = NULL;
     }
 }
 
-extern char cdidx_sizetbl_path[]; // host:/ffx/proj/prog/cdidx/jp/sizetbl.bin
-
-u8* func_00255800(void) {
+// Loads sizetbl.bin from the host (cdidx path, region code patched in).
+u8* HostSizeTblLoad(void) {
     char region[2];
 
     func_001ACEE8(region);
@@ -436,12 +447,11 @@ u8* func_00255800(void) {
     cdidx_sizetbl_path[0x1A] = region[0];
     cdidx_sizetbl_path[0x1B] = region[1];
 
-    return func_00254F40(cdidx_sizetbl_path, NULL);
+    return HostPcLoad(cdidx_sizetbl_path, NULL);
 }
 
-extern char cdidx_modulesize_path[]; // host:/ffx/proj/prog/cdidx/jp/modulesize.bin
-
-void* func_00255840(void) {
+// Loads modulesize.bin from the host (cdidx path, region code patched in).
+void* HostModuleSizeTblLoad(void) {
     char region[2];
 
     func_001ACEE8(region);
@@ -449,46 +459,47 @@ void* func_00255840(void) {
     cdidx_modulesize_path[0x1A] = region[0];
     cdidx_modulesize_path[0x1B] = region[1];
 
-    return func_00254F40(cdidx_modulesize_path, NULL);
+    return HostPcLoad(cdidx_modulesize_path, NULL);
 }
 
-s32 func_00255880(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) {
-    return func_00164628(lsn, buffer, size, callback, arg4);
+// Host slot +0x78: passes straight to ReadQLsnAdd.
+s32 HostReadQLsnAdd(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) {
+    return ReadQLsnAdd(lsn, buffer, size, callback, arg4);
 }
 
-s32 func_002558A0(void) { return -1; }
+// Host slot +0x88: a stub that returns -1.
+s32 HostReadQFileSeekAdd(void) { return -1; }
 
-s32 func_002558A8(void) { return -1; }
-
-/*?*/ void func_00255158();
+// Host slot +0x8C: a stub that returns -1.
+s32 HostReadQLsnSeekAdd(void) { return -1; }
 
 // Installs this file's loader functions into the archive state (sa_file).
-// func_00165588(arg) stores arg at +0x18; with arg == 0 it calls this function,
+// SaFileModeSet(arg) stores arg at +0x18; with arg == 0 it calls this function,
 // otherwise it stores the release versions into the same nine slots:
 //
-//   slot   debug (here)    release         type (from the debug versions)
-//   +0x04  func_00254EF0   FileLsnGet   s32 (*)(s32)
-//   +0x14  func_00254E08   FileSizeGet   s32 (*)(s32)
-//   +0x54  func_00254F40   func_00162D30   void* (*)(const char*, s32*)
-//   +0x58  func_00254DA8   func_00164A10   const char* (*)(s32)
-//   +0x60  func_002556A0   func_00162D18   void (*)(const char*)
-//   +0x68  func_00255158   func_00163E90   ?
-//   +0x78  func_00255880   func_00164628   s32 (*)(void)
-//   +0x88  func_002558A0   func_00165548   s32 (*)(?)
-//   +0x8C  func_002558A8   func_00165528   s32 (*)(?)
+//   slot   host (here)            release            type
+//   +0x04  HostFileLsnGet         FileLsnGet         s32 (*)(s32)
+//   +0x14  HostFileSizeGet        FileSizeGet        s32 (*)(s32)
+//   +0x54  HostPcLoad             func_00162D30      void* (*)(const char*, s32*)
+//   +0x58  FileNameGet            func_00164A10      const char* (*)(s32)
+//   +0x60  HostPcFileTblSet       func_00162D18      void (*)(const char*)
+//   +0x68  HostReadQServe         ReadQServe         void (*)(void)
+//   +0x78  HostReadQLsnAdd        ReadQLsnAdd        s32 (*)(s32, void*, u32, void*, ReadQEntry*)
+//   +0x88  HostReadQFileSeekAdd   ReadQFileSeekAdd   s32 (*)(s32, s32)
+//   +0x8C  HostReadQLsnSeekAdd    ReadQLsnSeekAdd    s32 (*)(s32)
 //
-// func_00255880 just calls the release +0x78, and func_00254E08 calls the
+// HostReadQLsnAdd just calls the release +0x78, and HostFileSizeGet calls the
 // release +0x14 when D_00565DF4 != 0. The +0x88/+0x8C stubs only return -1,
 // so their parameters, if any, are not visible here.
 
-void func_002558B0(void) {
-    sa_file.unk14 = func_00254E08;
-    sa_file.unk58 = func_00254DA8;
-    sa_file.unk54 = func_00254F40;
-    sa_file.unk68 = func_00255158;
-    sa_file.unk60 = func_002556A0;
-    sa_file.unk78 = func_00255880;
-    sa_file.unk88 = func_002558A0;
-    sa_file.unk8C = func_002558A8;
-    sa_file.unk4 = func_00254EF0;
+void HostModeSet(void) {
+    sa_file.unk14 = HostFileSizeGet;
+    sa_file.unk58 = FileNameGet;
+    sa_file.pc_load = HostPcLoad;
+    sa_file.unk68 = HostReadQServe;
+    sa_file.pc_file_tbl_set = HostPcFileTblSet;
+    sa_file.unk78 = HostReadQLsnAdd;
+    sa_file.unk88 = HostReadQFileSeekAdd;
+    sa_file.unk8C = HostReadQLsnSeekAdd;
+    sa_file.unk4 = HostFileLsnGet;
 }

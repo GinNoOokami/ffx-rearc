@@ -43,27 +43,27 @@ typedef struct {
 
 extern SaTask* read_task_buff;
 
-s32 func_001636F0(void);
-void func_00163950(SaFile*, ReadQEntry*, s32);
-void func_00163D20(SaFile*, ReadQEntry*, s32);
-s32 func_00164320(s32 id, void* buffer, s32 arg2, u32 size, void* callback, ReadQEntry* arg5);
+s32 CdReadPoll(void);
+void ReadQEntryRead(SaFile*, ReadQEntry*, s32);
+void ReadQEntrySeek(SaFile*, ReadQEntry*, s32);
+s32 ReadQFilePartAdd(s32 id, void* buffer, s32 arg2, u32 size, void* callback, ReadQEntry* arg5);
 void func_00165378(s32);
-s32 func_001653E8(s32 lsn, s32 group, s32 no);
-void func_00165588(s32 mode);
+s32 ReadQSeekAdd(s32 lsn, s32 group, s32 no);
+void SaFileModeSet(s32 mode);
 
 extern s32 read_q_req_no; // Always wraps around to 1, not 0 for some reason
 extern s8 D_0030DA7C;
 extern s8 D_0030DA7E;
 extern s8 sa_file_read_init;
-extern s32 D_0030DA80;
-extern s32 D_0030DA84;
+extern s32 last_read_time;
+extern s32 last_read_size;
 extern Unk0030DA88 demo_desc;
-extern sceCdRMode D_0030DA98;
-extern sceCdRMode D_0030DAA0;
+extern sceCdRMode read_mode;
+extern sceCdRMode retry_mode;
 
 extern s8 D_0030DAA4;
 extern s8 D_0030DAA5;
-extern s32 D_0030DAA8;
+extern s32 cd_retry_cnt;
 extern s32 lsn_base;
 extern s32 ex_file_cnt;
 extern char D_0030DAB8[];
@@ -73,8 +73,8 @@ extern s32 dbg_line_index; // ring buffer index
 extern s8 dbg_pending;     // dirty flag
 extern s8 dbg_out_mode;
 extern s8 dbg_filter_mode; // 1: print only lines starting with dbg_filter; 0: only lines that don't
-extern s8 D_0030DACF;
-extern char* D_0030DCD8;
+extern s8 dbg_printf_hooked;
+extern char* disc_id;
 
 // rodata string literals
 extern char D_0056B720[]; // "libmscd.c"
@@ -103,10 +103,10 @@ extern char D_0056B930[]; // "hdd mount err\n"
 extern char D_0056B940[]; // "host:printf.log"
 extern char D_0056B950[]; // "FFXDEBUG"
 
-extern void* D_0057C704;
+extern void* module_size_tbl;
 extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
-extern char* D_00595AD0;
+extern char* scratch_buff;
 extern s32 cd_read_lsn;
 extern s32 cd_read_size;
 extern void* cd_read_buff;
@@ -326,7 +326,8 @@ s32 func_00162BF8(void) {
 
 void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
 
-void func_00162CC8(void) {
+// Allocates the ex-file table (512 entries), zeroes it and resets ex_file_cnt.
+void ExFileTblInit(void) {
     ex_file_cnt = 0;
     ex_file_tbl = (ExFile*)func_0011D370(512 * sizeof(ExFile), 10, D_0056B720, 0x203);
     memset(ex_file_tbl, 0, 512 * sizeof(ExFile));
@@ -336,12 +337,13 @@ void func_00162D18(const char* path) { dbgAssert(D_0056B730, D_0056B720, 0x20C);
 
 void* func_00162D30(const char* path, s32* unused) { dbgAssert(D_0056B750, D_0056B720, 0x211); }
 
-char* func_00162D48(void) { return D_00595AD0; }
+// Returns scratch_buff, the 0x1800-byte buffer used for partial sectors and for unpacking.
+char* ScratchBuffGet(void) { return scratch_buff; }
 
 void func_00162D58(void) {
     switch ((s8)D_0030DAB4) {
     case 1:
-        func_00163768(D_0057C700);
+        ReadQEntryUnpack(D_0057C700);
         D_0030DAB4 = 0;
         break;
     case 3:
@@ -355,7 +357,8 @@ void func_00162DC0(void) { func_002D1C70(func_00162D58); }
 
 SaFile* SaFileGet(void) { return &sa_file; }
 
-void func_00162DE0(s32 arg0) {
+// Resets read queue slot index to an empty read request (and its path, in host mode).
+void ReadQEntryClear(s32 arg0) {
     if (sa_file.mode == 0) {
         *read_q_path[arg0] = 0;
     }
@@ -363,25 +366,26 @@ void func_00162DE0(s32 arg0) {
     read_q[arg0].no = 0;
     read_q[arg0].buffer = NULL;
     read_q[arg0].size = 0;
-    read_q[arg0].unk30 = 0;
+    read_q[arg0].type = READ_Q_TYPE_READ;
     read_q[arg0].active = 0;
     read_q[arg0].req_no = 0;
     read_q[arg0].cancel = 0;
     read_q[arg0].compressed = 0;
 }
 
-void func_00162E48(void) {
+// Clears every read queue slot and the state of the read in progress (sa_file slot unk64).
+void ReadQInit(void) {
     s32 i;
 
     for (i = 0; i < 64; i++) {
-        func_00162DE0(i);
+        ReadQEntryClear(i);
     }
 
     D_0030DA7C = 0;
     cd_read_lsn = 0;
     cd_read_size = 0;
-    D_0030DA80 = 0;
-    D_0030DA84 = 0;
+    last_read_time = 0;
+    last_read_size = 0;
     cd_read_buff = NULL;
     read_q_req_no = 0;
 
@@ -473,10 +477,12 @@ s32 FileLsnGet(s32 id) { return TblLsnGet(sa_file.id_base + id); }
 
 void func_001631C0(s8 arg0) { D_0030DAA4 = arg0; }
 
-s32 func_001631D0(s32 lsn, s32 size, void* buffer, sceCdRMode* mode) {
+// Records the read in cd_read_* and starts sceCdRead of size bytes at lsn (no wait).
+// Returns sceCdRead's result.
+s32 CdReadStart(s32 lsn, s32 size, void* buffer, sceCdRMode* mode) {
     s32 sectors;
     D_0030DAA4 = 0;
-    D_0030DAA8 = 0;
+    cd_retry_cnt = 0;
 
     cd_read_lsn = lsn;
     cd_read_size = size;
@@ -498,10 +504,10 @@ s32 func_00163290(void) {
 }
 
 // After the disc lid was opened: waits for the drive, then re-reads a sector until its first 32 bytes
-// match D_0030DCD8 (same disc). Returns 1 if the lid wasn't opened or there is no ID, else 0.
+// match disc_id (same disc). Returns 1 if the lid wasn't opened or there is no ID, else 0.
 // gotos: gcc 2.95 moves a loop's test to the bottom if a break/condition exits it near the top, but the
 // inner wait loop keeps its test at the top; no break/continue shape found matches, these gotos do.
-s32 func_001632B8(void) {
+s32 DiscCheck(void) {
     u32 lsn;
     s32 result;
 
@@ -513,7 +519,7 @@ s32 func_001632B8(void) {
                 if (D_0030DAA5 == 0) {
                     return 0;
                 }
-                if (D_0030DCD8 == NULL) {
+                if (disc_id == NULL) {
                     return 1;
                 }
 
@@ -522,7 +528,7 @@ s32 func_001632B8(void) {
 
                 lsn = GroupFileLsnGet(1, 1);
                 FlushCache(0);
-                if (sceCdRead(lsn, 1, D_00595AD0, &D_0030DA98) == 0) {
+                if (sceCdRead(lsn, 1, scratch_buff, &read_mode) == 0) {
                     goto restart;
                 }
 
@@ -534,8 +540,8 @@ s32 func_001632B8(void) {
                 }
 
                 FlushCache(0);
-                D_00595AD0[32] = '\0';
-                if (memcmp(D_00595AD0, D_0030DCD8, 32) == 0) {
+                scratch_buff[32] = '\0';
+                if (memcmp(scratch_buff, disc_id, 32) == 0) {
                     return 0;
                 }
 
@@ -557,7 +563,9 @@ s32 func_001632B8(void) {
     return 1;
 }
 
-s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) {
+// Blocking read: uses the HDD copy if there is one, else reads the disc with retries, switching to
+// retry_mode after repeated failures. Returns 1.
+s32 CdReadRetry(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) {
     s32 sectors;
     s32 found;
     s32 retry;
@@ -587,7 +595,7 @@ s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) 
         func_00125B40();
     }
 
-    D_0030DAA8 = 0;
+    cd_retry_cnt = 0;
     D_0030DAA4 = 0;
     retry = 0;
     tries = 60;
@@ -601,7 +609,7 @@ s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) 
 
                 if (sceCdRead(lsn, sectors, buffer, mode) == 1) {
                     for (i = 0; i < wait; i++) {
-                        if (func_001636F0() == 0) {
+                        if (CdReadPoll() == 0) {
                             return 1;
                         }
                         func_0017133C(1);
@@ -609,8 +617,8 @@ s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) 
                     break;
                 }
             }
-            func_001632B8();
-            D_0030DAA8++;
+            DiscCheck();
+            cd_retry_cnt++;
             D_0030DAA4 = 2;
             func_0017133C(1);
         }
@@ -637,14 +645,16 @@ s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) 
                 func_0017133C(1);
             }
 
-            mode = &D_0030DAA0;
+            mode = &retry_mode;
             continue;
         }
         retry++;
     }
 }
 
-s32 func_001636F0(void) {
+// Polls the read in progress: 0 = done, 1 = busy (or restarted with retry_mode after an error),
+// -1 = error with the drive not ready.
+s32 CdReadPoll(void) {
     s32 status = func_0015B830();
 
     if (status == 0) {
@@ -660,13 +670,13 @@ s32 func_001636F0(void) {
     }
 
     sceCdBreak();
-    func_001631D0(cd_read_lsn, cd_read_size, cd_read_buff, &D_0030DAA0);
+    CdReadStart(cd_read_lsn, cd_read_size, cd_read_buff, &retry_mode);
     return 1;
 }
 
 // Unpacks a compressed entry in place: byte 0 = method (1/2), bytes 1-4 = unpacked size (LE).
-// Input over 0x1800 bytes keeps its tail in D_00595AD0 and moves the rest to the end of the output.
-void func_00163768(ReadQEntry* entry) {
+// Input over 0x1800 bytes keeps its tail in scratch_buff and moves the rest to the end of the output.
+void ReadQEntryUnpack(ReadQEntry* entry) {
     u8* buff = entry->buffer;
     u32 packedSize = entry->disc_size;
     s32 unpackedSize = DECODE_SIZE(buff);
@@ -675,13 +685,13 @@ void func_00163768(ReadQEntry* entry) {
     s32 i;
 
     if (packedSize <= SCRATCH_BUFF_SIZE) {
-        memcpy(D_00595AD0, buff, packedSize);
-        func_002548A0(buff, D_00595AD0);
+        memcpy(scratch_buff, buff, packedSize);
+        func_002548A0(buff, scratch_buff);
         return;
     }
 
     headSize = packedSize - SCRATCH_BUFF_SIZE;
-    memcpy(D_00595AD0, buff + headSize, SCRATCH_BUFF_SIZE);
+    memcpy(scratch_buff, buff + headSize, SCRATCH_BUFF_SIZE);
     dst = buff + unpackedSize - 1;
     for (i = 0; i < headSize; i++) {
         *dst-- = buff[headSize - 1 - i];
@@ -690,10 +700,10 @@ void func_00163768(ReadQEntry* entry) {
     dst++;
     switch (*dst) {
     case 1: // lz decoder, 2kb window
-        func_00255C18(dst, buff, headSize, D_00595AD0);
+        func_00255C18(dst, buff, headSize, scratch_buff);
         return;
     case 2: // lz decoder, 4kb window
-        func_00255DE8(dst, buff, headSize, D_00595AD0);
+        func_00255DE8(dst, buff, headSize, scratch_buff);
         return;
     default:
         return;
@@ -719,9 +729,9 @@ void ReadQCallbackCall(ReadQEntry* arg0) { func_00171510(D_00591AD0, 0x4000, arg
 // -O2 -G0, and -fno-cse-follow-jumps, the only option found that makes the division recompute,
 // breaks two of those matches.
 #ifndef NON_MATCHING
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/libmscd", func_00163950);
+INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/libmscd", ReadQEntryRead);
 #else
-void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
+void ReadQEntryRead(SaFile* archive, ReadQEntry* entry, s32 index) {
     ExFile* exFile;
     s32 start;
     s32 size;
@@ -753,55 +763,55 @@ void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
         size = entry->size + 5;
         secs = size / 2048;
         if (secs != 0 && size > 0) {
-            func_00163450(entry->lsn, size, entry->buffer, &D_0030DA98, entry->group);
+            CdReadRetry(entry->lsn, size, entry->buffer, &read_mode, entry->group);
             FlushCache(0);
 
             if (*(char*)entry->buffer == 0) {
                 memcpy(entry->buffer, (char*)entry->buffer + 5, secs * 2048);
                 size -= secs * 2048;
-                func_00163450(entry->lsn + secs, 0x800, D_00595AD0, &D_0030DA98, entry->group);
+                CdReadRetry(entry->lsn + secs, 0x800, scratch_buff, &read_mode, entry->group);
                 FlushCache(0);
-                memcpy((char*)entry->buffer + secs * 2048, D_00595AD0, size - 5);
+                memcpy((char*)entry->buffer + secs * 2048, scratch_buff, size - 5);
                 goto end;
             }
 
             if (size & 0x7FF) {
-                func_00163450(entry->lsn + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->group);
+                CdReadRetry(entry->lsn + size / 2048, 0x800, scratch_buff, &read_mode, entry->group);
                 rest = size & 0x7FF;
                 FlushCache(0);
-                memcpy((char*)entry->buffer + size - rest, D_00595AD0, rest);
+                memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
             } else {
                 FlushCache(0);
             }
         } else {
-            func_00163450(entry->lsn, 0x800, D_00595AD0, &D_0030DA98, entry->group);
+            CdReadRetry(entry->lsn, 0x800, scratch_buff, &read_mode, entry->group);
             FlushCache(0);
 
-            if (*D_00595AD0 == 0) {
-                memcpy(entry->buffer, D_00595AD0 + 5, size - 5);
+            if (*scratch_buff == 0) {
+                memcpy(entry->buffer, scratch_buff + 5, size - 5);
                 goto end;
             }
 
             rest = size & 0x7FF;
             FlushCache(0);
-            memcpy((char*)entry->buffer + size - rest, D_00595AD0, rest);
+            memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
         }
     } else {
         if (size / 2048 != 0) {
-            func_00163450(entry->lsn, entry->disc_size, entry->buffer, &D_0030DA98, entry->group);
+            CdReadRetry(entry->lsn, entry->disc_size, entry->buffer, &read_mode, entry->group);
             if (size & 0x7FF) {
-                func_00163450(entry->lsn + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->group);
+                CdReadRetry(entry->lsn + size / 2048, 0x800, scratch_buff, &read_mode, entry->group);
                 rest = size & 0x7FF;
                 FlushCache(0);
-                memcpy((char*)entry->buffer + size - rest, D_00595AD0, rest);
+                memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
             } else {
                 FlushCache(0);
             }
         } else {
-            func_00163450(entry->lsn, 0x800, D_00595AD0, &D_0030DA98, entry->group);
+            CdReadRetry(entry->lsn, 0x800, scratch_buff, &read_mode, entry->group);
             rest = size & 0x7FF;
             FlushCache(0);
-            memcpy((char*)entry->buffer + size - rest, D_00595AD0, rest);
+            memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
         }
     }
 
@@ -817,13 +827,13 @@ void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
                 func_0017133C(1);
             }
         } else {
-            func_00163768(entry);
+            ReadQEntryUnpack(entry);
         }
     }
 
 end:
-    D_0030DA84 = cd_read_size;
-    D_0030DA80 = D_0057C71C->unk1C - start;
+    last_read_size = cd_read_size;
+    last_read_time = D_0057C71C->unk1C - start;
     if (entry->callback != NULL) {
         ReadQCallbackCall(entry);
     }
@@ -836,7 +846,9 @@ end:
 }
 #endif
 
-void func_00163D20(SaFile* archive, ReadQEntry* entry, s32 index) {
+// Seek request: if it is the only active entry, seeks to its LSN (up to 16 tries) and waits,
+// breaking off when another request arrives. Then frees the entry.
+void ReadQEntrySeek(SaFile* archive, ReadQEntry* entry, s32 index) {
     s32 count;
     s32 retry;
     s32 i;
@@ -875,7 +887,7 @@ void func_00163D20(SaFile* archive, ReadQEntry* entry, s32 index) {
                         break;
                     }
 
-                    if (func_001636F0() == 0) {
+                    if (CdReadPoll() == 0) {
                         break;
                     }
                     func_0017133C(1);
@@ -891,9 +903,9 @@ void func_00163D20(SaFile* archive, ReadQEntry* entry, s32 index) {
     entry->req_no = 0;
 }
 
-// Release read loop (sa_file.unk68): serves the read queue forever, passing each active entry to func_00163950
-// (unk30 == 0: read, or cancel if flagged) or func_00163D20 (unk30 == 1), then waiting a frame.
-void func_00163E90(void) {
+// Release read loop (sa_file.unk68): serves the read queue forever, passing each active entry to ReadQEntryRead
+// (READ_Q_TYPE_READ: read, or cancel if flagged) or ReadQEntrySeek (READ_Q_TYPE_SEEK), then waiting a frame.
+void ReadQServe(void) {
     SaFile* archive = SaFileGet();
     ReadQEntry* entry;
     s32 i;
@@ -907,15 +919,15 @@ void func_00163E90(void) {
                 continue;
             }
 
-            switch (entry->unk30) {
-            case 0:
+            switch (entry->type) {
+            case READ_Q_TYPE_READ:
                 if (entry->cancel != 0) {
                     while (sceCdBreak() == 0) {
                         func_0017133C(1);
                     }
 
                     entry->cancel = 0;
-                    func_00162DE0(archive->busy_index);
+                    ReadQEntryClear(archive->busy_index);
 
                     for (j = 0; j < READ_Q_CNT; j++) {
                         if (read_q[j].active != 0) {
@@ -930,12 +942,12 @@ void func_00163E90(void) {
                     }
                     archive->busy_index = -1;
                 } else {
-                    func_00163950(archive, entry, i);
+                    ReadQEntryRead(archive, entry, i);
                 }
                 break;
 
-            case 1:
-                func_00163D20(archive, entry, i);
+            case READ_Q_TYPE_SEEK:
+                ReadQEntrySeek(archive, entry, i);
                 break;
             }
         }
@@ -944,7 +956,9 @@ void func_00163E90(void) {
     }
 }
 
-s16 func_00163FD0(s32 arg0) {
+// Selects the archive group: file ids are then counted from its start in group_tbl.
+// Returns the group's first id, or -1 if the group has no entry.
+s16 GroupSet(s32 arg0) {
     s16 fid;
 
     if (sa_file_read_init == 0) {
@@ -961,7 +975,9 @@ s16 func_00163FD0(s32 arg0) {
     return fid;
 }
 
-s32 func_00164040(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
+// Queues a read of file id (current group) into buffer; callback (if set) runs when it completes.
+// Returns the request number.
+s32 ReadQFileAdd(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
     const char* str = NULL;
     ReadQEntry* entry;
     s32 q_cnt;
@@ -995,7 +1011,7 @@ s32 func_00164040(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
         entry->unk18 = arg3->unk18;
     }
 
-    entry->unk30 = 0;
+    entry->type = READ_Q_TYPE_READ;
     entry->callback = callback;
 
     if (++read_q_req_no > 0xFFFF) {
@@ -1007,7 +1023,7 @@ s32 func_00164040(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
     switch (sa_file.mode) {
     case 0:
         if (D_00565DF4 == 0) {
-            entry->disc_size = entry->size = func_00254E08(id);
+            entry->disc_size = entry->size = HostFileSizeGet(id);
         } else {
             entry->size = FileSizeGet(id);
         }
@@ -1015,7 +1031,7 @@ s32 func_00164040(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
         entry->lsn = 0;
 
         if (D_00565DF4 == 0) {
-            str = func_00254DA8(id);
+            str = FileNameGet(id);
             func_002D3C80(2);
         } else {
             entry->lsn = FileLsnGet(id);
@@ -1048,7 +1064,9 @@ s32 func_00164040(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
     return read_q_req_no;
 }
 
-s32 func_00164320(s32 id, void* buffer, s32 arg2, u32 size, void* callback, ReadQEntry* arg5) {
+// Like ReadQFileAdd, but reads size bytes from byte offset arg2 of the file (rounded down to its
+// sector). Returns the request number.
+s32 ReadQFilePartAdd(s32 id, void* buffer, s32 arg2, u32 size, void* callback, ReadQEntry* arg5) {
     const char* str = NULL;
     ReadQEntry* entry;
     s32 q_cnt;
@@ -1082,7 +1100,7 @@ s32 func_00164320(s32 id, void* buffer, s32 arg2, u32 size, void* callback, Read
         entry->unk18 = arg5->unk18;
     }
 
-    entry->unk30 = 0;
+    entry->type = READ_Q_TYPE_READ;
     entry->callback = callback;
 
     if (++read_q_req_no > 0xFFFF) {
@@ -1102,7 +1120,7 @@ s32 func_00164320(s32 id, void* buffer, s32 arg2, u32 size, void* callback, Read
 
         if (D_00565DF4 == 0) {
             entry->lsn = arg2 / 2048;
-            str = func_00254DA8(id);
+            str = FileNameGet(id);
             func_002D3C80(2);
         } else {
             entry->lsn = FileLsnGet(id) + arg2 / 2048;
@@ -1138,7 +1156,7 @@ s32 func_00164320(s32 id, void* buffer, s32 arg2, u32 size, void* callback, Read
 // Queues a read of size bytes at lsn into buffer; callback (if set) runs when it completes.
 // The entry's unkC..unk18 are copied from arg4, or zeroed if NULL. In mode 0 its path reads
 // "DVD FILE", as it has no file name. Returns the request number.
-s32 func_00164628(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) {
+s32 ReadQLsnAdd(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) {
     ReadQEntry* entry;
     char* src;
     s32 q_cnt;
@@ -1279,7 +1297,7 @@ void func_00164A60(s32 arg0) { D_0030DAC4 = arg0; }
 
 // Archive init: fills sa_file, then loads the index tables (cdrom.mdg, cdrom.fid, sizetbl.bin,
 // modulesize.bin) from the host (mode 0), the HDD (PS2 CD disk types) or the disc, and starts ReadTask.
-void func_00164A70(s32 mode) {
+void SaFileReadInit(s32 mode) {
     s32 fd;
     s32 lastLsnBase;
     s32 offset;
@@ -1293,7 +1311,7 @@ void func_00164A70(s32 mode) {
 
     sa_file_read_init = 1;
     read_task_buff = func_00171C78(1);
-    func_00165588(mode);
+    SaFileModeSet(mode);
 
     sa_file.unk50 = 0;
     sa_file.unk34 = func_00162778();
@@ -1307,17 +1325,17 @@ void func_00164A70(s32 mode) {
     func_00165378(0);
     func_0011C348(0x40);
 
-    D_00595AD0 = func_0011D370(SCRATCH_BUFF_SIZE, 10, D_0056B720, 0x6C9);
+    scratch_buff = func_0011D370(SCRATCH_BUFF_SIZE, 10, D_0056B720, 0x6C9);
     func_00165ED8();
 
     D_0030DA7E = 0;
     D_0030DAA5 = 0;
 
     if (mode == 0) {
-        func_00254958();
-        func_002556F8();
-        size_tbl = func_00255800();
-        D_0057C704 = func_00255840();
+        FileNameChgInit();
+        HostIndexLoad();
+        size_tbl = HostSizeTblLoad();
+        module_size_tbl = HostModuleSizeTblLoad();
         func_00165F88();
     } else {
         if (D_0030DAC4 != 0) {
@@ -1389,9 +1407,9 @@ void func_00164A70(s32 mode) {
                 }
                 size = sceLseek(fd, 0, SCE_SEEK_END);
                 func_0011C348(0x40);
-                D_0057C704 = func_0011D370(size, 10, D_0056B720, 0x732);
+                module_size_tbl = func_0011D370(size, 10, D_0056B720, 0x732);
                 sceLseek(fd, 0, SCE_SEEK_SET);
-                if (sceRead(fd, D_0057C704, size) != size) {
+                if (sceRead(fd, module_size_tbl, size) != size) {
                     dbgBreak();
                 }
                 sceClose(fd);
@@ -1417,18 +1435,18 @@ void func_00164A70(s32 mode) {
             }
 
             // sceCdRead transfers whole sectors: the buffer is rounded up to them, and the unmasked
-            // size makes func_001631D0's size / 2048 round up too.
+            // size makes CdReadStart's size / 2048 round up too.
             size += 0x7FF;
             func_0011C348(0x40);
             sa_file.file_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x75B);
 
-            while (func_001631D0(lsn, size, sa_file.file_tbl, &D_0030DA98) == 0) {
+            while (CdReadStart(lsn, size, sa_file.file_tbl, &read_mode) == 0) {
                 do {
                     func_002D3C80(0);
                 } while (sceCdDiskReady(1) != SCECdComplete);
             }
 
-            while (func_001636F0() != 0) {
+            while (CdReadPoll() != 0) {
                 func_002D3C80(0);
             }
 
@@ -1444,13 +1462,13 @@ void func_00164A70(s32 mode) {
             func_0011C348(0x40);
             sa_file.group_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x772);
 
-            while (func_001631D0(lsn, size, sa_file.group_tbl, &D_0030DA98) == 0) {
+            while (CdReadStart(lsn, size, sa_file.group_tbl, &read_mode) == 0) {
                 do {
                     func_002D3C80(0);
                 } while (sceCdDiskReady(1) != SCECdComplete);
             }
 
-            while (func_001636F0() != 0) {
+            while (CdReadPoll() != 0) {
                 func_002D3C80(0);
             }
 
@@ -1460,35 +1478,35 @@ void func_00164A70(s32 mode) {
             if (lastLsnBase != 0) {
                 lsn_base = lastLsnBase - offset;
             }
-            func_00163FD0(1);
+            GroupSet(1);
 
             size = FileSizeGet(func_001626B8());
             func_0011C348(0x40);
             size += 0x7FF;
             size_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x78D);
 
-            while (func_001631D0(TblLsnGet(func_001626B8()), size, size_tbl, &D_0030DA98) == 0) {
+            while (CdReadStart(TblLsnGet(func_001626B8()), size, size_tbl, &read_mode) == 0) {
                 do {
                     func_002D3C80(0);
                 } while (sceCdDiskReady(1) != SCECdComplete);
             }
 
-            while (func_001636F0() != 0) {
+            while (CdReadPoll() != 0) {
                 func_002D3C80(0);
             }
 
             size = FileSizeGet(func_001625F8());
             func_0011C348(0x40);
             size += 0x7FF;
-            D_0057C704 = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x79C);
+            module_size_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x79C);
 
-            while (func_001631D0(TblLsnGet(func_001625F8()), size, D_0057C704, &D_0030DA98) == 0) {
+            while (CdReadStart(TblLsnGet(func_001625F8()), size, module_size_tbl, &read_mode) == 0) {
                 do {
                     func_002D3C80(0);
                 } while (sceCdDiskReady(1) != SCECdComplete);
             }
 
-            while (func_001636F0() != 0) {
+            while (CdReadPoll() != 0) {
                 func_002D3C80(0);
             }
             FlushCache(0);
@@ -1498,7 +1516,7 @@ void func_00164A70(s32 mode) {
         func_00165F88();
     }
 
-    func_00162CC8();
+    ExFileTblInit();
     ex_file_cnt = func_00167F58(ex_file_tbl);
     func_00167C58(0);
 
@@ -1533,10 +1551,10 @@ void func_00165378(s32 arg0) {
     switch (arg0) {
     default:
     case 0:
-        D_0030DA98.spindlctrl = SCECdSpinNom;
+        read_mode.spindlctrl = SCECdSpinNom;
         break;
     case 1:
-        D_0030DA98.spindlctrl = SCECdSpinMax;
+        read_mode.spindlctrl = SCECdSpinMax;
         break;
     }
 }
@@ -1555,7 +1573,7 @@ void func_001653A0(s32 arg0) {
 
 // Takes a free read-queue slot and resets it for a read of lsn (group/no for the ExFile lookup).
 // Returns the request's number: counts 1..0xFFFF and wraps back to 1, so 0 is never issued
-s32 func_001653E8(s32 lsn, s32 group, s32 no) {
+s32 ReadQSeekAdd(s32 lsn, s32 group, s32 no) {
     ReadQEntry* entry;
     s32 q_cnt;
 
@@ -1590,39 +1608,43 @@ s32 func_001653E8(s32 lsn, s32 group, s32 no) {
     entry->compressed = 0;
     entry->unk34 = 0;
     entry->disc_size = 0;
-    entry->unk30 = 1;
+    entry->type = READ_Q_TYPE_SEEK;
 
     return read_q_req_no;
 }
 
-s32 func_00165528(s32 arg0) { return func_001653E8(arg0, 0, 0); }
+// Queues a seek to lsn. Returns the request number.
+s32 ReadQLsnSeekAdd(s32 arg0) { return ReadQSeekAdd(arg0, 0, 0); }
 
-s32 func_00165548(s32 arg0, s32 arg1) { return func_001653E8(GroupFileLsnGet(arg0, arg1), arg0, arg1); }
+// Queues a seek to file no of group. Returns the request number.
+s32 ReadQFileSeekAdd(s32 arg0, s32 arg1) { return ReadQSeekAdd(GroupFileLsnGet(arg0, arg1), arg0, arg1); }
 
-void func_00165588(s32 mode) {
+// Stores the archive mode and fills sa_file's function slots: mode 0 (host) takes most of them
+// from read_debug.c, any other mode the release versions here.
+void SaFileModeSet(s32 mode) {
     sa_file.mode = mode;
 
     if (mode == 0) {
-        func_002558B0();
+        HostModeSet();
     } else {
         sa_file.unk14 = FileSizeGet;
         sa_file.unk58 = func_00164A10;
-        sa_file.unk68 = func_00163E90;
-        sa_file.unk54 = func_00162D30;
-        sa_file.unk60 = func_00162D18;
+        sa_file.unk68 = ReadQServe;
+        sa_file.pc_load = func_00162D30;
+        sa_file.pc_file_tbl_set = func_00162D18;
         sa_file.unk4 = FileLsnGet;
-        sa_file.unk78 = func_00164628;
-        sa_file.unk88 = func_00165548;
-        sa_file.unk8C = func_00165528;
+        sa_file.unk78 = ReadQLsnAdd;
+        sa_file.unk88 = ReadQFileSeekAdd;
+        sa_file.unk8C = ReadQLsnSeekAdd;
     }
 
     sa_file.unk8 = ReadQSync;
     sa_file.unk1C = ReadQCancel;
-    sa_file.unk0 = func_00164040;
-    sa_file.unk90 = func_00164320;
-    sa_file.unk64 = func_00162E48;
-    sa_file.unkC = func_00165588;
-    sa_file.unk10 = func_00163FD0;
+    sa_file.unk0 = ReadQFileAdd;
+    sa_file.unk90 = ReadQFilePartAdd;
+    sa_file.unk64 = ReadQInit;
+    sa_file.unkC = SaFileModeSet;
+    sa_file.unk10 = GroupSet;
     sa_file.unk7C = func_00165378;
     sa_file.unk84 = func_001653A0;
     sa_file.unk80 = ReadQFileStatGet;
@@ -1631,8 +1653,8 @@ void func_00165588(s32 mode) {
 
 void func_001656B8(void) { read_task_buff->unk0(); }
 
-// Used by func_00165808, creates a new file the first call and appends thereafter
-void func_001656E0(const char* str, u32 len) {
+// Used by DebugVprintf, creates a new file the first call and appends thereafter
+void DebugLogAppend(const char* str, u32 len) {
     s32 fd;
 
     if (dbg_pending == 0) {
@@ -1653,7 +1675,9 @@ void func_001656E0(const char* str, u32 len) {
     sceClose(fd);
 }
 
-void func_001657A8(const char* str, s8 filter_mode) {
+// Sets the prefix filter for captured printf lines (NULL clears it) and whether matching lines are
+// the ones echoed (filter_mode 1) or the ones dropped (0).
+void DebugFilterSet(const char* str, s8 filter_mode) {
     s32 i;
 
     dbg_filter_mode = filter_mode;
@@ -1670,7 +1694,9 @@ void func_001657A8(const char* str, s8 filter_mode) {
     }
 }
 
-void func_00165808(const char* fmt, va_list ap) {
+// printf replacement: stores the line in the ring buffer, echoes it through the real printf
+// (subject to the filter) and streams it as dbg_out_mode says.
+void DebugVprintf(const char* fmt, va_list ap) {
     char text[0x200];
     char* line;
     u32 len;
@@ -1732,7 +1758,7 @@ void func_00165808(const char* fmt, va_list ap) {
         if (func_002D93E8() == 1) {
             len = strlen(line);
             if (len != 0) {
-                func_001656E0(line, len);
+                DebugLogAppend(line, len);
             }
         }
         break;
@@ -1740,22 +1766,25 @@ void func_00165808(const char* fmt, va_list ap) {
     dbg_pending = 1;
 }
 
-void func_00165A18(const char* fmt, ...) {
+// Varargs entry that DebugOutModeSet installs over printf.
+void DebugPrintf(const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    func_00165808(fmt, ap);
+    DebugVprintf(fmt, ap);
 }
 
-void func_00165A50(s32 mode) {
+// Sets dbg_out_mode; the first mode other than DBG_OUT_NONE clears the ring buffer and redirects
+// printf to DebugPrintf.
+void DebugOutModeSet(s32 mode) {
     if (mode != DBG_OUT_NONE) {
-        if (D_0030DACF == 0) {
+        if (dbg_printf_hooked == 0) {
             memset(dbg_line_buff, 0, DBG_LINE_SIZE * DBG_LINE_COUNT);
 
             dbg_filter[0] = '\0';
             dbg_filter_mode = 0;
-            D_0030DACF = 1;
+            dbg_printf_hooked = 1;
 
-            func_00171548(func_00165A18);
+            func_00171548(DebugPrintf);
             FlushCache(0);
             FlushCache(2);
         }
@@ -1763,17 +1792,20 @@ void func_00165A50(s32 mode) {
     dbg_out_mode = mode;
 }
 
-void func_00165AE0(void) {}
+// Empty printf replacement used by PrintfMute.
+void DebugPrintNull(void) {}
 
-// Silences printf: redirects it to the empty func_00165AE0, then writes back the data cache (0)
+// Silences printf: redirects it to the empty DebugPrintNull, then writes back the data cache (0)
 // and invalidates the instruction cache (2) so the patched code is fetched.
-void func_00165AE8(void) {
-    func_00171548(func_00165AE0);
+void PrintfMute(void) {
+    func_00171548(DebugPrintNull);
     FlushCache(0);
     FlushCache(2);
 }
 
-void func_00165B18(void) {
+// Writes the ring buffer out (DBG_OUT_LOG_FILE: to host:printf.log; DBG_OUT_LOG_MEMORY: to a heap
+// block that is freed straight away), then resets it. The assert handler calls it before breaking.
+void DebugLogFlush(void) {
     char* buffer;
     char* cursor;
     char* line;
