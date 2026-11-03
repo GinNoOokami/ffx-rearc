@@ -43,11 +43,14 @@ typedef struct {
  * Known from its fill: +0x0/+0x4/+0x8 are per-group function slots, +0x8 starts a task. */
 typedef struct {
     /* 0x00 */ void (*unk0)(void); // called with no args, then func_002D3C80(0) in the wait loop
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ void (*unk8)(void (*fn)(void), s32, s32);
 } SaTask;
 
 extern SaTask* read_task_buff;
 
 void FlushCache(s32);
+void func_0011C348(s32);
 void func_00125B40(void);
 s32 func_0015A530(void);
 sceCdRMode* func_0015B320();
@@ -58,12 +61,21 @@ void func_00163950(SaFile*, ReadQEntry*, s32);
 void func_00163D20(SaFile*, ReadQEntry*, s32);
 s32 func_00164320();
 s32 func_00164628();
+void func_00165378(s32);
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
+void func_00165588(s32 mode);
 s32 func_00165EB8(void);
+/*?*/ void func_00165ED8();
 s32 func_00165F30(s32);
+/*?*/ void func_00165F88();
+/*?*/ void func_00166370();
+s32 func_00166380();
+/*?*/ void func_00166438();
 void func_00166650(s32, void*, s32, s32);
 void func_00166798(char*, void*, s32, s32);
 void func_00166878(void);
+/*?*/ void func_00167C58(/*?*/ s32);
+s32 func_00167F58(ExFile*);
 
 /* Hand-written: moves are `addu rd,$0,rs` (compiled code here uses `daddu rd,rs,$0`), it calls
  * through $1 (gcc never allocates `at`), has no frame, and switches sp to a caller-supplied buffer.
@@ -76,12 +88,17 @@ void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a funct
  * The caller must flush the caches afterwards. */
 void func_00171548(void* fn); // redirects printf to fn
 s32 func_001715A0(const char* fmt, ...);
+SaTask* func_00171C78(/*?*/ s32);
 void func_00179058(s32, const char*, const char*, ...);
 
 void func_002D1C70(void (*)());
 /*?*/ s32 func_0020D378();
+/*?*/ void func_00254958();
 const char* func_00254DA8(s32);
 s32 func_00254E08(s32);
+/*?*/ void func_002556F8();
+u8* func_00255800();
+void* func_00255840();
 void func_002558B0();
 // TK frame wait: blocks until at least max(n, 1) VBlanks (INTC 2 handler func_002D3B08 counts
 // them in D_0078AC00) have passed since the last call, then resets the count and runs the
@@ -93,6 +110,7 @@ void func_002D8E20(const char* ch, const char* str, u32 len);
 
 extern s32 read_q_req_no;
 extern s8 D_0030DA7C;
+extern s8 D_0030DA7E;
 extern s8 sa_file_read_init;
 extern s32 D_0030DA80;
 extern s32 D_0030DA84;
@@ -128,9 +146,21 @@ extern char D_0056B7C8[]; // "movie running"
 extern char D_0056B7E0[]; // "name=%s.module=%d.num=%d"
 extern char D_0056B800[]; // "read_task_buff != NULL"
 extern char D_0056B818[]; // "0"
+extern char D_0056B820[]; // "sa_file_read_init==0"
+extern char D_0056B838[]; // "pfs0:cdrom.mdg"
+extern char D_0056B848[]; // "hdd err"
+extern char D_0056B850[]; // "hdd file open err pfs0:cdrom.mdg\n"
+extern char D_0056B878[]; // "pfs0:cdrom.fid"
+extern char D_0056B888[]; // "hdd file open err pfs0:cdrom.fid\n"
+extern char D_0056B8B0[]; // "pfs0:sizetbl.bin"
+extern char D_0056B8C8[]; // "hdd file open err pfs0:sizetbl.bin\n"
+extern char D_0056B8F0[]; // "pfs0:modulesize.bin"
+extern char D_0056B908[]; // "hdd file open err pfs0:modulesize.bin\n"
+extern char D_0056B930[]; // "hdd mount err\n"
 extern char D_0056B940[]; // "host:printf.log"
 extern char D_0056B950[]; // "FFXDEBUG"
 
+extern void* D_0057C704;
 extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
 extern char* D_00595AD0;
@@ -579,12 +609,12 @@ s32 FileLsnGet(s32 id) { return TblLsnGet(sa_file.id_base + id); }
 
 void func_001631C0(s8 arg0) { D_0030DAA4 = arg0; }
 
-s32 func_001631D0(s32 arg0, s32 size, void* buffer, sceCdRMode* mode) {
+s32 func_001631D0(s32 lsn, s32 size, void* buffer, sceCdRMode* mode) {
     s32 sectors;
     D_0030DAA4 = 0;
     D_0030DAA8 = 0;
 
-    cd_read_lsn = arg0;
+    cd_read_lsn = lsn;
     cd_read_size = size;
     cd_read_buff = buffer;
     cd_read_mode = *mode;
@@ -593,7 +623,7 @@ s32 func_001631D0(s32 arg0, s32 size, void* buffer, sceCdRMode* mode) {
 
     sectors = size / 2048;
     FlushCache(0);
-    return sceCdRead(arg0, sectors, buffer, mode);
+    return sceCdRead(lsn, sectors, buffer, mode);
 }
 
 s32 func_00163290(void) {
@@ -1383,7 +1413,239 @@ void func_00164A50(s8 arg0) { D_0030DAC1 = arg0; }
 
 void func_00164A60(s32 arg0) { D_0030DAC4 = arg0; }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164A70);
+// Archive init: fills sa_file, then loads the index tables (cdrom.mdg, cdrom.fid, sizetbl.bin,
+// modulesize.bin) from the host (mode 0), the HDD (PS2 CD disk types) or the disc, and starts ReadTask.
+void func_00164A70(s32 mode) {
+    s32 fd;
+    s32 lastLsnBase;
+    s32 offset;
+    u32 size;
+    s32 lsn;
+
+    D_0030DAB4 = 0;
+    if (sa_file_read_init != 0) {
+        dbgAssert(D_0056B820, D_0056B720, 0x6B5);
+    }
+
+    sa_file_read_init = 1;
+    read_task_buff = func_00171C78(1);
+    func_00165588(mode);
+
+    sa_file.unk50 = 0;
+    sa_file.unk34 = func_00162778();
+    sa_file.unk38 = func_00162838();
+    sa_file.unk3C = func_001628F8();
+    sa_file.unk40 = func_00162A78();
+    sa_file.unk44 = func_001629B8();
+    sa_file.unk48 = func_00162B38();
+    sa_file.unk4C = func_00162BF8();
+
+    func_00165378(0);
+    func_0011C348(0x40);
+
+    D_00595AD0 = func_0011D370(SCRATCH_BUFF_SIZE, 10, D_0056B720, 0x6C9);
+    func_00165ED8();
+
+    D_0030DA7E = 0;
+    D_0030DAA5 = 0;
+
+    if (mode == 0) {
+        func_00254958();
+        func_002556F8();
+        size_tbl = func_00255800();
+        D_0057C704 = func_00255840();
+        func_00165F88();
+    } else {
+        if (D_0030DAC4 != 0) {
+            while (sceCdSync(1) != 0) {
+                func_002D3C80(0);
+            }
+
+            while (sceCdStandby() == 0) {
+                func_002D3C80(0);
+            }
+        }
+
+        while (sceCdSync(1) != 0) {
+            func_002D3C80(0);
+        }
+
+        switch (sceCdGetDiskType()) {
+        case SCECdPS2CD:
+        case SCECdPS2CDDA:
+            if (func_00166380() == 0) {
+                D_0030DA7E = 1; // only set here: tables came from the HDD?
+
+                fd = sceOpen(D_0056B838, SCE_RDONLY);
+                if (fd < 0) {
+                    func_00179058(1, D_0056B848, D_0056B850);
+                    dbgBreak();
+                }
+                size = sceLseek(fd, 0, SCE_SEEK_END);
+                func_0011C348(0x40);
+                sa_file.file_tbl = func_0011D370(size, 10, D_0056B720, 0x702);
+                sceLseek(fd, 0, SCE_SEEK_SET);
+                if (sceRead(fd, sa_file.file_tbl, size) != size) {
+                    dbgBreak();
+                }
+                sceClose(fd);
+
+                fd = sceOpen(D_0056B878, SCE_RDONLY);
+                if (fd < 0) {
+                    func_00179058(1, D_0056B848, D_0056B888);
+                    dbgBreak();
+                }
+                size = sceLseek(fd, 0, SCE_SEEK_END);
+                func_0011C348(0x40);
+                sa_file.group_tbl = func_0011D370(size, 10, D_0056B720, 0x712);
+                sceLseek(fd, 0, SCE_SEEK_SET);
+                if (sceRead(fd, sa_file.group_tbl, size) != size) {
+                    dbgBreak();
+                }
+                sceClose(fd);
+
+                fd = sceOpen(D_0056B8B0, SCE_RDONLY);
+                if (fd < 0) {
+                    func_00179058(1, D_0056B848, D_0056B8C8);
+                    dbgBreak();
+                }
+                size = sceLseek(fd, 0, SCE_SEEK_END);
+                func_0011C348(0x40);
+                size_tbl = func_0011D370(size, 10, D_0056B720, 0x722);
+                sceLseek(fd, 0, SCE_SEEK_SET);
+                if (sceRead(fd, size_tbl, size) != size) {
+                    dbgBreak();
+                }
+                sceClose(fd);
+
+                fd = sceOpen(D_0056B8F0, SCE_RDONLY);
+                if (fd < 0) {
+                    func_00179058(1, D_0056B848, D_0056B908);
+                    dbgBreak();
+                }
+                size = sceLseek(fd, 0, SCE_SEEK_END);
+                func_0011C348(0x40);
+                D_0057C704 = func_0011D370(size, 10, D_0056B720, 0x732);
+                sceLseek(fd, 0, SCE_SEEK_SET);
+                if (sceRead(fd, D_0057C704, size) != size) {
+                    dbgBreak();
+                }
+                sceClose(fd);
+
+                FlushCache(0);
+                func_00166438();
+            } else {
+                func_00179058(1, D_0056B848, D_0056B930);
+                dbgBreak();
+            }
+            break;
+
+        default:
+            // The two index tables load from fixed LSNs, so lsn_base is cleared until they are in.
+            lastLsnBase = lsn_base;
+            lsn_base = 0;
+            if (demo_desc.file_tbl_lsn == 0) {
+                size = func_001629B8();
+                lsn = func_00162838();
+            } else {
+                size = demo_desc.file_tbl_size;
+                lsn = demo_desc.file_tbl_lsn;
+            }
+
+            // sceCdRead transfers whole sectors: the buffer is rounded up to them, and the unmasked
+            // size makes func_001631D0's size / 2048 round up too.
+            size += 0x7FF;
+            func_0011C348(0x40);
+            sa_file.file_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x75B);
+
+            while (func_001631D0(lsn, size, sa_file.file_tbl, &D_0030DA98) == 0) {
+                do {
+                    func_002D3C80(0);
+                } while (sceCdDiskReady(1) != SCECdComplete);
+            }
+
+            while (func_001636F0() != 0) {
+                func_002D3C80(0);
+            }
+
+            if (demo_desc.group_tbl_lsn == 0) {
+                size = func_00162B38();
+                lsn = func_001628F8();
+            } else {
+                size = demo_desc.group_tbl_size;
+                lsn = demo_desc.group_tbl_lsn;
+            }
+
+            size += 0x7FF;
+            func_0011C348(0x40);
+            sa_file.group_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x772);
+
+            while (func_001631D0(lsn, size, sa_file.group_tbl, &D_0030DA98) == 0) {
+                do {
+                    func_002D3C80(0);
+                } while (sceCdDiskReady(1) != SCECdComplete);
+            }
+
+            while (func_001636F0() != 0) {
+                func_002D3C80(0);
+            }
+
+            // Rebase so that group 1, file 0 lands on the LSN DemoDescSet found (if any).
+            offset = GroupFileLsnGet(1, 0);
+            lsn_base = lastLsnBase;
+            if (lastLsnBase != 0) {
+                lsn_base = lastLsnBase - offset;
+            }
+            func_00163FD0(1);
+
+            size = FileSizeGet(func_001626B8());
+            func_0011C348(0x40);
+            size += 0x7FF;
+            size_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x78D);
+
+            while (func_001631D0(TblLsnGet(func_001626B8()), size, size_tbl, &D_0030DA98) == 0) {
+                do {
+                    func_002D3C80(0);
+                } while (sceCdDiskReady(1) != SCECdComplete);
+            }
+
+            while (func_001636F0() != 0) {
+                func_002D3C80(0);
+            }
+
+            size = FileSizeGet(func_001625F8());
+            func_0011C348(0x40);
+            size += 0x7FF;
+            D_0057C704 = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x79C);
+
+            while (func_001631D0(TblLsnGet(func_001625F8()), size, D_0057C704, &D_0030DA98) == 0) {
+                do {
+                    func_002D3C80(0);
+                } while (sceCdDiskReady(1) != SCECdComplete);
+            }
+
+            while (func_001636F0() != 0) {
+                func_002D3C80(0);
+            }
+            FlushCache(0);
+            break;
+        }
+
+        func_00165F88();
+    }
+
+    func_00162CC8();
+    ex_file_cnt = func_00167F58(ex_file_tbl);
+    func_00167C58(0);
+
+    sa_file.host_fd = -1;
+    sa_file.busy_index = -1;
+    sa_file.busy = 0;
+    sa_file.unk64();
+
+    read_task_buff->unk8(ReadTask, 1, 0);
+    func_00166370();
+}
 
 void ReadQCancel(s32 arg0) {
     s32 i;

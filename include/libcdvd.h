@@ -78,6 +78,19 @@ typedef struct {
 #define SCECdStatSeek 0x12
 #define SCECdStatEmg 0x20 /* error */
 
+/* sceCdGetDiskType results */
+#define SCECdNODISC 0x00
+#define SCECdDETCT 0x01 /* still detecting */
+#define SCECdUNKNOWN 0x05
+#define SCECdPSCD 0x10
+#define SCECdPSCDDA 0x11 /* with audio tracks */
+#define SCECdPS2CD 0x12
+#define SCECdPS2CDDA 0x13 /* with audio tracks */
+#define SCECdPS2DVD 0x14
+#define SCECdCDDA 0xFD        /* not PS/PS2: audio CD */
+#define SCECdDVDV 0xFE        /* not PS/PS2: DVD video */
+#define SCECdIllgalMedia 0xFF /* not PS/PS2 (SDK spelling) */
+
 int sceCdInit(int init_mode);                                     /* 0x2E10B0, 0x80000592 */
 int sceCdInitEeCB(int cb_prio, void* stack_addr, int stack_size); /* 0x2E0580 */
 int* sceCdCallback(void (*func)(int));                            /* 0x2E03C8 */

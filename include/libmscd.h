@@ -51,12 +51,19 @@ typedef struct {
     /* 0x28 */ u32* file_tbl;  // cdrom.mdg
     /* 0x2C */ s16* group_tbl; // cdrom.fid
     /* 0x30 */ void* name_tbl; // cdrom.fnd (host mode)
-    /* 0x34 */ u8 pad34[0x54 - 0x34];
+    /* 0x34 */ s32 unk34;      // func_00162778 (279)
+    /* 0x38 */ s32 unk38;      // func_00162838 (280): cdrom.mdg's disc LSN?
+    /* 0x3C */ s32 unk3C;      // func_001628F8 (344): cdrom.fid's disc LSN?
+    /* 0x40 */ s32 unk40;      // func_00162A78 (48)
+    /* 0x44 */ s32 unk44;      // func_001629B8 (0x20000): cdrom.mdg's size?
+    /* 0x48 */ s32 unk48;      // func_00162B38 (130): cdrom.fid's size?
+    /* 0x4C */ s32 unk4C;      // func_00162BF8 (2)
+    /* 0x50 */ s32 unk50;
     /* 0x54 */ void* (*unk54)(const char*, s32*); // func_00162D30 / func_00254F40
     /* 0x58 */ const char* (*unk58)(s32);         // func_00164A10 / func_00254DA8
     /* 0x5C */ s32 host_fd;                       // file descriptor during a host read (func_00255158); -1 when idle
     /* 0x60 */ void (*unk60)(const char*);        // func_00162D18 / func_002556A0
-    /* 0x64 */ void (*unk64)();                   // func_00162E48
+    /* 0x64 */ void (*unk64)(void);               // func_00162E48
     /* 0x68 */ void (*unk68)();                   // func_00163E90 / func_00255158
     /* 0x6C */ u32 (*unk6C)(s32, s32);            // GroupFileLsnGet
     /* 0x70 */ s32 busy;                          // 1 while an entry is being processed, 0 after
