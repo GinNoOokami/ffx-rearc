@@ -49,12 +49,12 @@ extern SaTask* read_task_buff;
 
 void FlushCache(s32);
 void func_00125B40(void);
+s32 func_0015A530();
 sceCdRMode* func_0015B320();
 void func_0015B330(void);
 s32 func_0015B830(void);
 s32 func_001636F0(void);
 void func_00163E90();
-s32 func_00164040();
 s32 func_00164320();
 s32 func_00164628();
 /*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
@@ -75,9 +75,12 @@ void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a funct
  * The caller must flush the caches afterwards. */
 void func_00171548(void* fn); // redirects printf to fn
 s32 func_001715A0(const char* fmt, ...);
+void func_00179058(s32, const char*, const char*, ...);
 
 void func_002D1C70(void (*)());
 /*?*/ s32 func_0020D378();
+const char* func_00254DA8(s32);
+s32 func_00254E08(s32);
 void func_002558B0();
 // TK frame wait: blocks until at least max(n, 1) VBlanks (INTC 2 handler func_002D3B08 counts
 // them in D_0078AC00) have passed since the last call, then resets the count and runs the
@@ -117,8 +120,11 @@ extern char D_0056B730[]; // "PcFileTblSet  DVD MODE ONLY"
 extern char D_0056B750[]; // "PCload  DVD MODE ONLY"
 extern char D_0056B768[]; // "pfs0:/ex/%s"
 extern char D_0056B778[]; // "sa_file_read_init!=0"
-extern char D_0056B7B8[]; // "DVD FILE"
 extern char D_0056B790[]; // "q_cnt != READ_Q_CNT"
+extern char D_0056B7A8[]; // "HDD FILE"
+extern char D_0056B7B8[]; // "DVD FILE"
+extern char D_0056B7C8[]; // "movie running"
+extern char D_0056B7E0[]; // "name=%s.module=%d.num=%d"
 extern char D_0056B800[]; // "read_task_buff != NULL"
 extern char D_0056B818[]; // "0"
 extern char D_0056B940[]; // "host:printf.log"
@@ -568,7 +574,7 @@ s32 TblLsnGet(s32 arg0) { return (sa_file.file_tbl[arg0] & TBL_ENTRY_SIZE_MASK) 
 
 u32 GroupFileLsnGet(s32 arg0, s32 arg1) { return TblLsnGet(sa_file.group_tbl[arg0] + arg1); }
 
-s32 FileLsnGet(s32 arg0) { return TblLsnGet(sa_file.id_base + arg0); }
+s32 FileLsnGet(s32 id) { return TblLsnGet(sa_file.id_base + id); }
 
 void func_001631C0(s8 arg0) { D_0030DAA4 = arg0; }
 
@@ -956,7 +962,92 @@ s16 func_00163FD0(s32 arg0) {
     return fid;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164040);
+s32 func_00164040(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
+    const char* str = NULL;
+    ReadQEntry* entry;
+    s32 q_cnt;
+    s32 i;
+
+    for (q_cnt = 0; q_cnt < READ_Q_CNT; q_cnt++) {
+        if (read_q[q_cnt].active == 0) {
+            break;
+        }
+    }
+
+    if (q_cnt == READ_Q_CNT) {
+        dbgAssert(D_0056B790, D_0056B720, 0x550);
+    }
+
+    entry = &read_q[q_cnt];
+    entry->active = 1;
+    entry->buff.p = buffer;
+    entry->no = id;
+    entry->group = sa_file.group;
+
+    if (arg3 == NULL) {
+        entry->unkC = 0;
+        entry->unk10 = 0;
+        entry->unk14 = 0;
+        entry->unk18 = 0;
+    } else {
+        entry->unkC = arg3->unkC;
+        entry->unk10 = arg3->unk10;
+        entry->unk14 = arg3->unk14;
+        entry->unk18 = arg3->unk18;
+    }
+
+    entry->unk30 = 0;
+    entry->callback = callback;
+
+    if (++read_q_req_no > 0xFFFF) {
+        read_q_req_no = 1;
+    }
+
+    entry->req_no = read_q_req_no;
+
+    switch (sa_file.mode) {
+    case 0:
+        if (D_00565DF4 == 0) {
+            entry->disc_size = entry->size = func_00254E08(id);
+        } else {
+            entry->size = FileSizeGet(id);
+        }
+
+        entry->lsn = 0;
+
+        if (D_00565DF4 == 0) {
+            str = func_00254DA8(id);
+            func_002D3C80(2);
+        } else {
+            entry->lsn = FileLsnGet(id);
+            entry->disc_size = FileDiscSizeGet(id);
+            str = D_0056B7A8;
+        }
+
+        for (i = 0; i < READ_Q_PATH_SIZE; i++) {
+            read_q_path[q_cnt][i] = str[i];
+            if (str[i] == '\0') {
+                break;
+            }
+        }
+        break;
+    case 1:
+        entry->size = FileSizeGet(id);
+        entry->lsn = FileLsnGet(id);
+        entry->disc_size = FileDiscSizeGet(id);
+        str = D_0056B7B8;
+        break;
+    }
+
+    if (func_0015A530() != 0) {
+        func_00179058(1, D_0056B7C8, D_0056B7E0, str, sa_file.group, id);
+    }
+
+    entry->compressed = FileCompressedGet(id);
+    entry->unk34 = 0;
+
+    return read_q_req_no;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164320);
 
