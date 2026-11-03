@@ -942,7 +942,60 @@ end:
 }
 #endif
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00163D20);
+void func_00163D20(SaFile* archive, ReadQEntry* entry, s32 index) {
+    s32 count;
+    s32 retry;
+    s32 i;
+
+    if (D_00565DF4 == 0) {
+        archive->busy_index = index;
+
+        count = 0;
+        for (i = 0; i < READ_Q_CNT; i++) {
+            if (read_q[i].active != 0) {
+                count++;
+            }
+        }
+
+        if (count == 1) {
+            for (retry = 0; retry < 16; retry++) {
+                if (sceCdSeek(entry->lsn) == 1) {
+                    break;
+                }
+                func_0017133C(1);
+            }
+
+            if (retry != 16) {
+                do {
+                    count = 0;
+                    for (i = 0; i < READ_Q_CNT; i++) {
+                        if (read_q[i].active != 0) {
+                            count++;
+                        }
+                    }
+
+                    if (count != 1) {
+                        while (sceCdBreak() == 0) {
+                            func_0017133C(1);
+                        }
+                        break;
+                    }
+
+                    if (func_001636F0() == 0) {
+                        break;
+                    }
+                    func_0017133C(1);
+                } while (1);
+            }
+        }
+    }
+
+    archive->busy_index = -1;
+    archive->host_fd = -1;
+    archive->busy = 0;
+    entry->active = 0;
+    entry->req_no = 0;
+}
 
 // Release read loop (sa_file.unk68): serves the read queue forever, passing each active entry to func_00163950
 // (unk30 == 0: read, or cancel if flagged) or func_00163D20 (unk30 == 1), then waiting a frame.
