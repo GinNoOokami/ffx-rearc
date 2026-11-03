@@ -63,7 +63,7 @@ EE_CC      := $(EE_CC_DIR)/bin/ee-gcc
 # The system headers the package lacks (newlib's libc, gcc's own), unpacked by tools/fetch_headers.
 SYS_INC    := tools/cc/include
 C_INCLUDES := -I include -isystem $(SYS_INC)/gcc -isystem $(SYS_INC)/newlib
-C_FLAGS    := -O2 -G0 $(C_INCLUDES)
+C_FLAGS    := -O2 -G0 -fno-strict-aliasing $(C_INCLUDES)
 
 # ---- Inputs: whatever splat has written to asm/<version>/ ----
 # nonmatchings/ holds the functions a C file pulls in with INCLUDE_ASM; they aren't built alone.

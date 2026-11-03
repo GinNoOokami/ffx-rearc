@@ -49,7 +49,7 @@ extern SaTask* read_task_buff;
 
 void FlushCache(s32);
 void func_00125B40(void);
-s32 func_0015A530();
+s32 func_0015A530(void);
 sceCdRMode* func_0015B320();
 void func_0015B330(void);
 s32 func_0015B830(void);
@@ -1049,7 +1049,92 @@ s32 func_00164040(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
     return read_q_req_no;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/libmscd", func_00164320);
+s32 func_00164320(s32 id, void* buffer, s32 arg2, u32 size, void* callback, ReadQEntry* arg5) {
+    const char* str = NULL;
+    ReadQEntry* entry;
+    s32 q_cnt;
+    s32 i;
+
+    for (q_cnt = 0; q_cnt < READ_Q_CNT; q_cnt++) {
+        if (read_q[q_cnt].active == 0) {
+            break;
+        }
+    }
+
+    if (q_cnt == READ_Q_CNT) {
+        dbgAssert(D_0056B790, D_0056B720, 0x5AA);
+    }
+
+    entry = &read_q[q_cnt];
+    entry->active = 1;
+    entry->buff.p = buffer;
+    entry->group = sa_file.group;
+    entry->no = id;
+
+    if (arg5 == NULL) {
+        entry->unkC = 0;
+        entry->unk10 = 0;
+        entry->unk14 = 0;
+        entry->unk18 = 0;
+    } else {
+        entry->unkC = arg5->unkC;
+        entry->unk10 = arg5->unk10;
+        entry->unk14 = arg5->unk14;
+        entry->unk18 = arg5->unk18;
+    }
+
+    entry->unk30 = 0;
+    entry->callback = callback;
+
+    if (++read_q_req_no > 0xFFFF) {
+        read_q_req_no = 1;
+    }
+
+    entry->req_no = read_q_req_no;
+
+    switch (sa_file.mode) {
+    case 0:
+        if (D_00565DF4 == 0) {
+            entry->size = size;
+            entry->disc_size = size;
+        } else {
+            entry->size = size;
+        }
+
+        if (D_00565DF4 == 0) {
+            entry->lsn = arg2 / 2048;
+            str = func_00254DA8(id);
+            func_002D3C80(2);
+        } else {
+            entry->lsn = FileLsnGet(id) + arg2 / 2048;
+            entry->disc_size = size;
+            str = D_0056B7A8;
+        }
+
+        for (i = 0; i < READ_Q_PATH_SIZE; i++) {
+            read_q_path[q_cnt][i] = str[i];
+            if (str[i] == '\0') {
+                break;
+            }
+        }
+        break;
+    case 1:
+        entry->size = size;
+        entry->lsn = FileLsnGet(id) + arg2 / 2048;
+        entry->disc_size = size;
+        str = D_0056B7B8;
+        break;
+    }
+
+    if (func_0015A530() != 0) {
+        func_00179058(1, D_0056B7C8, D_0056B7E0, str, sa_file.group, id);
+    }
+
+    entry->compressed = FileCompressedGet(id);
+    entry->unk34 = 0;
+
+    return read_q_req_no;
+}
 
 // Queues a read of size bytes at lsn into buffer; callback (if set) runs when it completes.
 // The entry's unkC..unk18 are copied from arg4, or zeroed if NULL. In mode 0 its path reads
