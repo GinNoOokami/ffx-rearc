@@ -6,6 +6,8 @@
 /* Allocator: (size, 10 at every call so far, file name, line). */
 void* func_0011D370(s32, s32, const char*, s32);
 
+void* func_0011D420(s32, s32, const char*, s32); // Mem_AllocDebug
+
 // AllocFree
 void func_0011D590(void*, s32);
 

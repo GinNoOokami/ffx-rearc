@@ -1,7 +1,7 @@
 #ifndef LIBMSCD_H
 #define LIBMSCD_H
 
-#include <libcdvd.h>
+#include <sdk/libcdvd.h>
 
 #include "common.h"
 
@@ -87,29 +87,17 @@ typedef struct {
     /* 0x24 */ char name[0x10]; // file name under pfs0:/ex/
 } ExFile;                       // size: 0x34
 
-/* Used by libmscd but defined outside it (owning files not split yet). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0xB];
-    /* 0x0B */ s8 unkB;
-    /* 0x0C */ s8 unkC;
-    /* 0x0D */ u8 padD[0x10 - 0xD];
-    /* 0x10 */ s8 unk10;
-} Unk00588A00;
-
-Unk00588A00* func_001244D0(void);
-void func_0017133C(s32); // sleep?
-s32 func_002D1C60(void);
-
-extern s8 D_00565DF4;
-
 SaFile* SaFileGet(void);
 char* func_00162D48(void);
 void func_00162DE0(s32);
+s32 FileSizeGet(s32);
+s32 TblLsnGet(s32);
 s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group);
 void func_00163768(ReadQEntry*);
 void ReadQCallbackCall(ReadQEntry*);
+s32 func_00164628(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4);
 ExFile* ExFileFind(s32, s32);
-s32 func_002D93E8(void);
+s32 ExFileSizeGet(s32, s32);
 
 extern volatile u8 D_0030DAB4;
 extern ReadQEntry* D_0057C700;

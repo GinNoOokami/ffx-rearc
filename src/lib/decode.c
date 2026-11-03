@@ -1,6 +1,6 @@
 #include <string.h>
 #include "common.h"
-#include "decode.h"
+#include "lib/decode.h"
 
 // Reads a little endian 'size' from src, then copies that many bytes from src to dst
 s32 func_00254830(u8* src, void* dst, s32* out) {

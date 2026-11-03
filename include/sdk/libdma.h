@@ -2,7 +2,7 @@
 #define LIBDMA_H
 
 #include <sys/types.h>
-#include <eeregs.h>
+#include <sdk/eeregs.h>
 
 /*
  * EE DMA library (libdma, ID string "PsIIlibdma  2300"). Only what FFX is shown to use.

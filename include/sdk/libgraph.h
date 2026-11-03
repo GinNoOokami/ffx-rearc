@@ -1,9 +1,9 @@
 #ifndef LIBGRAPH_H
 #define LIBGRAPH_H
 
-#include <eetypes.h>
-#include <eeregs.h>
-#include <eestruct.h>
+#include <sdk/eetypes.h>
+#include <sdk/eeregs.h>
+#include <sdk/eestruct.h>
 
 /*
  * GS library (libgraph, ID string "PsIIlibgraph2300"). Only what FFX is shown to use.

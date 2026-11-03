@@ -1,10 +1,12 @@
-#include <sifdev.h>
+#include <sdk/sifdev.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "common.h"
-#include "libmscd.h"
+#include "extern.h"
+#include "lib/libmscd.h"
 #include "mem.h"
+#include "lib/read_debug.h"
 
 #define FILE_NAME_CHG_TBL_CNT 16
 
@@ -13,7 +15,6 @@ extern const char* D_006A2C90[FILE_NAME_CHG_TBL_CNT];
 extern const char* D_006A2CD0[FILE_NAME_CHG_TBL_CNT];
 
 extern char D_00573400[]; // "read_debug.c", emitted by INCLUDE_RODATA
-extern SaFile sa_file;
 
 void func_00254958(void) {
     s32 i;
@@ -55,7 +56,6 @@ void func_00254A88(s32 arg0) {
 // getFileTbl
 void* func_00254AB0(void) { return SaFileGet()->name_tbl; }
 
-const char* func_0011A480(void);   // returns "sugimoto"
 extern char file_name_buff[0x200]; // name buffer, size inferred
 
 // Returns file `index`'s name from the cdrom.fnd table, expanded into a static buffer:
@@ -129,9 +129,6 @@ const char* func_00254DA8(s32 arg0) { return func_00254AD0(SaFileGet()->id_base 
 
 const char* func_00254DD8(s32 arg0, s32 arg1) { return func_00254AD0(sa_file.group_tbl[arg0] + arg1); }
 
-s32 FileSizeGet(s32);
-s32 ExFileSizeGet(s32, s32);
-
 s32 func_00254E08(s32 id) {
     SaFile* state = SaFileGet();
     s32 size = ExFileSizeGet(sa_file.group, id);
@@ -161,11 +158,9 @@ s32 func_00254E08(s32 id) {
     return size;
 }
 
-/*?*/ s32 TblLsnGet(s32); /* extern */
-
 s32 func_00254EF0(s32 arg0) { return TblLsnGet(sa_file.id_base + arg0); }
 
-INCLUDE_RODATA("asm/jp_intl/nonmatchings/dbg/read_debug", D_00573400);
+INCLUDE_RODATA("asm/jp_intl/nonmatchings/lib/read_debug", D_00573400);
 
 // Assert an invalid fd
 void func_00254F18(s32 fd, const char* path) {
@@ -173,8 +168,6 @@ void func_00254F18(s32 fd, const char* path) {
         dbgAssert("fd >= 0", D_00573400, 0x14D);
     }
 }
-
-/*?*/ void FlushCache(/*?*/ s32);
 
 // Debug PCload
 void* func_00254F40(const char* path, s32* arg1) {
@@ -203,7 +196,6 @@ void* func_00254F40(const char* path, s32* arg1) {
     return block;
 }
 
-void* func_0011D420(s32, s32, const char*, s32); // Mem_AllocDebug
 extern s8 D_00565DF0;
 
 void* func_00255020(const char* path, s32* arg1) {
@@ -252,7 +244,7 @@ extern char D_006A2F10[];
 // sets a3 = sp there and computes rest after the call. The same C without the three changes
 // is 23 instructions off. The release counterpart func_00163950 has the same read logic.
 #ifndef NON_MATCHING
-INCLUDE_ASM("asm/jp_intl/nonmatchings/dbg/read_debug", func_00255158);
+INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/read_debug", func_00255158);
 #else
 void func_00255158(void) {
     sceCdRMode mode;
@@ -392,8 +384,6 @@ void func_00255158(void) {
 }
 #endif
 
-void func_0011D590(void*, /*?*/ s32);
-
 // Debug PcFileTblSet
 void func_002556A0(const char* path) {
     if (sa_file.name_tbl != NULL) {
@@ -402,12 +392,11 @@ void func_002556A0(const char* path) {
     sa_file.name_tbl = func_00255020(path, NULL);
 }
 
-/*?*/ s32 func_001ACEE8(char*); // getRegionCode?
-extern char cddata_mdg_path[];  // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
-extern char cddata_fid_path[];  // host:/ffx/proj/battle/jp/cddata/cdrom.fid
-extern char cddata_fnd_path[];  // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
-extern char cdidx_mdg_path[];   // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
-extern char cdidx_fid_path[];   // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
+extern char cddata_mdg_path[]; // host:/ffx/proj/battle/jp/cddata/cdrom.mdg
+extern char cddata_fid_path[]; // host:/ffx/proj/battle/jp/cddata/cdrom.fid
+extern char cddata_fnd_path[]; // host:/ffx/proj/battle/jp/cddata/cdrom.fnd
+extern char cdidx_mdg_path[];  // host:/ffx/proj/prog/cdidx/jp/cdrom.mdg
+extern char cdidx_fid_path[];  // host:/ffx/proj/prog/cdidx/jp/cdrom.fid
 
 void func_002556F8(void) {
     char region[2];
@@ -439,7 +428,7 @@ void func_002556F8(void) {
 
 extern char cdidx_sizetbl_path[]; // host:/ffx/proj/prog/cdidx/jp/sizetbl.bin
 
-void* func_00255800(void) {
+u8* func_00255800(void) {
     char region[2];
 
     func_001ACEE8(region);
@@ -463,9 +452,9 @@ void* func_00255840(void) {
     return func_00254F40(cdidx_modulesize_path, NULL);
 }
 
-/*?*/ s32 func_00164628(); /* extern */
-
-s32 func_00255880(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) { return func_00164628(); }
+s32 func_00255880(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) {
+    return func_00164628(lsn, buffer, size, callback, arg4);
+}
 
 s32 func_002558A0(void) { return -1; }
 

@@ -1,7 +1,7 @@
 #ifndef LIBPAD_H
 #define LIBPAD_H
 
-#include <eetypes.h>
+#include <sdk/eetypes.h>
 
 /*
  * EE-side controller library (libpad, ID string "PsIIlibpad  2300"). Only what FFX is shown to use.
