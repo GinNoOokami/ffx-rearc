@@ -10,13 +10,9 @@
 
 /* Read queue entry: 64 entries at read_q (= archive state +0x98), stride 0x38. */
 typedef struct {
-    /* 0x00 */ u32 size; // read size (sceRead); compared unsigned with disc_size
-    // Tentative union, may be fake: a union access (alias set 0) is the only pointer-typed shape found
-    // that reproduces func_00162DE0's scheduling; any bare pointer type schedules one copy differently.
-    /* 0x04 */ union {
-        void* p;
-    } buff;            // destination buffer (sceRead, memcpy)
-    /* 0x08 */ s32 no; // ExFileFind's second argument
+    /* 0x00 */ u32 size;     // read size (sceRead); compared unsigned with disc_size
+    /* 0x04 */ void* buffer; // destination buffer (sceRead, memcpy)
+    /* 0x08 */ s32 no;       // ExFileFind's second argument
     /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
@@ -113,7 +109,7 @@ s32 func_00163450(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group);
 void func_00163768(ReadQEntry*);
 void ReadQCallbackCall(ReadQEntry*);
 ExFile* ExFileFind(s32, s32);
-s32 func_002D93E8();
+s32 func_002D93E8(void);
 
 extern volatile u8 D_0030DAB4;
 extern ReadQEntry* D_0057C700;

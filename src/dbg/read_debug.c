@@ -299,7 +299,7 @@ void func_00255158(void) {
                 func_0017133C(one);
             }
             FlushCache(0);
-            sceRead(fd, entry->buff.p, exFile->size);
+            sceRead(fd, entry->buffer, exFile->size);
             while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                 func_0017133C(one);
             }
@@ -312,22 +312,22 @@ void func_00255158(void) {
                 secs = size / 2048;
                 if (secs != 0 && size > 0) {
                     rest = secs * 2048;
-                    func_00163450(entry->lsn, size, entry->buff.p, &mode, entry->group);
+                    func_00163450(entry->lsn, size, entry->buffer, &mode, entry->group);
                     FlushCache(0);
-                    memcpy(entry->buff.p, (char*)entry->buff.p + 5, rest);
+                    memcpy(entry->buffer, (char*)entry->buffer + 5, rest);
                     func_00163450(entry->lsn + secs, 0x800, buf, &mode, entry->group);
                     FlushCache(0);
                     size -= rest;
-                    memcpy((char*)entry->buff.p + rest, buf, size - 5);
+                    memcpy((char*)entry->buffer + rest, buf, size - 5);
                 } else {
                     func_00163450(entry->lsn, 0x800, buf, &mode, entry->group);
                     FlushCache(0);
-                    memcpy(entry->buff.p, buf + 5, size - 5);
+                    memcpy(entry->buffer, buf + 5, size - 5);
                 }
             } else {
                 secs = size / 2048;
                 if (secs != 0) {
-                    func_00163450(entry->lsn, entry->disc_size, entry->buff.p, &mode, entry->group);
+                    func_00163450(entry->lsn, entry->disc_size, entry->buffer, &mode, entry->group);
                     rest = size & 0x7FF;
                     if (rest != 0) {
                         func_00163450(entry->lsn + secs, 0x800, buf, &mode, entry->group);
@@ -339,7 +339,7 @@ void func_00255158(void) {
                     rest = size & 0x7FF;
                 copy:
                     FlushCache(0);
-                    memcpy((char*)entry->buff.p + size - rest, buf, rest);
+                    memcpy((char*)entry->buffer + size - rest, buf, rest);
                 }
                 if (entry->compressed != 0) {
                     if (func_001244D0()->unk10 != 0) {
@@ -365,14 +365,14 @@ void func_00255158(void) {
                 func_00254F18(archive->host_fd, read_q_path[i]);
                 sceLseek(archive->host_fd, entry->lsn << 11, SCE_SEEK_SET);
                 FlushCache(0);
-                sceRead(archive->host_fd, entry->buff.p, entry->size);
+                sceRead(archive->host_fd, entry->buffer, entry->size);
                 sceClose(archive->host_fd);
                 FlushCache(0);
             } else {
                 archive->host_fd = sceOpen(read_q_path[i], SCE_RDONLY | SCE_NOWAIT);
                 func_00254F18(archive->host_fd, read_q_path[i]);
                 FlushCache(0);
-                sceRead(archive->host_fd, entry->buff.p, entry->size);
+                sceRead(archive->host_fd, entry->buffer, entry->size);
                 while (sceIoctl(archive->host_fd, SCE_FS_EXECUTING, &stat), stat != 0) {
                     func_0017133C(1);
                 }

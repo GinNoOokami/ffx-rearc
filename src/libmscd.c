@@ -53,24 +53,24 @@ void FlushCache(s32);
 void func_0011C348(s32);
 void func_00125B40(void);
 s32 func_0015A530(void);
-sceCdRMode* func_0015B320();
+sceCdRMode* func_0015B320(void);
 void func_0015B330(void);
 s32 func_0015B830(void);
 s32 func_001636F0(void);
 void func_00163950(SaFile*, ReadQEntry*, s32);
 void func_00163D20(SaFile*, ReadQEntry*, s32);
-s32 func_00164320();
-s32 func_00164628();
+s32 func_00164320(s32 id, void* buffer, s32 arg2, u32 size, void* callback, ReadQEntry* arg5);
+s32 func_00164628(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4);
 void func_00165378(s32);
-/*?*/ s32 func_001653E8(s32, /*?*/ s32, /*?*/ s32);
+s32 func_001653E8(s32 lsn, s32 group, s32 no);
 void func_00165588(s32 mode);
 s32 func_00165EB8(void);
-/*?*/ void func_00165ED8();
+void func_00165ED8(void);
 s32 func_00165F30(s32);
-/*?*/ void func_00165F88();
-/*?*/ void func_00166370();
-s32 func_00166380();
-/*?*/ void func_00166438();
+void func_00165F88(void);
+s8 func_00166370(void);
+s32 func_00166380(void);
+void func_00166438(void);
 void func_00166650(s32, void*, s32, s32);
 void func_00166798(char*, void*, s32, s32);
 void func_00166878(void);
@@ -89,26 +89,94 @@ void func_00171510(void* stack, u32 size, void* fn, void* arg); // calls a funct
 void func_00171548(void* fn); // redirects printf to fn
 s32 func_001715A0(const char* fmt, ...);
 SaTask* func_00171C78(/*?*/ s32);
+
+// Variant getters (`jr ra; li v0, N`): nine values, seven variants each, picked by func_001625F8 and its siblings
+s32 func_00171CC8(void);
+s32 func_00171CD0(void);
+s32 func_00171CD8(void);
+s32 func_00171CE0(void);
+s32 func_00171CE8(void);
+s32 func_00171CF0(void);
+s32 func_00171CF8(void);
+s32 func_00171D00(void);
+s32 func_00171D08(void);
+s32 func_00171D10(void);
+s32 func_00171D18(void);
+s32 func_00171D20(void);
+s32 func_00171D28(void);
+s32 func_00171D30(void);
+s32 func_00171D38(void);
+s32 func_00171D40(void);
+s32 func_00171D48(void);
+s32 func_00171D50(void);
+s32 func_00171D58(void);
+s32 func_00171D60(void);
+s32 func_00171D68(void);
+s32 func_00171D70(void);
+s32 func_00171D78(void);
+s32 func_00171D80(void);
+s32 func_00171D88(void);
+s32 func_00171D90(void);
+s32 func_00171D98(void);
+s32 func_00171DA0(void);
+s32 func_00171DA8(void);
+s32 func_00171DB0(void);
+s32 func_00171DB8(void);
+s32 func_00171DC0(void);
+s32 func_00171DC8(void);
+s32 func_00171DD0(void);
+s32 func_00171DD8(void);
+s32 func_00171DE0(void);
+s32 func_00171DE8(void);
+s32 func_00171DF0(void);
+s32 func_00171DF8(void);
+s32 func_00171E00(void);
+s32 func_00171E08(void);
+s32 func_00171E10(void);
+s32 func_00171E18(void);
+s32 func_00171E20(void);
+s32 func_00171E28(void);
+s32 func_00171E30(void);
+s32 func_00171E38(void);
+s32 func_00171E40(void);
+s32 func_00171E48(void);
+s32 func_00171E50(void);
+s32 func_00171E58(void);
+s32 func_00171E60(void);
+s32 func_00171E68(void);
+s32 func_00171E70(void);
+s32 func_00171E78(void);
+s32 func_00171E80(void);
+s32 func_00171E88(void);
+s32 func_00171E90(void);
+s32 func_00171E98(void);
+s32 func_00171EA0(void);
+s32 func_00171EA8(void);
+s32 func_00171EB0(void);
+s32 func_00171EB8(void);
+
 void func_00179058(s32, const char*, const char*, ...);
+s32 func_001BD228(void);
 
 void func_002D1C70(void (*)());
-/*?*/ s32 func_0020D378();
-/*?*/ void func_00254958();
+s32 func_0020D378(void);
+void func_00254958(void);
 const char* func_00254DA8(s32);
 s32 func_00254E08(s32);
-/*?*/ void func_002556F8();
-u8* func_00255800();
-void* func_00255840();
-void func_002558B0();
+void func_002556F8(void);
+u8* func_00255800(void);
+void* func_00255840(void);
+void func_002558B0(void);
 // TK frame wait: blocks until at least max(n, 1) VBlanks (INTC 2 handler func_002D3B08 counts
 // them in D_0078AC00) have passed since the last call, then resets the count and runs the
 // per-frame TK updates.
-/*?*/ void func_002D3C80(s32);
+void func_002D3C80(s32);
 s32 func_002D6418(void);
 s32 func_002D6478(void);
 void func_002D8E20(const char* ch, const char* str, u32 len);
+u32 func_002D9460(void);
 
-extern s32 read_q_req_no;
+extern s32 read_q_req_no; // Always wraps around to 1, not 0 for some reason
 extern s8 D_0030DA7C;
 extern s8 D_0030DA7E;
 extern s8 sa_file_read_init;
@@ -174,16 +242,6 @@ extern char D_00595AF0[];
 extern char dbg_line_buff[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
 extern char dbg_filter[];
 
-/*?*/ s32 func_00171D08();
-/*?*/ s32 func_00171D50();
-/*?*/ s32 func_00171D98();
-/*?*/ s32 func_00171DE0();
-/*?*/ s32 func_00171E28();
-/*?*/ s32 func_00171E70();
-/*?*/ s32 func_00171EB8();
-s32 func_001BD228();
-u32 func_002D9460();
-
 s32 func_001625F8(void) {
     if (func_001BD228() == 0) {
         switch (func_002D9460()) {
@@ -206,14 +264,6 @@ s32 func_001625F8(void) {
     }
     return func_00171E28();
 }
-
-/*?*/ s32 func_00171CC8();
-/*?*/ s32 func_00171D10();
-/*?*/ s32 func_00171D58();
-/*?*/ s32 func_00171DA0();
-/*?*/ s32 func_00171DE8();
-/*?*/ s32 func_00171E30();
-/*?*/ s32 func_00171E78();
 
 s32 func_001626B8(void) {
     if (func_001BD228() == 0) {
@@ -238,14 +288,6 @@ s32 func_001626B8(void) {
     return func_00171DE8();
 }
 
-/*?*/ s32 func_00171CD0();
-/*?*/ s32 func_00171D18();
-/*?*/ s32 func_00171D60();
-/*?*/ s32 func_00171DA8();
-/*?*/ s32 func_00171DF0();
-/*?*/ s32 func_00171E38();
-/*?*/ s32 func_00171E80();
-
 s32 func_00162778(void) {
     if (func_001BD228() == 0) {
         switch (func_002D9460()) {
@@ -268,14 +310,6 @@ s32 func_00162778(void) {
     }
     return func_00171DF0();
 }
-
-/*?*/ s32 func_00171CD8();
-/*?*/ s32 func_00171D20();
-/*?*/ s32 func_00171D68();
-/*?*/ s32 func_00171DB0();
-/*?*/ s32 func_00171DF8();
-/*?*/ s32 func_00171E40();
-/*?*/ s32 func_00171E88();
 
 s32 func_00162838(void) {
     if (func_001BD228() == 0) {
@@ -300,32 +334,19 @@ s32 func_00162838(void) {
     return func_00171DF8();
 }
 
-/*?*/ s32 func_00171CE0();
-/*?*/ s32 func_00171D28();
-/*?*/ s32 func_00171D70();
-/*?*/ s32 func_00171DB8();
-/*?*/ s32 func_00171E00();
-/*?*/ s32 func_00171E48();
-/*?*/ s32 func_00171E90();
-
 s32 func_001628F8(void) {
     if (func_001BD228() == 0) {
         switch (func_002D9460()) {
         case 2:
             return func_00171E48();
-            return;
         case 3:
             return func_00171CE0();
-            return;
         case 4:
             return func_00171D28();
-            return;
         case 5:
             return func_00171E90();
-            return;
         case 6:
             return func_00171DB8();
-            return;
         default:
         case 0:
             return func_00171D70();
@@ -335,14 +356,6 @@ s32 func_001628F8(void) {
     }
     return func_00171E00();
 }
-
-/*?*/ s32 func_00171CE8(); /* extern */
-/*?*/ s32 func_00171D30(); /* extern */
-/*?*/ s32 func_00171D78(); /* extern */
-/*?*/ s32 func_00171DC0(); /* extern */
-/*?*/ s32 func_00171E08(); /* extern */
-/*?*/ s32 func_00171E50(); /* extern */
-/*?*/ s32 func_00171E98(); /* extern */
 
 s32 func_001629B8(void) {
     if (func_001BD228() == 0) {
@@ -367,14 +380,6 @@ s32 func_001629B8(void) {
     return func_00171E08();
 }
 
-/*?*/ s32 func_00171CF0(); /* extern */
-/*?*/ s32 func_00171D38(); /* extern */
-/*?*/ s32 func_00171D80(); /* extern */
-/*?*/ s32 func_00171DC8(); /* extern */
-/*?*/ s32 func_00171E10(); /* extern */
-/*?*/ s32 func_00171E58(); /* extern */
-/*?*/ s32 func_00171EA0(); /* extern */
-
 s32 func_00162A78(void) {
     if (func_001BD228() == 0) {
         switch (func_002D9460()) {
@@ -398,14 +403,6 @@ s32 func_00162A78(void) {
     return func_00171E10();
 }
 
-/*?*/ s32 func_00171CF8(); /* extern */
-/*?*/ s32 func_00171D40(); /* extern */
-/*?*/ s32 func_00171D88(); /* extern */
-/*?*/ s32 func_00171DD0(); /* extern */
-/*?*/ s32 func_00171E18(); /* extern */
-/*?*/ s32 func_00171E60(); /* extern */
-/*?*/ s32 func_00171EA8(); /* extern */
-
 s32 func_00162B38(void) {
     if (func_001BD228() == 0) {
         switch (func_002D9460()) {
@@ -428,14 +425,6 @@ s32 func_00162B38(void) {
     }
     return func_00171E18();
 }
-
-/*?*/ s32 func_00171D00(); /* extern */
-/*?*/ s32 func_00171D48(); /* extern */
-/*?*/ s32 func_00171D90(); /* extern */
-/*?*/ s32 func_00171DD8(); /* extern */
-/*?*/ s32 func_00171E20(); /* extern */
-/*?*/ s32 func_00171E68(); /* extern */
-/*?*/ s32 func_00171EB0(); /* extern */
 
 s32 func_00162BF8(void) {
     if (func_001BD228() == 0) {
@@ -497,7 +486,7 @@ void func_00162DE0(s32 arg0) {
     }
 
     read_q[arg0].no = 0;
-    read_q[arg0].buff.p = NULL;
+    read_q[arg0].buffer = NULL;
     read_q[arg0].size = 0;
     read_q[arg0].unk30 = 0;
     read_q[arg0].active = 0;
@@ -803,7 +792,7 @@ s32 func_001636F0(void) {
 // Unpacks a compressed entry in place: byte 0 = method (1/2), bytes 1-4 = unpacked size (LE).
 // Input over 0x1800 bytes keeps its tail in D_00595AD0 and moves the rest to the end of the output.
 void func_00163768(ReadQEntry* entry) {
-    u8* buff = entry->buff.p;
+    u8* buff = entry->buffer;
     u32 packedSize = entry->disc_size;
     s32 unpackedSize = DECODE_SIZE(buff);
     s32 headSize;
@@ -877,7 +866,7 @@ void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
 
     if (exFile != NULL) {
         sprintf(D_00595AF0, D_0056B768, exFile->name);
-        func_00166798(D_00595AF0, entry->buff.p, exFile->size, exFile->offset);
+        func_00166798(D_00595AF0, entry->buffer, exFile->size, exFile->offset);
         if (func_00165EB8() == 0) {
             goto end;
         }
@@ -889,15 +878,15 @@ void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
         size = entry->size + 5;
         secs = size / 2048;
         if (secs != 0 && size > 0) {
-            func_00163450(entry->lsn, size, entry->buff.p, &D_0030DA98, entry->group);
+            func_00163450(entry->lsn, size, entry->buffer, &D_0030DA98, entry->group);
             FlushCache(0);
 
-            if (*(char*)entry->buff.p == 0) {
-                memcpy(entry->buff.p, (char*)entry->buff.p + 5, secs * 2048);
+            if (*(char*)entry->buffer == 0) {
+                memcpy(entry->buffer, (char*)entry->buffer + 5, secs * 2048);
                 size -= secs * 2048;
                 func_00163450(entry->lsn + secs, 0x800, D_00595AD0, &D_0030DA98, entry->group);
                 FlushCache(0);
-                memcpy((char*)entry->buff.p + secs * 2048, D_00595AD0, size - 5);
+                memcpy((char*)entry->buffer + secs * 2048, D_00595AD0, size - 5);
                 goto end;
             }
 
@@ -905,7 +894,7 @@ void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
                 func_00163450(entry->lsn + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->group);
                 rest = size & 0x7FF;
                 FlushCache(0);
-                memcpy((char*)entry->buff.p + size - rest, D_00595AD0, rest);
+                memcpy((char*)entry->buffer + size - rest, D_00595AD0, rest);
             } else {
                 FlushCache(0);
             }
@@ -914,22 +903,22 @@ void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
             FlushCache(0);
 
             if (*D_00595AD0 == 0) {
-                memcpy(entry->buff.p, D_00595AD0 + 5, size - 5);
+                memcpy(entry->buffer, D_00595AD0 + 5, size - 5);
                 goto end;
             }
 
             rest = size & 0x7FF;
             FlushCache(0);
-            memcpy((char*)entry->buff.p + size - rest, D_00595AD0, rest);
+            memcpy((char*)entry->buffer + size - rest, D_00595AD0, rest);
         }
     } else {
         if (size / 2048 != 0) {
-            func_00163450(entry->lsn, entry->disc_size, entry->buff.p, &D_0030DA98, entry->group);
+            func_00163450(entry->lsn, entry->disc_size, entry->buffer, &D_0030DA98, entry->group);
             if (size & 0x7FF) {
                 func_00163450(entry->lsn + size / 2048, 0x800, D_00595AD0, &D_0030DA98, entry->group);
                 rest = size & 0x7FF;
                 FlushCache(0);
-                memcpy((char*)entry->buff.p + size - rest, D_00595AD0, rest);
+                memcpy((char*)entry->buffer + size - rest, D_00595AD0, rest);
             } else {
                 FlushCache(0);
             }
@@ -937,7 +926,7 @@ void func_00163950(SaFile* archive, ReadQEntry* entry, s32 index) {
             func_00163450(entry->lsn, 0x800, D_00595AD0, &D_0030DA98, entry->group);
             rest = size & 0x7FF;
             FlushCache(0);
-            memcpy((char*)entry->buff.p + size - rest, D_00595AD0, rest);
+            memcpy((char*)entry->buffer + size - rest, D_00595AD0, rest);
         }
     }
 
@@ -1115,7 +1104,7 @@ s32 func_00164040(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
 
     entry = &read_q[q_cnt];
     entry->active = 1;
-    entry->buff.p = buffer;
+    entry->buffer = buffer;
     entry->no = id;
     entry->group = sa_file.group;
 
@@ -1202,7 +1191,7 @@ s32 func_00164320(s32 id, void* buffer, s32 arg2, u32 size, void* callback, Read
 
     entry = &read_q[q_cnt];
     entry->active = 1;
-    entry->buff.p = buffer;
+    entry->buffer = buffer;
     entry->group = sa_file.group;
     entry->no = id;
 
@@ -1292,7 +1281,7 @@ s32 func_00164628(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* a
 
     entry = &read_q[q_cnt];
     entry->active = 1;
-    entry->buff.p = buffer;
+    entry->buffer = buffer;
     entry->no = -1;
     entry->group = -1;
 
@@ -1709,7 +1698,7 @@ s32 func_001653E8(s32 lsn, s32 group, s32 no) {
     entry->active = 1;
     entry->no = no;
     entry->group = group;
-    entry->buff.p = NULL;
+    entry->buffer = NULL;
     entry->unkC = 0;
     entry->unk10 = 0;
     entry->unk14 = 0;
@@ -1717,7 +1706,6 @@ s32 func_001653E8(s32 lsn, s32 group, s32 no) {
     entry->size = 0;
     entry->callback = NULL;
 
-    // Unsure why 0 is not considered a valid
     if (++read_q_req_no > 0xFFFF) {
         read_q_req_no = 1;
     }
