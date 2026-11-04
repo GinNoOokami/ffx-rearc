@@ -712,22 +712,24 @@ void ReadQEntryUnpack(ReadQEntry* entry) {
 
 void ReadQCallbackCall(ReadQEntry* arg0) { func_00171510(D_00591AD0, 0x4000, arg0->callback, arg0); }
 
-// Not matching yet. For compressed entries (entry->compressed, entry->size < size) the function reads the first
-// sectors, tests the first data byte and, if it is nonzero, carries on with the generic read code:
+// Not matching yet. The C below has the target's behaviour without gotos; it compiles to 257 words
+// (target 244).
+// For compressed entries (entry->compressed, entry->size < size) the target reads the first
+// sectors, tests the first data byte and, if it is nonzero, carries on in the generic read code:
 // the long read joins at the `rest` test (0x163B68), the one-sector read at the FlushCache/memcpy
-// tail, so that path runs FlushCache twice (0x163AFC, 0x163BE8). The PC port's version (0x76E1C0)
-// has the same flow.
-// Writing those continuations out as repeated code reproduces most of it (about 84%): gcc
-// cross-jumps the copies into the generic code. The difference left: at the shared partial read the
-// target recomputes size / 2048 (0x163B70-0x163B84) instead of reusing the value from the test,
-// which needs that code to be reachable from both paths before CSE, i.e. a join in the source.
-// Labels at the two joins give about 90% but are unlikely to be original. Helpers are ruled out:
-// this compiler won't inline a static inline function that ends in a call (memcpy), so they'd
-// show up as calls. Also unsolved: the exits to the shared end (timing stores, cleanup) after the
-// HDD read and the uncompressed copies are still gotos in every version tried.
-// Compiler options are not the cause: the rest of read_debug.c (same library) matches with
-// -O2 -G0, and -fno-cse-follow-jumps, the only option found that makes the division recompute,
-// breaks two of those matches.
+// tail (0x163BE4), so that path runs FlushCache twice (0x163AFC, 0x163BE8). The PC port's version
+// (0x76E1C0) has the same flow.
+// Here those continuations are written out a second time, the stored (first byte 0) paths set
+// `stored` to skip the unpack, and a failed HDD read clears exFile to fall back to the disc. gcc
+// keeps all of that: cross-jumping only merges identical code after register allocation, and the
+// `stored`/exFile re-tests are not folded away. That is the 13 extra words.
+// Gotos at the two joins plus one for the HDD exit give 245 words, but still differ: the target
+// recomputes size / 2048 at the partial read (0x163B70), copies rest at the tail (0x163BEC) and
+// keeps %hi(D_0057C71C) in s8 for the whole function.
+// Helpers are ruled out: this compiler won't inline a static inline function that ends in a call
+// (memcpy), so they'd show up as calls. Compiler options are not the cause: the rest of
+// read_debug.c (same library) matches with -O2 -G0, and -fno-cse-follow-jumps, the only option
+// found that makes the division recompute, breaks two of those matches.
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/libmscd", ReadQEntryRead);
 #else
@@ -737,71 +739,71 @@ void ReadQEntryRead(SaFile* archive, ReadQEntry* entry, s32 index) {
     s32 size;
     s32 secs;
     s32 rest;
+    s32 stored;
 
     if (archive->busy != 0) {
         return;
     }
-
     archive->busy_index = index;
     archive->busy = 1;
     archive->host_fd = 0;
+
     start = D_0057C71C->unk1C;
     size = entry->disc_size;
-    exFile = ExFileFind(entry->group, entry->no);
 
+    exFile = ExFileFind(entry->group, entry->no);
     if (exFile != NULL) {
         sprintf(D_00595AF0, D_0056B768, exFile->name);
         func_00166798(D_00595AF0, entry->buffer, exFile->size, exFile->offset);
-        if (func_00165EB8() == 0) {
-            goto end;
+        if (func_00165EB8() != 0) {
+            D_00565DF4 = 0;
+            func_00125B40();
+            exFile = NULL;
         }
-        D_00565DF4 = 0;
-        func_00125B40();
     }
 
-    if (entry->compressed != 0 && entry->size < size) {
-        size = entry->size + 5;
-        secs = size / 2048;
-        if (secs != 0 && size > 0) {
-            CdReadRetry(entry->lsn, size, entry->buffer, &read_mode, entry->group);
-            FlushCache(0);
-
-            if (*(char*)entry->buffer == 0) {
-                memcpy(entry->buffer, (char*)entry->buffer + 5, secs * 2048);
-                size -= secs * 2048;
-                CdReadRetry(entry->lsn + secs, 0x800, scratch_buff, &read_mode, entry->group);
+    if (exFile == NULL) {
+        stored = 0;
+        if (entry->compressed != 0 && entry->size < size) {
+            size = entry->size + 5;
+            secs = size / 2048;
+            if (secs != 0 && size > 0) {
+                CdReadRetry(entry->lsn, size, entry->buffer, &read_mode, entry->group);
                 FlushCache(0);
-                memcpy((char*)entry->buffer + secs * 2048, scratch_buff, size - 5);
-                goto end;
-            }
-
-            if (size & 0x7FF) {
-                CdReadRetry(entry->lsn + size / 2048, 0x800, scratch_buff, &read_mode, entry->group);
-                rest = size & 0x7FF;
-                FlushCache(0);
-                memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
+                if (*(char*)entry->buffer == 0) {
+                    memcpy(entry->buffer, (char*)entry->buffer + 5, secs * 2048);
+                    size -= secs * 2048;
+                    CdReadRetry(entry->lsn + secs, 0x800, scratch_buff, &read_mode, entry->group);
+                    FlushCache(0);
+                    memcpy((char*)entry->buffer + secs * 2048, scratch_buff, size - 5);
+                    stored = 1;
+                } else {
+                    rest = size & 0x7FF;
+                    if (rest != 0) {
+                        CdReadRetry(entry->lsn + size / 2048, 0x800, scratch_buff, &read_mode, entry->group);
+                        FlushCache(0);
+                        memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
+                    } else {
+                        FlushCache(0);
+                    }
+                }
             } else {
+                CdReadRetry(entry->lsn, 0x800, scratch_buff, &read_mode, entry->group);
                 FlushCache(0);
+                if (*scratch_buff == 0) {
+                    memcpy(entry->buffer, scratch_buff + 5, size - 5);
+                    stored = 1;
+                } else {
+                    rest = size & 0x7FF;
+                    FlushCache(0);
+                    memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
+                }
             }
-        } else {
-            CdReadRetry(entry->lsn, 0x800, scratch_buff, &read_mode, entry->group);
-            FlushCache(0);
-
-            if (*scratch_buff == 0) {
-                memcpy(entry->buffer, scratch_buff + 5, size - 5);
-                goto end;
-            }
-
-            rest = size & 0x7FF;
-            FlushCache(0);
-            memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
-        }
-    } else {
-        if (size / 2048 != 0) {
+        } else if (size / 2048 != 0) {
             CdReadRetry(entry->lsn, entry->disc_size, entry->buffer, &read_mode, entry->group);
-            if (size & 0x7FF) {
+            rest = size & 0x7FF;
+            if (rest != 0) {
                 CdReadRetry(entry->lsn + size / 2048, 0x800, scratch_buff, &read_mode, entry->group);
-                rest = size & 0x7FF;
                 FlushCache(0);
                 memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
             } else {
@@ -813,31 +815,29 @@ void ReadQEntryRead(SaFile* archive, ReadQEntry* entry, s32 index) {
             FlushCache(0);
             memcpy((char*)entry->buffer + size - rest, scratch_buff, rest);
         }
-    }
 
-    if (entry->compressed != 0) {
-        if (func_001244D0()->unk10 != 0) {
-            while (D_0030DAB4 != 0) {
-                func_0017133C(1);
+        if (stored == 0 && entry->compressed != 0) {
+            if (func_001244D0()->unk10 != 0) {
+                while (D_0030DAB4 != 0) {
+                    func_0017133C(1);
+                }
+                D_0057C700 = entry;
+                D_0030DAB4 = 1;
+                func_002D1C60();
+                while (D_0030DAB4 != 0) {
+                    func_0017133C(1);
+                }
+            } else {
+                ReadQEntryUnpack(entry);
             }
-            D_0057C700 = entry;
-            D_0030DAB4 = 1;
-            func_002D1C60();
-            while (D_0030DAB4 != 0) {
-                func_0017133C(1);
-            }
-        } else {
-            ReadQEntryUnpack(entry);
         }
     }
 
-end:
     last_read_size = cd_read_size;
     last_read_time = D_0057C71C->unk1C - start;
     if (entry->callback != NULL) {
         ReadQCallbackCall(entry);
     }
-
     archive->busy = 0;
     archive->host_fd = -1;
     archive->busy_index = -1;
