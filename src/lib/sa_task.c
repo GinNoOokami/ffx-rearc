@@ -79,7 +79,7 @@ void func_001719C8() { func_00171958(5); }
 
 void func_001719D0() { func_00171958(6); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_001719D8);
+void func_001719D8() { func_00171958(7); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_001719E0);
 
