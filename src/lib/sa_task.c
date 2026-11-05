@@ -22,7 +22,7 @@ s32 func_00171758(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(2, arg0, 
 
 s32 func_00171788(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(3, arg0, arg1, arg2); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_001717B8);
+s32 func_001717B8(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(4, arg0, arg1, arg2); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_001717E8);
 
