@@ -30,9 +30,11 @@ s32 func_00171818(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(6, arg0, 
 
 s32 func_00171848(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(7, arg0, arg1, arg2); }
 
+/*?*/ void func_00171878();
+
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171878);
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171918);
+void func_00171918(void) { func_00171878(0); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171920);
 
