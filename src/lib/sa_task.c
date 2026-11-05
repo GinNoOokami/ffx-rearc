@@ -98,7 +98,7 @@ s32 func_001719E0(SaTask* task, s32 arg1, s32 arg2, s32 arg3) {
     return result;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171A68);
+s32 func_00171A68(s32 arg0, s32 arg1, s32 arg2) { return func_00170FE4(arg0, arg1, arg2); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171A88);
 
