@@ -36,7 +36,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171878);
 
 void func_00171918(void) { func_00171878(0); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171920);
+void func_00171920(void) { func_00171878(1); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171928);
 
