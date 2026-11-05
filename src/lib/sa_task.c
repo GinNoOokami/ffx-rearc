@@ -283,7 +283,7 @@ s32 func_00171DF8(void) { return 0x118; }
 
 s32 func_00171E00(void) { return 0x158; }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171E08);
+s32 func_00171E08(void) { return 0x20000; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171E10);
 
