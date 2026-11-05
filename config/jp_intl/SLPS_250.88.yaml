@@ -68,6 +68,7 @@ segments:
     - [0x065E98, c, lib/hddcopy]
     - [0x0691A8, asm, 1691A8]
     - [0x071628, c, lib/sa_task]
+    - [0x071CC8, c, lib/171CC8]
     - [0x071EC0, asm, 171EC0]
     - [0x0ACEA8, c, game/battle/1ACEA8]
     - [0x0AF888, asm, 1AF888]
