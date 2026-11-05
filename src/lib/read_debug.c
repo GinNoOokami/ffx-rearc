@@ -301,16 +301,16 @@ void HostReadQServe(void) {
                 dbgBreak();
             }
             while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
-                func_0017133C(one);
+                task_wait(one);
             }
             sceLseek(fd, exFile->offset, SCE_SEEK_SET);
             while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
-                func_0017133C(one);
+                task_wait(one);
             }
             FlushCache(0);
             sceRead(fd, entry->buffer, exFile->size);
             while (sceIoctl(fd, SCE_FS_EXECUTING, &stat), stat != 0) {
-                func_0017133C(one);
+                task_wait(one);
             }
             sceClose(fd);
             FlushCache(0);
@@ -353,13 +353,13 @@ void HostReadQServe(void) {
                 if (entry->compressed != 0) {
                     if (func_001244D0()->unk10 != 0) {
                         while (D_0030DAB4 != 0) {
-                            func_0017133C(1);
+                            task_wait(1);
                         }
                         D_0030DAB4 = 1;
                         D_0057C700 = entry;
                         func_002D1C60();
                         while (D_0030DAB4 != 0) {
-                            func_0017133C(1);
+                            task_wait(1);
                         }
                     } else {
                         ReadQEntryUnpack(entry);
@@ -383,7 +383,7 @@ void HostReadQServe(void) {
                 FlushCache(0);
                 sceRead(archive->host_fd, entry->buffer, entry->size);
                 while (sceIoctl(archive->host_fd, SCE_FS_EXECUTING, &stat), stat != 0) {
-                    func_0017133C(1);
+                    task_wait(1);
                 }
                 sceClose(archive->host_fd);
                 FlushCache(0);

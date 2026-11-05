@@ -519,7 +519,7 @@ s32 DiscCheck(void) {
                     return 1;
                 }
 
-                func_0017133C(1);
+                task_wait(1);
                 func_0015B330();
 
                 lsn = GroupFileLsnGet(1, 1);
@@ -532,7 +532,7 @@ s32 DiscCheck(void) {
                     if (result != -1) {
                         goto restart;
                     }
-                    func_0017133C(1);
+                    task_wait(1);
                 }
 
                 FlushCache(0);
@@ -548,12 +548,12 @@ s32 DiscCheck(void) {
                         }
                         goto read;
                     }
-                    func_0017133C(1);
+                    task_wait(1);
                 }
             }
 
             D_0030DAA4 = 1;
-            func_0017133C(1);
+            task_wait(1);
         }
     }
     return 1;
@@ -570,7 +570,7 @@ s32 CdReadRetry(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) {
     s32 i;
 
     while (func_002D6418() != 0) {
-        func_0017133C(1);
+        task_wait(1);
     }
 
     cd_read_lsn = lsn;
@@ -608,7 +608,7 @@ s32 CdReadRetry(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) {
                         if (CdReadPoll() == 0) {
                             return 1;
                         }
-                        func_0017133C(1);
+                        task_wait(1);
                     }
                     break;
                 }
@@ -616,12 +616,12 @@ s32 CdReadRetry(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) {
             DiscCheck();
             cd_retry_cnt++;
             D_0030DAA4 = 2;
-            func_0017133C(1);
+            task_wait(1);
         }
 
         sceCdBreak();
         D_0030DAA4 = 2;
-        func_0017133C(1);
+        task_wait(1);
 
         if (retry > 2) {
             wait = 600;
@@ -631,14 +631,14 @@ s32 CdReadRetry(s32 lsn, s32 size, void* buffer, sceCdRMode* mode, s32 group) {
                 if (sceCdStandby() != 0) {
                     break;
                 }
-                func_0017133C(1);
+                task_wait(1);
             }
 
             for (i = 0; i < 120; i++) {
                 if (sceCdSync(1) == 0) {
                     break;
                 }
-                func_0017133C(1);
+                task_wait(1);
             }
 
             mode = &retry_mode;
@@ -706,7 +706,7 @@ void ReadQEntryUnpack(ReadQEntry* entry) {
     }
 }
 
-void ReadQCallbackCall(ReadQEntry* arg0) { func_00171510(D_00591AD0, 0x4000, arg0->callback, arg0); }
+void ReadQCallbackCall(ReadQEntry* arg0) { SPAD_CALL(D_00591AD0, 0x4000, arg0->callback, arg0); }
 
 // Not matching yet. The C below has the target's behaviour without gotos; it compiles to 257 words
 // (target 244).
@@ -815,13 +815,13 @@ void ReadQEntryRead(SaFile* archive, ReadQEntry* entry, s32 index) {
         if (stored == 0 && entry->compressed != 0) {
             if (func_001244D0()->unk10 != 0) {
                 while (D_0030DAB4 != 0) {
-                    func_0017133C(1);
+                    task_wait(1);
                 }
                 D_0057C700 = entry;
                 D_0030DAB4 = 1;
                 func_002D1C60();
                 while (D_0030DAB4 != 0) {
-                    func_0017133C(1);
+                    task_wait(1);
                 }
             } else {
                 ReadQEntryUnpack(entry);
@@ -864,7 +864,7 @@ void ReadQEntrySeek(SaFile* archive, ReadQEntry* entry, s32 index) {
                 if (sceCdSeek(entry->lsn) == 1) {
                     break;
                 }
-                func_0017133C(1);
+                task_wait(1);
             }
 
             if (retry != 16) {
@@ -878,7 +878,7 @@ void ReadQEntrySeek(SaFile* archive, ReadQEntry* entry, s32 index) {
 
                     if (count != 1) {
                         while (sceCdBreak() == 0) {
-                            func_0017133C(1);
+                            task_wait(1);
                         }
                         break;
                     }
@@ -886,7 +886,7 @@ void ReadQEntrySeek(SaFile* archive, ReadQEntry* entry, s32 index) {
                     if (CdReadPoll() == 0) {
                         break;
                     }
-                    func_0017133C(1);
+                    task_wait(1);
                 } while (1);
             }
         }
@@ -919,7 +919,7 @@ void ReadQServe(void) {
             case READ_Q_TYPE_READ:
                 if (entry->cancel != 0) {
                     while (sceCdBreak() == 0) {
-                        func_0017133C(1);
+                        task_wait(1);
                     }
 
                     entry->cancel = 0;
@@ -948,7 +948,7 @@ void ReadQServe(void) {
             }
         }
 
-        func_0017133C(1);
+        task_wait(1);
     }
 }
 
@@ -1287,7 +1287,7 @@ const char* func_00164A10(s32 unused) { return D_0030DAB8; }
 void ReadTask(void) {
     while (1) {
         sa_file.unk68();
-        func_0017133C(1);
+        task_wait(1);
     }
 }
 
@@ -1525,7 +1525,7 @@ void SaFileReadInit(s32 mode) {
     sa_file.busy = 0;
     sa_file.unk64();
 
-    read_task_buff->spawn(ReadTask, 1, 0);
+    read_task_buff->create(ReadTask, 1, 0);
     func_00166370();
 }
 
@@ -1784,7 +1784,7 @@ void DebugOutModeSet(s32 mode) {
             dbg_filter_mode = 0;
             dbg_printf_hooked = 1;
 
-            func_00171548(DebugPrintf);
+            sa_printf_set(DebugPrintf);
             FlushCache(0);
             FlushCache(2);
         }
@@ -1798,7 +1798,7 @@ void DebugPrintNull(void) {}
 // Silences printf: redirects it to the empty DebugPrintNull, then writes back the data cache (0)
 // and invalidates the instruction cache (2) so the patched code is fetched.
 void PrintfMute(void) {
-    func_00171548(DebugPrintNull);
+    sa_printf_set(DebugPrintNull);
     FlushCache(0);
     FlushCache(2);
 }

@@ -1,7 +1,6 @@
 // entry: the ELF header's entry point
 entry = 0x00100008; // type:func
-// Sg_AnalysysELFformat: inferred: its first call is printf("Sg_AnalysysELFformat:%s\n", arg0)
-Sg_AnalysysELFformat = 0x00119F90; // type:func
+Sg_AnalysysELFformat = 0x00119F90; // type:func original name, from its own printf string (inferred)
 // main: called by entry; calls 0x11BE48, then calls the frame function forever
 main = 0x0011B9D8; // type:func
 dbgAssert = 0x00157788; // type:func
@@ -51,16 +50,21 @@ DebugLogFlush = 0x00165B18; // type:func
 ExFileFind = 0x00165D00; // type:func
 ExFileSizeGet = 0x00165D70; // type:func
 DemoDescSet = 0x00165DD0; // type:func
+task_init_asm = 0x00170F9C; // type:func original name, from the PC port's placeholder string for this asm function
+task_create_asm = 0x00170FE4; // type:func original name, from the PC port's placeholder string for this asm function
+task_wait = 0x0017133C; // type:func original name, from the PC port's placeholder string for this asm function
+SPAD_CALL = 0x00171510; // type:func original name, from the PC port's placeholder string for this asm function
+sa_printf_set = 0x00171548; // type:func original name, from the PC port's placeholder string for this asm function
 TaskGroupInit = 0x00171628; // type:func
-TaskSpawn = 0x00171660; // type:func
-TaskSpawn0 = 0x001716F8; // type:func
-TaskSpawn1 = 0x00171728; // type:func
-TaskSpawn2 = 0x00171758; // type:func
-TaskSpawn3 = 0x00171788; // type:func
-TaskSpawn4 = 0x001717B8; // type:func
-TaskSpawn5 = 0x001717E8; // type:func
-TaskSpawn6 = 0x00171818; // type:func
-TaskSpawn7 = 0x00171848; // type:func
+TaskCreate = 0x00171660; // type:func
+TaskCreate0 = 0x001716F8; // type:func
+TaskCreate1 = 0x00171728; // type:func
+TaskCreate2 = 0x00171758; // type:func
+TaskCreate3 = 0x00171788; // type:func
+TaskCreate4 = 0x001717B8; // type:func
+TaskCreate5 = 0x001717E8; // type:func
+TaskCreate6 = 0x00171818; // type:func
+TaskCreate7 = 0x00171848; // type:func
 TaskRun = 0x00171878; // type:func
 TaskRun0 = 0x00171918; // type:func
 TaskRun1 = 0x00171920; // type:func
@@ -79,7 +83,7 @@ TaskRemove4 = 0x001719C0; // type:func
 TaskRemove5 = 0x001719C8; // type:func
 TaskRemove6 = 0x001719D0; // type:func
 TaskRemove7 = 0x001719D8; // type:func
-TaskBuffSpawn = 0x001719E0; // type:func
+TaskBuffCreate = 0x001719E0; // type:func
 TaskBuffSize = 0x00171A88; // type:func
 TaskBuffInit = 0x00171AB0; // type:func
 TaskBuffAlloc = 0x00171C78; // type:func
@@ -104,7 +108,7 @@ HostReadQFileSeekAdd = 0x002558A0; // type:func
 HostReadQLsnSeekAdd = 0x002558A8; // type:func
 HostModeSet = 0x002558B0; // type:func
 read_q_req_no = 0x0030DA78; // size:0x4
-sa_file_read_init = 0x0030DA7D; // size:0x1
+sa_file_read_init = 0x0030DA7D; // size:0x1 original name, from its assert strings
 last_read_ticks = 0x0030DA80; // size:0x4
 last_read_size = 0x0030DA84; // size:0x4
 demo_desc = 0x0030DA88; // size:0x10
@@ -119,7 +123,7 @@ dbg_out_mode = 0x0030DACD; // size:0x1
 dbg_filter_mode = 0x0030DACE; // size:0x1
 dbg_printf_hooked = 0x0030DACF; // size:0x1
 disc_id = 0x0030DCD8; // size:0x4
-task_spawn_tbl = 0x0030E548; // size:0x20
+task_create_tbl = 0x0030E548; // size:0x20
 task_run_tbl = 0x0030E568; // size:0x20
 task_remove_tbl = 0x0030E588; // size:0x20
 cddata_mdg_path = 0x00326CE0;
@@ -138,7 +142,7 @@ cd_read_lsn = 0x00595AD4; // size:0x4
 cd_read_size = 0x00595AD8; // size:0x4
 cd_read_buff = 0x00595ADC; // size:0x4
 cd_read_mode = 0x00595AE0; // size:0x4
-read_task_buff = 0x00595AE4; // size:0x4
+read_task_buff = 0x00595AE4; // size:0x4 original name, from its assert string
 size_tbl = 0x00595AE8; // size:0x4
 ex_file_tbl = 0x00595AEC; // size:0x4
 dbg_line_buff = 0x00595BF0;
@@ -155,10 +159,8 @@ read_q_path = 0x0078EE30; // size:0x2000
 // Same lists also make D_00750074, D_00770076, D_00780077, D_00670066, D_00680067: probably fake
 // too, not checked for code references yet.
 D_00790078 = 0x00790078; // ignore:true
-// Sg_PcReadL: inferred: passes "Sg_PcReadL" as the 2nd argument of the assert function 0x179058
-Sg_PcReadL = 0x0011EE60; // type:func
-// Sg_PcRead: inferred: passes "Sg_PcRead" as the 2nd argument of the assert function 0x179058
-Sg_PcRead = 0x0011EF68; // type:func
+Sg_PcReadL = 0x0011EE60; // type:func original name, passed as the function name to the assert at 0x179058 (inferred)
+Sg_PcRead = 0x0011EF68; // type:func original name, passed as the function name to the assert at 0x179058 (inferred)
 // TkReadMapFile: inferred: prints "TkReadMapFile: %s\n" with printf
 TkReadMapFile = 0x00180988; // type:func
 
@@ -4593,14 +4595,9 @@ func_00170BA4 = 0x00170BA4; // type:func
 func_00170D2C = 0x00170D2C; // type:func
 func_00170DA4 = 0x00170DA4; // type:func
 func_00170DF4 = 0x00170DF4; // type:func
-func_00170F9C = 0x00170F9C; // type:func
 func_00170FD8 = 0x00170FD8; // type:func
-func_00170FE4 = 0x00170FE4; // type:func
 func_00171070 = 0x00171070; // type:func
 func_001710B4 = 0x001710B4; // type:func
-func_0017133C = 0x0017133C; // type:func
-func_00171510 = 0x00171510; // type:func
-func_00171548 = 0x00171548; // type:func
 func_001715A0 = 0x001715A0; // type:func
 func_001715B8 = 0x001715B8; // type:func
 func_00171A68 = 0x00171A68; // type:func

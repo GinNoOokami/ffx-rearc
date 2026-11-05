@@ -6,22 +6,30 @@
 
 #define TASK_GRUPE_MAX 8
 
+// A thread: its saved context (read and written by the hand-written task_*_asm code) and its stack
 typedef struct {
-    u8 pad[0x1310];
-} UnkSize1310; // size: 0x1310
+    /* 0x000 */ s32 args[4];    // the thread function's a0-a3
+    /* 0x010 */ u128 unk10;     // task_create_asm's 2nd argument
+    /* 0x020 */ u128 bucket;    // task_create_asm's 3rd argument: the run-queue bucket
+    /* 0x030 */ u128 regs[13];  // s0-s7, ra, sp, fp, gp, k1; s0 = the thread function, ra = 0: free slot
+    /* 0x100 */ u128 fregs[32]; // f0-f31
+    /* 0x300 */ u128 wait;      // runs before it resumes: task_wait(n) sets n
+    /* 0x310 */ u8 stack[0x1000];
+} TaskSlot; // size: 0x1310
 
+// Run-queue entry, one per slot: rebuilt from the in-use slots on every run
 typedef struct {
-    u8 pad[0x20];
-} UnkSize20; // size: 0x20
+    /* 0x00 */ u128 slot; // TaskSlot*
+    /* 0x10 */ u128 next; // TaskQueueNode*, 0 at the bucket tail
+} TaskQueueNode;          // size: 0x20
 
 typedef struct {
     u8 pad[0x5C8];
 } UnkSize5C8; // size: 0x5C8
 
-extern s32 (*task_spawn_tbl[TASK_GRUPE_MAX])(void (*fn)(void), s32, s32);
+extern s32 (*task_create_tbl[TASK_GRUPE_MAX])(TaskThreadFunc fn, s32 unk, s32 bucket);
 extern void (*task_run_tbl[TASK_GRUPE_MAX])(void);
 extern void (*task_remove_tbl[TASK_GRUPE_MAX])(void);
-extern char D_0056BD90[]; // "sa_task.c"
 extern SaTask* task_group[TASK_GRUPE_MAX];
 
 void TaskGroupInit(void) {
@@ -32,7 +40,7 @@ void TaskGroupInit(void) {
     }
 }
 
-s32 TaskSpawn(s32 group, s32 arg1, s32 arg2, s32 arg3) {
+s32 TaskCreate(s32 group, TaskThreadFunc fn, s32 unk, s32 bucket) {
     SaTask* task = task_group[group];
     s32 d0057C718 = D_0057C718;
     s32 d0057C720 = D_0057C720;
@@ -40,10 +48,10 @@ s32 TaskSpawn(s32 group, s32 arg1, s32 arg2, s32 arg3) {
 
     D_0057C724 = task->slots;
     D_0057C718 = task->save_area;
-    D_0057C728 = task->unk14;
+    D_0057C728 = task->queue;
     D_0057C720 = task->slot_num;
 
-    result = func_00170FE4(arg1, arg2, arg3);
+    result = task_create_asm(fn, unk, bucket);
 
     D_0057C718 = d0057C718;
     D_0057C720 = d0057C720;
@@ -51,21 +59,21 @@ s32 TaskSpawn(s32 group, s32 arg1, s32 arg2, s32 arg3) {
     return result;
 }
 
-s32 TaskSpawn0(s32 arg0, s32 arg1, s32 arg2) { return TaskSpawn(0, arg0, arg1, arg2); }
+s32 TaskCreate0(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(0, fn, unk, bucket); }
 
-s32 TaskSpawn1(s32 arg0, s32 arg1, s32 arg2) { return TaskSpawn(1, arg0, arg1, arg2); }
+s32 TaskCreate1(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(1, fn, unk, bucket); }
 
-s32 TaskSpawn2(s32 arg0, s32 arg1, s32 arg2) { return TaskSpawn(2, arg0, arg1, arg2); }
+s32 TaskCreate2(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(2, fn, unk, bucket); }
 
-s32 TaskSpawn3(s32 arg0, s32 arg1, s32 arg2) { return TaskSpawn(3, arg0, arg1, arg2); }
+s32 TaskCreate3(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(3, fn, unk, bucket); }
 
-s32 TaskSpawn4(s32 arg0, s32 arg1, s32 arg2) { return TaskSpawn(4, arg0, arg1, arg2); }
+s32 TaskCreate4(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(4, fn, unk, bucket); }
 
-s32 TaskSpawn5(s32 arg0, s32 arg1, s32 arg2) { return TaskSpawn(5, arg0, arg1, arg2); }
+s32 TaskCreate5(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(5, fn, unk, bucket); }
 
-s32 TaskSpawn6(s32 arg0, s32 arg1, s32 arg2) { return TaskSpawn(6, arg0, arg1, arg2); }
+s32 TaskCreate6(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(6, fn, unk, bucket); }
 
-s32 TaskSpawn7(s32 arg0, s32 arg1, s32 arg2) { return TaskSpawn(7, arg0, arg1, arg2); }
+s32 TaskCreate7(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(7, fn, unk, bucket); }
 
 void TaskRun(s32 group) {
     s32 d0057C718 = D_0057C718;
@@ -74,7 +82,7 @@ void TaskRun(s32 group) {
     cur_task = task_group[group];
     D_0057C724 = cur_task->slots;
     D_0057C718 = cur_task->save_area;
-    D_0057C728 = cur_task->unk14;
+    D_0057C728 = cur_task->queue;
     D_0057C720 = cur_task->slot_num;
     cur_task->ticks++;
 
@@ -110,42 +118,42 @@ void TaskRemove(s32 group) {
     *slot = NULL;
 }
 
-void TaskRemove0() { TaskRemove(0); }
+void TaskRemove0(void) { TaskRemove(0); }
 
-void TaskRemove1() { TaskRemove(1); }
+void TaskRemove1(void) { TaskRemove(1); }
 
-void TaskRemove2() { TaskRemove(2); }
+void TaskRemove2(void) { TaskRemove(2); }
 
-void TaskRemove3() { TaskRemove(3); }
+void TaskRemove3(void) { TaskRemove(3); }
 
-void TaskRemove4() { TaskRemove(4); }
+void TaskRemove4(void) { TaskRemove(4); }
 
-void TaskRemove5() { TaskRemove(5); }
+void TaskRemove5(void) { TaskRemove(5); }
 
-void TaskRemove6() { TaskRemove(6); }
+void TaskRemove6(void) { TaskRemove(6); }
 
-void TaskRemove7() { TaskRemove(7); }
+void TaskRemove7(void) { TaskRemove(7); }
 
-s32 TaskBuffSpawn(SaTask* task, s32 arg1, s32 arg2, s32 arg3) {
+s32 TaskBuffCreate(SaTask* task, TaskThreadFunc fn, s32 unk, s32 bucket) {
     s32 d0057C718 = D_0057C718;
     s32 d0057C720 = D_0057C720;
     s32 result;
 
     D_0057C724 = task->slots;
     D_0057C718 = task->save_area;
-    D_0057C728 = task->unk14;
+    D_0057C728 = task->queue;
     D_0057C720 = task->slot_num;
 
-    result = func_00170FE4(arg1, arg2, arg3);
+    result = task_create_asm(fn, unk, bucket);
     D_0057C718 = d0057C718;
     D_0057C720 = d0057C720;
     return result;
 }
 
-s32 func_00171A68(s32 arg0, s32 arg1, s32 arg2) { return func_00170FE4(arg0, arg1, arg2); }
+s32 func_00171A68(TaskThreadFunc fn, s32 unk, s32 bucket) { return task_create_asm(fn, unk, bucket); }
 
 // Returns size needed for a task with n thread slots
-s32 TaskBuffSize(s32 n) { return ALIGN_64(sizeof(UnkSize5C8) + n * sizeof(UnkSize1310) + n * sizeof(UnkSize20)); }
+s32 TaskBuffSize(s32 n) { return ALIGN_64(sizeof(UnkSize5C8) + n * sizeof(TaskSlot) + n * sizeof(TaskQueueNode)); }
 
 SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
     s32 saved718 = D_0057C718;
@@ -155,7 +163,7 @@ SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
     s32 pad;
     s32 i;
 
-    slotsSize = n * sizeof(UnkSize1310);
+    slotsSize = n * sizeof(TaskSlot);
     slots = (s32)(task + 1);
 
     // round slots up to a multiple of 16
@@ -173,7 +181,7 @@ SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
     }
 
     if (i == TASK_GRUPE_MAX) {
-        dbgAssert("i!=TASK_GRUPE_MAX", D_0056BD90, 0xFE);
+        dbgAssert("i!=TASK_GRUPE_MAX", "sa_task.c", 254);
     }
     task_group[i] = task;
 
@@ -181,16 +189,16 @@ SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
 
     D_0057C724 = task->slots = slots;
     D_0057C718 = task->save_area = slots + slotsSize;
-    D_0057C728 = task->unk14 = slots + slotsSize + 0x370;
+    D_0057C728 = task->queue = slots + slotsSize + 0x370;
     D_0057C720 = task->slot_num = n;
 
-    task->spawn = task_spawn_tbl[i];
+    task->create = task_create_tbl[i];
     task->run = task_run_tbl[i];
     task->remove = task_remove_tbl[i];
     task->owned = owned;
     task->ticks = 0;
 
-    func_00170F9C();
+    task_init_asm();
 
     D_0057C718 = saved718;
     D_0057C720 = saved720;
@@ -200,7 +208,7 @@ SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
 
 SaTask* TaskBuffAlloc(s32 n) {
     s32 size = TaskBuffSize(n);
-    return TaskBuffInit(n, func_0011D370(size, 10, D_0056BD90, 0x11A), 1);
+    return TaskBuffInit(n, func_0011D370(size, 10, "sa_task.c", 282), 1);
 }
 
 s32 func_00171CC8(void) { return 0xF; }
@@ -328,5 +336,3 @@ s32 func_00171EA8(void) { return 0x82; }
 s32 func_00171EB0(void) { return 0x2; }
 
 s32 func_00171EB8(void) { return 0x10; }
-
-INCLUDE_RODATA("asm/jp_intl/nonmatchings/lib/sa_task", D_0056BD90);
