@@ -25,10 +25,10 @@ SYS_INCLUDE = ROOT / "tools" / "cc" / "include"
 
 
 def function_name(arg: str) -> str:
-    """func_002548A0, or an address like 2548A0 / 0x2548a0."""
-    if arg.startswith("func_"):
-        return arg
-    return "func_" + arg.upper().removeprefix("0X").zfill(8)
+    """A function name (func_002548A0, TaskBuffAlloc), or an address like 2548A0 / 0x2548a0."""
+    if re.fullmatch(r"(0[xX])?[0-9A-Fa-f]{1,8}", arg):
+        return "func_" + arg.upper().removeprefix("0X").zfill(8)
+    return arg
 
 
 def find_asm(nonmatchings: Path, name: str) -> Path:
@@ -62,10 +62,12 @@ def make_context(c_file: Path, out: Path) -> None:
 
 def run_m2c(asm: Path, name: str, context: Path, m2c_args: list[str]) -> str:
     # Read-only data shared by several functions isn't moved into any one function's
-    # .s; splat puts it in its own D_*.s next to them (INCLUDE_RODATA). Passing those
-    # too lets m2c show its contents.
+    # .s; splat puts it in its own .s next to them (INCLUDE_RODATA). Passing those
+    # too lets m2c show its contents. Picked by section, since functions can be named.
     rodata = sorted(
-        str(p) for p in asm.parent.glob("*.s") if not p.name.startswith("func_")
+        str(p)
+        for p in asm.parent.glob("*.s")
+        if p.read_text().startswith(".section .rodata")
     )
     result = subprocess.run(
         [
