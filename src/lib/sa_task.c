@@ -198,7 +198,10 @@ SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
     return task;
 }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", TaskBuffAlloc);
+SaTask* TaskBuffAlloc(s32 n) {
+    s32 size = TaskBuffSize(n);
+    return TaskBuffInit(n, func_0011D370(size, 10, D_0056BD90, 0x11A), 1);
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171CC8);
 
