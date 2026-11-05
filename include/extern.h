@@ -4,8 +4,6 @@
 /* Declarations for code whose source file isn't split yet, grouped by area. Move each group to its
  * owner's header once that file exists. */
 
-#include <sdk/libcdvd.h>
-
 #include "common.h"
 #include "lib/libmscd.h"
 
@@ -15,12 +13,6 @@ void FlushCache(s32);
 /* main program */
 const char* func_0011A480(void); // returns "sugimoto"
 void func_0011C348(s32);
-
-/* movie (0x1584E8-0x160678: moviefunc.ac, movie_cd.c, movie_str.c) */
-s32 func_0015A530(void);
-sceCdRMode* func_0015B320(void);
-void func_0015B330(void);
-s32 func_0015B830(void);
 
 /* HDD (0x165E98-; hddcopy.c from 0x166A90) */
 s32 func_00165EB8(void);
