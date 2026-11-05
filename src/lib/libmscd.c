@@ -979,6 +979,8 @@ s16 GroupSet(s32 arg0) {
 
 // Queues a read of file id (current group) into buffer; callback (if set) runs when it completes.
 // Returns the request number.
+// arg3 isn't a ReadQEntry: callers pass a small struct (often a local) whose +0xC..+0x18 are four
+// words for the callback, e.g. func_001B06C8 -> callback func_001B0670 reads entry->unkC/unk10.
 s32 ReadQFileAdd(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
     const char* str = NULL;
     ReadQEntry* entry;
@@ -1068,6 +1070,7 @@ s32 ReadQFileAdd(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
 
 // Like ReadQFileAdd, but reads size bytes from byte offset arg2 of the file (rounded down to its
 // sector). Returns the request number.
+// arg5 isn't a ReadQEntry (see ReadQFileAdd).
 s32 ReadQFilePartAdd(s32 id, void* buffer, s32 arg2, u32 size, void* callback, ReadQEntry* arg5) {
     const char* str = NULL;
     ReadQEntry* entry;
@@ -1158,6 +1161,7 @@ s32 ReadQFilePartAdd(s32 id, void* buffer, s32 arg2, u32 size, void* callback, R
 // Queues a read of size bytes at lsn into buffer; callback (if set) runs when it completes.
 // The entry's unkC..unk18 are copied from arg4, or zeroed if NULL. In mode 0 its path reads
 // "DVD FILE", as it has no file name. Returns the request number.
+// arg4 isn't a ReadQEntry (see ReadQFileAdd).
 s32 ReadQLsnAdd(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) {
     ReadQEntry* entry;
     char* src;

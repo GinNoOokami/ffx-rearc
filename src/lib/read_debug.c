@@ -464,6 +464,7 @@ void* HostModuleSizeTblLoad(void) {
 }
 
 // Host slot +0x78: passes straight to ReadQLsnAdd.
+// arg4 isn't a ReadQEntry (see ReadQFileAdd in libmscd.c).
 s32 HostReadQLsnAdd(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg4) {
     return ReadQLsnAdd(lsn, buffer, size, callback, arg4);
 }

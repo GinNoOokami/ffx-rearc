@@ -1,12 +1,17 @@
 #include "common.h"
 
-extern s32 D_005979B8[8];
+#include "lib/sa_task.h"
+#include "mem.h"
+
+#define TASK_GRUPE_MAX 8
+
+extern SaTask* D_005979B8[TASK_GRUPE_MAX];
 
 void func_00171628(void) {
     s32 i;
 
-    for (i = 0; i < 8; i++) {
-        D_005979B8[i] = 0;
+    for (i = 0; i < TASK_GRUPE_MAX; i++) {
+        D_005979B8[i] = NULL;
     }
 }
 
@@ -50,7 +55,15 @@ void func_00171948(void) { func_00171878(6); }
 
 void func_00171950(void) { func_00171878(7); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171958);
+void func_00171958(s32 index) {
+    SaTask** slot = &D_005979B8[index];
+    SaTask* task = *slot;
+
+    if (task->unk24 != 0) {
+        func_0011D590(task, 10);
+    }
+    *slot = NULL;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_001719A0);
 
