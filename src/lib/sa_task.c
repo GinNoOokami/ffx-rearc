@@ -67,7 +67,7 @@ void func_00171958(s32 index) {
 
 void func_001719A0() { func_00171958(0); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_001719A8);
+void func_001719A8() { func_00171958(1); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_001719B0);
 
