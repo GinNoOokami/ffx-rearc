@@ -1,6 +1,14 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171628);
+extern s32 D_005979B8[8];
+
+void func_00171628(void) {
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        D_005979B8[i] = 0;
+    }
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171660);
 
