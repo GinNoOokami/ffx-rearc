@@ -18,8 +18,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/hddcopy", func_00165F88);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/hddcopy", func_00166090);
 
-void func_00166098(void) {
-}
+void func_00166098(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/hddcopy", func_001660A0);
 

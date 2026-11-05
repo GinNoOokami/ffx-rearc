@@ -17,11 +17,9 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_001577F8);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_00157898);
 
-void func_00157918(void) {
-}
+void func_00157918(void) {}
 
-void func_00157920(void) {
-}
+void func_00157920(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_00157928);
 
@@ -33,8 +31,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_001581E0);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_001583F0);
 
-void func_001584E0(void) {
-}
+void func_001584E0(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_001584E8);
 
@@ -112,8 +109,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_00159AD0);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_00159AF8);
 
-void func_00159B20(void) {
-}
+void func_00159B20(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_00159B28);
 
@@ -131,8 +127,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_00159EA8);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_0015A100);
 
-void func_0015A238(void) {
-}
+void func_0015A238(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/moviefunc_ac", func_0015A240);
 

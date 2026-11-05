@@ -27,8 +27,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/game/battle/1ACEA8", func_001AD9C0);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/game/battle/1ACEA8", func_001ADAB8);
 
-void func_001ADB08(void) {
-}
+void func_001ADB08(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/game/battle/1ACEA8", func_001ADB10);
 

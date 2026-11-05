@@ -135,16 +135,13 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_00124FC8);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_00124FE8);
 
-void func_00125008(void) {
-}
+void func_00125008(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_00125010);
 
-void func_00125018(void) {
-}
+void func_00125018(void) {}
 
-void func_00125020(void) {
-}
+void func_00125020(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_00125028);
 
@@ -172,8 +169,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_00125460);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_001254B8);
 
-void func_001254E0(void) {
-}
+void func_001254E0(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_001254E8);
 
@@ -181,8 +177,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_00125510);
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_00125520);
 
-void func_00125558(void) {
-}
+void func_00125558(void) {}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/common/tklib", func_00125560);
 
