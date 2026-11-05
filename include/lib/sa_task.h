@@ -3,20 +3,28 @@
 
 #include "common.h"
 
-/* Task object from sa_task.c (read_task_buff): a buffer allocated and set up by
- * func_00171C78(1) in SaFileReadInit; stub, only slot 0 so far.
- * Known from its fill: +0x0/+0x4/+0x8 are per-group function slots, +0x8 starts a task. */
+/* Task buffer: func_00171A88(n) bytes from func_00171C78(n), set up by func_00171AB0 and registered in
+ * D_005979B8[i].
+ *
+ *   +0x00           +0x28       unkC             unk10       unk14
+ *   +---------------+-----------+----------------+-----------+-----------+----------------+
+ *   | SaTask header | pad to 16 | n thread slots | save area | n entries | rest, to a     |
+ *   | (0x28)        |           | 0x1310 each    | 0x370     | 0x20 each | multiple of 64 |
+ *   +---------------+-----------+----------------+-----------+-----------+----------------+
+ *
+ * unk0/unk4/unk8 are slot i's entries of the tables D_0030E568/D_0030E588/D_0030E548. */
 typedef struct {
-    /* 0x00 */ void (*unk0)(void); // called with no args, then func_002D3C80(0) in the wait loop
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ void (*unk8)(void (*fn)(void), s32, s32);
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 pad1C[0x24 - 0x1C];
-    /* 0x24 */ s32 unk24;
-} SaTask;
+    /* 0x00 */ void (*unk0)(void);                      // runs the task (func_00171918..func_00171950)
+    /* 0x04 */ void (*unk4)(void);                      // removes it (func_001719A0..func_001719D8)
+    /* 0x08 */ s32 (*unk8)(void (*fn)(void), s32, s32); // adds a thread running fn (func_001716F8..func_00171848)
+    /* 0x0C */ s32 unkC;                                // thread slots, 16-aligned after the header
+    /* 0x10 */ s32 unk10;                               // register save area, right after the slots
+    /* 0x14 */ s32 unk14;                               // per-slot 0x20 entries, after the save area
+    /* 0x18 */ s32 unk18;                               // n, number of thread slots
+    /* 0x1C */ s32 unk1C;                               // incremented each time func_00171878 runs the task
+    /* 0x20 */ s32 unk20;                               // index i in D_005979B8
+    /* 0x24 */ s32 unk24;                               // nonzero: freed on removal (func_00171958)
+} SaTask;                                               // size: 0x28
 
 SaTask* func_00171C78(/*?*/ s32);
 

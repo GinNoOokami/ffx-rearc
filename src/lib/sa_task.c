@@ -6,7 +6,7 @@
 
 #define TASK_GRUPE_MAX 8
 
-extern SaTask* D_005979B8[TASK_GRUPE_MAX];
+extern SaTask* D_005979B8[TASK_GRUPE_MAX]; // SaTask* g_TaskBuffer[8]
 
 void func_00171628(void) {
     s32 i;
@@ -115,7 +115,62 @@ typedef struct {
 // Returns size needed for a task with n thread slots
 s32 func_00171A88(s32 n) { return ALIGN_64(sizeof(UnkSize5C8) + n * sizeof(UnkSize1310) + n * sizeof(UnkSize20)); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171AB0);
+void func_00170F9C();
+extern s32 (*D_0030E548[TASK_GRUPE_MAX])(void (*fn)(void), s32, s32);
+extern void (*D_0030E568[TASK_GRUPE_MAX])(void);
+extern void (*D_0030E588[TASK_GRUPE_MAX])(void);
+extern char D_0056BD90[]; // "sa_task.c"
+
+SaTask* func_00171AB0(s32 n, SaTask* task, s32 owned) {
+    s32 saved718 = D_0057C718;
+    s32 saved720 = D_0057C720;
+    s32 slotsSize;
+    s32 slots;
+    s32 pad;
+    s32 i;
+
+    slotsSize = n * sizeof(UnkSize1310);
+    slots = (s32)(task + 1);
+
+    // round slots up to a multiple of 16
+    pad = slots & 0xF;
+    if (pad != 0) {
+        pad -= 0x10;
+        slots -= pad;
+    }
+    task->unkC = slots;
+
+    for (i = 0; i < TASK_GRUPE_MAX; i++) {
+        if (D_005979B8[i] == NULL) {
+            break;
+        }
+    }
+
+    if (i == TASK_GRUPE_MAX) {
+        dbgAssert("i!=TASK_GRUPE_MAX", D_0056BD90, 0xFE);
+    }
+    D_005979B8[i] = task;
+
+    task->unk20 = i;
+
+    D_0057C724 = task->unkC = slots;
+    D_0057C718 = task->unk10 = slots + slotsSize;
+    D_0057C728 = task->unk14 = slots + slotsSize + 0x370;
+    D_0057C720 = task->unk18 = n;
+
+    task->unk8 = D_0030E548[i];
+    task->unk0 = D_0030E568[i];
+    task->unk4 = D_0030E588[i];
+    task->unk24 = owned;
+    task->unk1C = 0;
+
+    func_00170F9C();
+
+    D_0057C718 = saved718;
+    D_0057C720 = saved720;
+
+    return task;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171C78);
 

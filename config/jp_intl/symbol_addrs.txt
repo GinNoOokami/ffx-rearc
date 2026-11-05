@@ -107,6 +107,7 @@ size_tbl = 0x00595AE8; // size:0x4
 ex_file_tbl = 0x00595AEC; // size:0x4
 dbg_line_buff = 0x00595BF0;
 dbg_filter = 0x00596FF0;
+D_005979B8 = 0x005979B8; // size:0x20
 file_name_chg_from = 0x006A2C90; // size:0x40
 file_name_chg_to = 0x006A2CD0; // size:0x40
 file_name_buff = 0x006A2D10; // size:0x200
