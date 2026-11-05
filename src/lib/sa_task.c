@@ -100,7 +100,20 @@ s32 func_001719E0(SaTask* task, s32 arg1, s32 arg2, s32 arg3) {
 
 s32 func_00171A68(s32 arg0, s32 arg1, s32 arg2) { return func_00170FE4(arg0, arg1, arg2); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171A88);
+typedef struct {
+    u8 pad[0x1310];
+} UnkSize1310; // size: 0x1310
+
+typedef struct {
+    u8 pad[0x20];
+} UnkSize20; // size: 0x20
+
+typedef struct {
+    u8 pad[0x5C8];
+} UnkSize5C8; // size: 0x5C8
+
+// Returns size needed for a task with n thread slots
+s32 func_00171A88(s32 n) { return ALIGN_64(sizeof(UnkSize5C8) + n * sizeof(UnkSize1310) + n * sizeof(UnkSize20)); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171AB0);
 

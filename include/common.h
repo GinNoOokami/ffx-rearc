@@ -5,6 +5,11 @@
 
 #include "include_asm.h"
 
+#define ALIGN(x, a) (((x) + (a) - 1) & ~((a) - 1))
+#define ALIGN_16(x) (ALIGN(x, 16))
+#define ALIGN_32(x) (ALIGN(x, 32))
+#define ALIGN_64(x) (ALIGN(x, 64))
+
 /* Signed integers */
 typedef signed char s8;
 typedef short s16;
