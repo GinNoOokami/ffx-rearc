@@ -7,6 +7,7 @@
 #include "lib/libmscd.h"
 #include "mem.h"
 #include "lib/read_debug.h"
+#include "common/tklib.h"
 
 #define FILE_NAME_CHG_TBL_CNT 16
 

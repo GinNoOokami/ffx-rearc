@@ -11,6 +11,7 @@
 #include "mem.h"
 #include "lib/read_debug.h"
 #include "lib/sa_task.h"
+#include "common/tklib.h"
 
 #define DBG_LINE_SIZE 40
 #define DBG_LINE_COUNT 128

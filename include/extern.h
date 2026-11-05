@@ -16,17 +16,6 @@ void FlushCache(s32);
 const char* func_0011A480(void); // returns "sugimoto"
 void func_0011C348(s32);
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0xB];
-    /* 0x0B */ s8 unkB;
-    /* 0x0C */ s8 unkC;
-    /* 0x0D */ u8 padD[0x10 - 0xD];
-    /* 0x10 */ s8 unk10;
-} Unk00588A00;
-
-Unk00588A00* func_001244D0(void);
-void func_00125B40(void);
-
 /* movie (0x1584E8-0x160678: moviefunc.ac, movie_cd.c, movie_str.c) */
 s32 func_0015A530(void);
 sceCdRMode* func_0015B320(void);
