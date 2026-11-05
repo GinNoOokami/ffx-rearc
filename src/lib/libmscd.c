@@ -52,7 +52,7 @@ extern s32 read_q_req_no; // Always wraps around to 1, not 0 for some reason
 extern s8 D_0030DA7C;
 extern s8 D_0030DA7E;
 extern s8 sa_file_read_init;
-extern s32 last_read_time;
+extern s32 last_read_ticks;
 extern s32 last_read_size;
 extern Unk0030DA88 demo_desc;
 extern sceCdRMode read_mode;
@@ -380,7 +380,7 @@ void ReadQInit(void) {
     D_0030DA7C = 0;
     cd_read_lsn = 0;
     cd_read_size = 0;
-    last_read_time = 0;
+    last_read_ticks = 0;
     last_read_size = 0;
     cd_read_buff = NULL;
     read_q_req_no = 0;
@@ -721,7 +721,7 @@ void ReadQCallbackCall(ReadQEntry* arg0) { func_00171510(D_00591AD0, 0x4000, arg
 // `stored`/exFile re-tests are not folded away. That is the 13 extra words.
 // Gotos at the two joins plus one for the HDD exit give 245 words, but still differ: the target
 // recomputes size / 2048 at the partial read (0x163B70), copies rest at the tail (0x163BEC) and
-// keeps %hi(D_0057C71C) in s8 for the whole function.
+// keeps %hi(cur_task) in s8 for the whole function.
 // Helpers are ruled out: this compiler won't inline a static inline function that ends in a call
 // (memcpy), so they'd show up as calls. Compiler options are not the cause: the rest of
 // read_debug.c (same library) matches with -O2 -G0, and -fno-cse-follow-jumps, the only option
@@ -744,7 +744,7 @@ void ReadQEntryRead(SaFile* archive, ReadQEntry* entry, s32 index) {
     archive->busy = 1;
     archive->host_fd = 0;
 
-    start = D_0057C71C->unk1C;
+    start = cur_task->ticks;
     size = entry->disc_size;
 
     exFile = ExFileFind(entry->group, entry->no);
@@ -830,7 +830,7 @@ void ReadQEntryRead(SaFile* archive, ReadQEntry* entry, s32 index) {
     }
 
     last_read_size = cd_read_size;
-    last_read_time = D_0057C71C->unk1C - start;
+    last_read_ticks = cur_task->ticks - start;
     if (entry->callback != NULL) {
         ReadQCallbackCall(entry);
     }
@@ -1227,7 +1227,7 @@ void ReadQWait(void) {
 
     // Waits until no queue entry is active: the task step and frame wait sit in the for's
     // increment, so they run only between searches (the target jumps straight to the first search)
-    for (;; read_task_buff->unk0(), func_002D3C80(0)) {
+    for (;; read_task_buff->run(), func_002D3C80(0)) {
         for (i = 0; i < READ_Q_CNT; i++) {
             if (read_q[i].active != 0) {
                 if (func_002D6478() != 0) {
@@ -1310,7 +1310,7 @@ void SaFileReadInit(s32 mode) {
     }
 
     sa_file_read_init = 1;
-    read_task_buff = func_00171C78(1);
+    read_task_buff = TaskBuffAlloc(1);
     SaFileModeSet(mode);
 
     sa_file.unk50 = 0;
@@ -1525,7 +1525,7 @@ void SaFileReadInit(s32 mode) {
     sa_file.busy = 0;
     sa_file.unk64();
 
-    read_task_buff->unk8(ReadTask, 1, 0);
+    read_task_buff->spawn(ReadTask, 1, 0);
     func_00166370();
 }
 
@@ -1651,7 +1651,7 @@ void SaFileModeSet(s32 mode) {
     sa_file.unk6C = GroupFileLsnGet;
 }
 
-void func_001656B8(void) { read_task_buff->unk0(); }
+void func_001656B8(void) { read_task_buff->run(); }
 
 // Used by DebugVprintf, creates a new file the first call and appends thereafter
 void DebugLogAppend(const char* str, u32 len) {

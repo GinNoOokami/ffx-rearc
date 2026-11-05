@@ -3,30 +3,30 @@
 
 #include "common.h"
 
-/* Task buffer: func_00171A88(n) bytes from func_00171C78(n), set up by func_00171AB0 and registered in
- * D_005979B8[i].
+/* Task buffer: TaskBuffSize(n) bytes from TaskBuffAlloc(n), set up by TaskBuffInit and registered in
+ * task_group[group].
  *
- *   +0x00           +0x28       unkC             unk10       unk14
+ *   +0x00           +0x28       slots            save_area   unk14
  *   +---------------+-----------+----------------+-----------+-----------+----------------+
  *   | SaTask header | pad to 16 | n thread slots | save area | n entries | rest, to a     |
  *   | (0x28)        |           | 0x1310 each    | 0x370     | 0x20 each | multiple of 64 |
  *   +---------------+-----------+----------------+-----------+-----------+----------------+
  *
- * unk0/unk4/unk8 are slot i's entries of the tables D_0030E568/D_0030E588/D_0030E548. */
+ * run/remove/spawn are this group's entries of task_run_tbl/task_remove_tbl/task_spawn_tbl. */
 typedef struct {
-    /* 0x00 */ void (*unk0)(void);                      // runs the task (func_00171918..func_00171950)
-    /* 0x04 */ void (*unk4)(void);                      // removes it (func_001719A0..func_001719D8)
-    /* 0x08 */ s32 (*unk8)(void (*fn)(void), s32, s32); // adds a thread running fn (func_001716F8..func_00171848)
-    /* 0x0C */ s32 unkC;                                // thread slots, 16-aligned after the header
-    /* 0x10 */ s32 unk10;                               // register save area, right after the slots
-    /* 0x14 */ s32 unk14;                               // per-slot 0x20 entries, after the save area
-    /* 0x18 */ s32 unk18;                               // n, number of thread slots
-    /* 0x1C */ s32 unk1C;                               // incremented each time func_00171878 runs the task
-    /* 0x20 */ s32 unk20;                               // index i in D_005979B8
-    /* 0x24 */ s32 unk24;                               // nonzero: freed on removal (func_00171958)
-} SaTask;                                               // size: 0x28
+    /* 0x00 */ void (*run)(void);                        // TaskRun0..TaskRun7
+    /* 0x04 */ void (*remove)(void);                     // TaskRemove0..TaskRemove7
+    /* 0x08 */ s32 (*spawn)(void (*fn)(void), s32, s32); // TaskSpawn0..TaskSpawn7: adds a thread running fn
+    /* 0x0C */ s32 slots;                                // 16-aligned after the header
+    /* 0x10 */ s32 save_area;                            // register save area, right after the slots
+    /* 0x14 */ s32 unk14;                                // per-slot 0x20 entries, after the save area
+    /* 0x18 */ s32 slot_num;
+    /* 0x1C */ s32 ticks; // +1 per TaskRun
+    /* 0x20 */ s32 group; // index in task_group
+    /* 0x24 */ s32 owned; // nonzero: TaskRemove frees it
+} SaTask;                 // size: 0x28
 
-SaTask* func_00171C78(/*?*/ s32);
+SaTask* TaskBuffAlloc(s32 n);
 
 // Variant getters (`jr ra; li v0, N`): nine values, seven variants each, picked by libmscd.c's
 // func_001625F8 and its siblings

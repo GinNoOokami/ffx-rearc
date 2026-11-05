@@ -31,10 +31,13 @@ s32 func_00167F58(ExFile*);
 
 /* 0x170BA4-0x171628: hand-written, before sa_task.c */
 extern s32 D_0057C718;
-extern SaTask* D_0057C71C;
+extern SaTask* cur_task;
 extern s32 D_0057C720;
 extern s32 D_0057C724;
 extern s32 D_0057C728;
+/* Hand-written. Clears the +0xB0 quad (func_00170FE4's free-slot test) of each of D_0057C720 slots
+ * from D_0057C724. */
+void func_00170F9C(void);
 /* Hand-written. Scans D_0057C720 slots of 0x1310 bytes from D_0057C724 for one whose +0xB0 quad is
  * zero (spins forever in func_0017101C if none), then sets it up to start at func_00171070:
  * a0/a1/a2 at +0x30/+0x10/+0x20, gp at +0xE0, fp at +0xD0, sp = slot + 0x12F0 at +0xC0, +0x300 = 1.
