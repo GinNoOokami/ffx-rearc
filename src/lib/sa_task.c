@@ -16,7 +16,7 @@ INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171660);
 
 s32 func_001716F8(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(0, arg0, arg1, arg2); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171728);
+s32 func_00171728(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(1, arg0, arg1, arg2); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171758);
 
