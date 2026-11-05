@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "lib/libmscd.h"
+#include "lib/sa_task.h"
 
 /* SDK: kernel */
 void FlushCache(s32);
@@ -14,7 +15,7 @@ void FlushCache(s32);
 const char* func_0011A480(void); // returns "sugimoto"
 void func_0011C348(s32);
 
-/* HDD (0x165E98-; hddcopy.c from 0x166A90) */
+/* HDD install: hddcopy.c */
 s32 func_00165EB8(void);
 void func_00165ED8(void);
 s32 func_00165F30(s32);
@@ -30,6 +31,7 @@ s32 func_00167F58(ExFile*);
 
 /* 0x170BA4-0x171628: hand-written, before sa_task.c */
 extern s32 D_0057C718;
+extern SaTask* D_0057C71C;
 extern s32 D_0057C720;
 extern s32 D_0057C724;
 extern s32 D_0057C728;
@@ -38,6 +40,7 @@ extern s32 D_0057C728;
  * a0/a1/a2 at +0x30/+0x10/+0x20, gp at +0xE0, fp at +0xD0, sp = slot + 0x12F0 at +0xC0, +0x300 = 1.
  * Returns the slot. */
 s32 func_00170FE4(s32, s32, s32);
+s32 func_001710B4(void);
 void func_0017133C(s32); // sleep?
 /* Hand-written: moves are `addu rd,$0,rs` (compiled code here uses `daddu rd,rs,$0`), it calls
  * through $1 (gcc never allocates `at`), has no frame, and switches sp to a caller-supplied buffer.

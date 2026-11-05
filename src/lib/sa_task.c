@@ -36,9 +36,22 @@ s32 func_00171818(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(6, arg0, 
 
 s32 func_00171848(s32 arg0, s32 arg1, s32 arg2) { return func_00171660(7, arg0, arg1, arg2); }
 
-/*?*/ void func_00171878();
+void func_00171878(s32 arg0) {
+    s32 d0057C718 = D_0057C718;
+    s32 d0057C720 = D_0057C720;
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171878);
+    D_0057C71C = D_005979B8[arg0];
+    D_0057C724 = D_0057C71C->unkC;
+    D_0057C718 = D_0057C71C->unk10;
+    D_0057C728 = D_0057C71C->unk14;
+    D_0057C720 = D_0057C71C->unk18;
+    D_0057C71C->unk1C++;
+
+    func_001710B4();
+
+    D_0057C718 = d0057C718;
+    D_0057C720 = d0057C720;
+}
 
 void func_00171918(void) { func_00171878(0); }
 

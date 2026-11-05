@@ -38,11 +38,6 @@ typedef struct {
     /* 0xC */ u32 group_tbl_size; // CDROM.FID size
 } Unk0030DA88;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s32 unk1C;
-} Unk0057C71C;
-
 extern SaTask* read_task_buff;
 
 s32 CdReadPoll(void);
@@ -106,7 +101,6 @@ extern char D_0056B940[]; // "host:printf.log"
 extern char D_0056B950[]; // "FFXDEBUG"
 
 extern void* module_size_tbl;
-extern Unk0057C71C* D_0057C71C;
 extern u8 D_00591AD0[0x4000];
 extern char* scratch_buff;
 extern s32 cd_read_lsn;
