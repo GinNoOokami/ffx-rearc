@@ -205,7 +205,7 @@ SaTask* TaskBuffAlloc(s32 n) {
 
 s32 func_00171CC8(void) { return 0xF; }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171CD0);
+s32 func_00171CD0(void) { return 0x117; }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171CD8);
 
