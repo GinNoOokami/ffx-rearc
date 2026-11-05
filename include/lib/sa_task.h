@@ -10,7 +10,11 @@ typedef struct {
     /* 0x00 */ void (*unk0)(void); // called with no args, then func_002D3C80(0) in the wait loop
     /* 0x04 */ s32 unk4;
     /* 0x08 */ void (*unk8)(void (*fn)(void), s32, s32);
-    /* 0x0C */ u8 padC[0x24 - 0x0C];
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 pad1C[0x24 - 0x1C];
     /* 0x24 */ s32 unk24;
 } SaTask;
 

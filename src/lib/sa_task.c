@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "extern.h"
 #include "lib/sa_task.h"
 #include "mem.h"
 
@@ -81,7 +82,21 @@ void func_001719D0() { func_00171958(6); }
 
 void func_001719D8() { func_00171958(7); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_001719E0);
+s32 func_001719E0(SaTask* task, s32 arg1, s32 arg2, s32 arg3) {
+    s32 d0057C718 = D_0057C718;
+    s32 d0057C720 = D_0057C720;
+    s32 result;
+
+    D_0057C724 = task->unkC;
+    D_0057C718 = task->unk10;
+    D_0057C728 = task->unk14;
+    D_0057C720 = task->unk18;
+
+    result = func_00170FE4(arg1, arg2, arg3);
+    D_0057C718 = d0057C718;
+    D_0057C720 = d0057C720;
+    return result;
+}
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171A68);
 

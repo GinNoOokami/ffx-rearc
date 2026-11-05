@@ -28,7 +28,16 @@ void func_00166878(void);
 /*?*/ void func_00167C58(/*?*/ s32);
 s32 func_00167F58(ExFile*);
 
-/* 0x17133C-0x1715A0, before sa_task.c */
+/* 0x170BA4-0x171628: hand-written, before sa_task.c */
+extern s32 D_0057C718;
+extern s32 D_0057C720;
+extern s32 D_0057C724;
+extern s32 D_0057C728;
+/* Hand-written. Scans D_0057C720 slots of 0x1310 bytes from D_0057C724 for one whose +0xB0 quad is
+ * zero (spins forever in func_0017101C if none), then sets it up to start at func_00171070:
+ * a0/a1/a2 at +0x30/+0x10/+0x20, gp at +0xE0, fp at +0xD0, sp = slot + 0x12F0 at +0xC0, +0x300 = 1.
+ * Returns the slot. */
+s32 func_00170FE4(s32, s32, s32);
 void func_0017133C(s32); // sleep?
 /* Hand-written: moves are `addu rd,$0,rs` (compiled code here uses `daddu rd,rs,$0`), it calls
  * through $1 (gcc never allocates `at`), has no frame, and switches sp to a caller-supplied buffer.
