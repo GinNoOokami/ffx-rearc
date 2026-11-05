@@ -42,7 +42,7 @@ void func_00171928(void) { func_00171878(2); }
 
 void func_00171930(void) { func_00171878(3); }
 
-INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171938);
+void func_00171938(void) { func_00171878(4); }
 
 INCLUDE_ASM("asm/jp_intl/nonmatchings/lib/sa_task", func_00171940);
 
