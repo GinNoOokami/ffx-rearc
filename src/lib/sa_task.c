@@ -42,21 +42,21 @@ void TaskGroupInit(void) {
 
 s32 TaskCreate(s32 group, TaskThreadFunc fn, s32 unk, s32 bucket) {
     SaTask* task = task_group[group];
-    s32 d0057C718 = D_0057C718;
-    s32 d0057C720 = D_0057C720;
-    s32 result;
+    s32 prev_save_area = cur_save_area;
+    s32 prev_slot_num = cur_slot_num;
+    s32 slot;
 
-    D_0057C724 = task->slots;
-    D_0057C718 = task->save_area;
-    D_0057C728 = task->queue;
-    D_0057C720 = task->slot_num;
+    cur_slots = task->slots;
+    cur_save_area = task->save_area;
+    cur_queue = task->queue;
+    cur_slot_num = task->slot_num;
 
-    result = task_create_asm(fn, unk, bucket);
+    slot = task_create_asm(fn, unk, bucket);
 
-    D_0057C718 = d0057C718;
-    D_0057C720 = d0057C720;
+    cur_save_area = prev_save_area;
+    cur_slot_num = prev_slot_num;
 
-    return result;
+    return slot;
 }
 
 s32 TaskCreate0(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(0, fn, unk, bucket); }
@@ -76,20 +76,20 @@ s32 TaskCreate6(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(6, f
 s32 TaskCreate7(TaskThreadFunc fn, s32 unk, s32 bucket) { return TaskCreate(7, fn, unk, bucket); }
 
 void TaskRun(s32 group) {
-    s32 d0057C718 = D_0057C718;
-    s32 d0057C720 = D_0057C720;
+    s32 prev_save_area = cur_save_area;
+    s32 prev_slot_num = cur_slot_num;
 
     cur_task = task_group[group];
-    D_0057C724 = cur_task->slots;
-    D_0057C718 = cur_task->save_area;
-    D_0057C728 = cur_task->queue;
-    D_0057C720 = cur_task->slot_num;
+    cur_slots = cur_task->slots;
+    cur_save_area = cur_task->save_area;
+    cur_queue = cur_task->queue;
+    cur_slot_num = cur_task->slot_num;
     cur_task->ticks++;
 
-    func_001710B4();
+    task_run_asm();
 
-    D_0057C718 = d0057C718;
-    D_0057C720 = d0057C720;
+    cur_save_area = prev_save_area;
+    cur_slot_num = prev_slot_num;
 }
 
 void TaskRun0(void) { TaskRun(0); }
@@ -135,19 +135,19 @@ void TaskRemove6(void) { TaskRemove(6); }
 void TaskRemove7(void) { TaskRemove(7); }
 
 s32 TaskBuffCreate(SaTask* task, TaskThreadFunc fn, s32 unk, s32 bucket) {
-    s32 d0057C718 = D_0057C718;
-    s32 d0057C720 = D_0057C720;
-    s32 result;
+    s32 prev_save_area = cur_save_area;
+    s32 prev_slot_num = cur_slot_num;
+    s32 slot;
 
-    D_0057C724 = task->slots;
-    D_0057C718 = task->save_area;
-    D_0057C728 = task->queue;
-    D_0057C720 = task->slot_num;
+    cur_slots = task->slots;
+    cur_save_area = task->save_area;
+    cur_queue = task->queue;
+    cur_slot_num = task->slot_num;
 
-    result = task_create_asm(fn, unk, bucket);
-    D_0057C718 = d0057C718;
-    D_0057C720 = d0057C720;
-    return result;
+    slot = task_create_asm(fn, unk, bucket);
+    cur_save_area = prev_save_area;
+    cur_slot_num = prev_slot_num;
+    return slot;
 }
 
 s32 func_00171A68(TaskThreadFunc fn, s32 unk, s32 bucket) { return task_create_asm(fn, unk, bucket); }
@@ -156,8 +156,8 @@ s32 func_00171A68(TaskThreadFunc fn, s32 unk, s32 bucket) { return task_create_a
 s32 TaskBuffSize(s32 n) { return ALIGN_64(sizeof(UnkSize5C8) + n * sizeof(TaskSlot) + n * sizeof(TaskQueueNode)); }
 
 SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
-    s32 saved718 = D_0057C718;
-    s32 saved720 = D_0057C720;
+    s32 prev_save_area = cur_save_area;
+    s32 prev_slot_num = cur_slot_num;
     s32 slotsSize;
     s32 slots;
     s32 pad;
@@ -187,10 +187,10 @@ SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
 
     task->group = i;
 
-    D_0057C724 = task->slots = slots;
-    D_0057C718 = task->save_area = slots + slotsSize;
-    D_0057C728 = task->queue = slots + slotsSize + 0x370;
-    D_0057C720 = task->slot_num = n;
+    cur_slots = task->slots = slots;
+    cur_save_area = task->save_area = slots + slotsSize;
+    cur_queue = task->queue = slots + slotsSize + 0x370;
+    cur_slot_num = task->slot_num = n;
 
     task->create = task_create_tbl[i];
     task->run = task_run_tbl[i];
@@ -200,8 +200,8 @@ SaTask* TaskBuffInit(s32 n, SaTask* task, s32 owned) {
 
     task_init_asm();
 
-    D_0057C718 = saved718;
-    D_0057C720 = saved720;
+    cur_save_area = prev_save_area;
+    cur_slot_num = prev_slot_num;
 
     return task;
 }

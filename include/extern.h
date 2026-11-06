@@ -30,21 +30,6 @@ void func_00166878(void);
 s32 func_00167F58(ExFile*);
 
 /* 0x170BA4-0x171628: hand-written, before sa_task.c */
-extern s32 D_0057C718;
-extern SaTask* cur_task;
-extern s32 D_0057C720;
-extern s32 D_0057C724;
-extern s32 D_0057C728;
-/* Hand-written. Clears the +0xB0 quad (task_create_asm's free-slot test) of each of D_0057C720 slots
- * from D_0057C724. */
-void task_init_asm(void);
-/* Hand-written. Scans D_0057C720 slots of 0x1310 bytes from D_0057C724 for one whose +0xB0 quad is
- * zero (spins forever in func_0017101C if none), then sets it up to start at func_00171070:
- * a0/a1/a2 at +0x30/+0x10/+0x20, gp at +0xE0, fp at +0xD0, sp = slot + 0x12F0 at +0xC0, +0x300 = 1.
- * Returns the slot. */
-s32 task_create_asm(TaskThreadFunc fn, s32 unk, s32 bucket);
-s32 func_001710B4(void);
-void task_wait(s32);
 /* Hand-written: moves are `addu rd,$0,rs` (compiled code here uses `daddu rd,rs,$0`), it calls
  * through $1 (gcc never allocates `at`), has no frame, and switches sp to a caller-supplied buffer.
  * Saves ra/sp/s0 at stack[0..2], runs fn(arg) with sp = stack + size - 0x10, then restores them;
