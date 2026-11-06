@@ -142,7 +142,7 @@ const char* TblNameGet(s32 index) {
 }
 
 // Name of file id in the current group (TblNameGet).
-const char* FileNameGet(s32 arg0) { return TblNameGet(SaFileGet()->id_base + arg0); }
+const char* HostFileNameGet(s32 arg0) { return TblNameGet(SaFileGet()->id_base + arg0); }
 
 // Name of file arg1 in group arg0 (TblNameGet).
 const char* GroupFileNameGet(s32 arg0, s32 arg1) { return TblNameGet(sa_file.group_tbl[arg0] + arg1); }
@@ -482,9 +482,9 @@ s32 HostReadQLsnSeekAdd(void) { return -1; }
 //   slot   host (here)            release            type
 //   +0x04  HostFileLsnGet         FileLsnGet         s32 (*)(s32)
 //   +0x14  HostFileSizeGet        FileSizeGet        s32 (*)(s32)
-//   +0x54  HostPcLoad             func_00162D30      void* (*)(const char*, s32*)
-//   +0x58  FileNameGet            func_00164A10      const char* (*)(s32)
-//   +0x60  HostPcFileTblSet       func_00162D18      void (*)(const char*)
+//   +0x54  HostPcLoad             PCload             void* (*)(const char*, s32*)
+//   +0x58  HostFileNameGet        FileNameGet        const char* (*)(s32)
+//   +0x60  HostPcFileTblSet       PcFileTblSet       void (*)(const char*)
 //   +0x68  HostReadQServe         ReadQServe         void (*)(void)
 //   +0x78  HostReadQLsnAdd        ReadQLsnAdd        s32 (*)(s32, void*, u32, void*, ReadQEntry*)
 //   +0x88  HostReadQFileSeekAdd   ReadQFileSeekAdd   s32 (*)(s32, s32)
@@ -496,7 +496,7 @@ s32 HostReadQLsnSeekAdd(void) { return -1; }
 
 void HostModeSet(void) {
     sa_file.unk14 = HostFileSizeGet;
-    sa_file.unk58 = FileNameGet;
+    sa_file.unk58 = HostFileNameGet;
     sa_file.pc_load = HostPcLoad;
     sa_file.unk68 = HostReadQServe;
     sa_file.pc_file_tbl_set = HostPcFileTblSet;

@@ -44,7 +44,7 @@ s32 CdReadPoll(void);
 void ReadQEntryRead(SaFile*, ReadQEntry*, s32);
 void ReadQEntrySeek(SaFile*, ReadQEntry*, s32);
 s32 ReadQFilePartAdd(s32 id, void* buffer, s32 arg2, u32 size, void* callback, ReadQEntry* arg5);
-void func_00165378(s32);
+void ReadSpinSet(s32);
 s32 ReadQSeekAdd(s32 lsn, s32 group, s32 no);
 void SaFileModeSet(s32 mode);
 
@@ -59,7 +59,7 @@ extern sceCdRMode read_mode;
 extern sceCdRMode retry_mode;
 
 extern s8 D_0030DAA4;
-extern s8 D_0030DAA5;
+extern s8 disc_check;
 extern s32 cd_retry_cnt;
 extern s32 lsn_base;
 extern s32 ex_file_cnt;
@@ -113,225 +113,225 @@ extern char D_00595AF0[];
 extern char dbg_line_buff[DBG_LINE_COUNT][DBG_LINE_SIZE]; // ring buffer
 extern char dbg_filter[];
 
-s32 func_001625F8(void) {
+s32 ModuleSizeTblNoGet(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
-            return func_00171E70();
-        case 3:
-            return func_00171D08();
-        case 4:
-            return func_00171D50();
-        case 5:
-            return func_00171EB8();
-        case 6:
-            return func_00171DE0();
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
+            return ModuleSizeTblNoGetDe();
+        case GAME_REGION_FR:
+            return ModuleSizeTblNoGetFr();
+        case GAME_REGION_IT:
+            return ModuleSizeTblNoGetIt();
+        case GAME_REGION_ES:
+            return ModuleSizeTblNoGetEs();
+        case GAME_REGION_UK:
+            return ModuleSizeTblNoGetUk();
         default:
-        case 0:
-            return func_00171D98();
-        case 1:
-            return func_00171E28();
+        case GAME_REGION_JP:
+            return ModuleSizeTblNoGetJp();
+        case GAME_REGION_US:
+            return ModuleSizeTblNoGetUs();
         }
     }
-    return func_00171E28();
+    return ModuleSizeTblNoGetUs();
 }
 
-s32 func_001626B8(void) {
+s32 SizeTblNoGet(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
-            return func_00171E30();
-        case 3:
-            return func_00171CC8();
-        case 4:
-            return func_00171D10();
-        case 5:
-            return func_00171E78();
-        case 6:
-            return func_00171DA0();
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
+            return SizeTblNoGetDe();
+        case GAME_REGION_FR:
+            return SizeTblNoGetFr();
+        case GAME_REGION_IT:
+            return SizeTblNoGetIt();
+        case GAME_REGION_ES:
+            return SizeTblNoGetEs();
+        case GAME_REGION_UK:
+            return SizeTblNoGetUk();
         default:
-        case 0:
-            return func_00171D58();
-        case 1:
-            return func_00171DE8();
+        case GAME_REGION_JP:
+            return SizeTblNoGetJp();
+        case GAME_REGION_US:
+            return SizeTblNoGetUs();
         }
     }
-    return func_00171DE8();
+    return SizeTblNoGetUs();
 }
 
 s32 func_00162778(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
             return func_00171E38();
-        case 3:
+        case GAME_REGION_FR:
             return func_00171CD0();
-        case 4:
+        case GAME_REGION_IT:
             return func_00171D18();
-        case 5:
+        case GAME_REGION_ES:
             return func_00171E80();
-        case 6:
+        case GAME_REGION_UK:
             return func_00171DA8();
         default:
-        case 0:
+        case GAME_REGION_JP:
             return func_00171D60();
-        case 1:
+        case GAME_REGION_US:
             return func_00171DF0();
         }
     }
     return func_00171DF0();
 }
 
-s32 func_00162838(void) {
+s32 FileTblLsnGet(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
-            return func_00171E40();
-        case 3:
-            return func_00171CD8();
-        case 4:
-            return func_00171D20();
-        case 5:
-            return func_00171E88();
-        case 6:
-            return func_00171DB0();
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
+            return FileTblLsnGetDe();
+        case GAME_REGION_FR:
+            return FileTblLsnGetFr();
+        case GAME_REGION_IT:
+            return FileTblLsnGetIt();
+        case GAME_REGION_ES:
+            return FileTblLsnGetEs();
+        case GAME_REGION_UK:
+            return FileTblLsnGetUk();
         default:
-        case 0:
-            return func_00171D68();
-        case 1:
-            return func_00171DF8();
+        case GAME_REGION_JP:
+            return FileTblLsnGetJp();
+        case GAME_REGION_US:
+            return FileTblLsnGetUs();
         }
     }
-    return func_00171DF8();
+    return FileTblLsnGetUs();
 }
 
-s32 func_001628F8(void) {
+s32 GroupTblLsnGet(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
-            return func_00171E48();
-        case 3:
-            return func_00171CE0();
-        case 4:
-            return func_00171D28();
-        case 5:
-            return func_00171E90();
-        case 6:
-            return func_00171DB8();
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
+            return GroupTblLsnGetDe();
+        case GAME_REGION_FR:
+            return GroupTblLsnGetFr();
+        case GAME_REGION_IT:
+            return GroupTblLsnGetIt();
+        case GAME_REGION_ES:
+            return GroupTblLsnGetEs();
+        case GAME_REGION_UK:
+            return GroupTblLsnGetUk();
         default:
-        case 0:
-            return func_00171D70();
-        case 1:
-            return func_00171E00();
+        case GAME_REGION_JP:
+            return GroupTblLsnGetJp();
+        case GAME_REGION_US:
+            return GroupTblLsnGetUs();
         }
     }
-    return func_00171E00();
+    return GroupTblLsnGetUs();
 }
 
-s32 func_001629B8(void) {
+s32 FileTblSizeGet(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
-            return func_00171E50();
-        case 3:
-            return func_00171CE8();
-        case 4:
-            return func_00171D30();
-        case 5:
-            return func_00171E98();
-        case 6:
-            return func_00171DC0();
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
+            return FileTblSizeGetDe();
+        case GAME_REGION_FR:
+            return FileTblSizeGetFr();
+        case GAME_REGION_IT:
+            return FileTblSizeGetIt();
+        case GAME_REGION_ES:
+            return FileTblSizeGetEs();
+        case GAME_REGION_UK:
+            return FileTblSizeGetUk();
         default:
-        case 0:
-            return func_00171D78();
-        case 1:
-            return func_00171E08();
+        case GAME_REGION_JP:
+            return FileTblSizeGetJp();
+        case GAME_REGION_US:
+            return FileTblSizeGetUs();
         }
     }
-    return func_00171E08();
+    return FileTblSizeGetUs();
 }
 
 s32 func_00162A78(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
             return func_00171E58();
-        case 3:
+        case GAME_REGION_FR:
             return func_00171CF0();
-        case 4:
+        case GAME_REGION_IT:
             return func_00171D38();
-        case 5:
+        case GAME_REGION_ES:
             return func_00171EA0();
-        case 6:
+        case GAME_REGION_UK:
             return func_00171DC8();
         default:
-        case 0:
+        case GAME_REGION_JP:
             return func_00171D80();
-        case 1:
+        case GAME_REGION_US:
             return func_00171E10();
         }
     }
     return func_00171E10();
 }
 
-s32 func_00162B38(void) {
+s32 GroupTblSizeGet(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
-            return func_00171E60();
-        case 3:
-            return func_00171CF8();
-        case 4:
-            return func_00171D40();
-        case 5:
-            return func_00171EA8();
-        case 6:
-            return func_00171DD0();
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
+            return GroupTblSizeGetDe();
+        case GAME_REGION_FR:
+            return GroupTblSizeGetFr();
+        case GAME_REGION_IT:
+            return GroupTblSizeGetIt();
+        case GAME_REGION_ES:
+            return GroupTblSizeGetEs();
+        case GAME_REGION_UK:
+            return GroupTblSizeGetUk();
         default:
-        case 0:
-            return func_00171D88();
-        case 1:
-            return func_00171E18();
+        case GAME_REGION_JP:
+            return GroupTblSizeGetJp();
+        case GAME_REGION_US:
+            return GroupTblSizeGetUs();
         }
     }
-    return func_00171E18();
+    return GroupTblSizeGetUs();
 }
 
 s32 func_00162BF8(void) {
     if (func_001BD228() == 0) {
-        switch (func_002D9460()) {
-        case 2:
+        switch (GetGameRegion()) {
+        case GAME_REGION_DE:
             return func_00171E68();
-        case 3:
+        case GAME_REGION_FR:
             return func_00171D00();
-        case 4:
+        case GAME_REGION_IT:
             return func_00171D48();
-        case 5:
+        case GAME_REGION_ES:
             return func_00171EB0();
-        case 6:
+        case GAME_REGION_UK:
             return func_00171DD8();
         default:
-        case 0:
+        case GAME_REGION_JP:
             return func_00171D90();
-        case 1:
+        case GAME_REGION_US:
             return func_00171E20();
         }
     }
     return func_00171E20();
 }
 
-void func_00162CB8(s8 arg0) { D_0030DAA5 = arg0; }
+void DiscCheckSet(s8 arg0) { disc_check = arg0; }
 
 // Allocates the ex-file table (512 entries), zeroes it and resets ex_file_cnt.
 void ExFileTblInit(void) {
     ex_file_cnt = 0;
-    ex_file_tbl = (ExFile*)func_0011D370(512 * sizeof(ExFile), 10, D_0056B720, 0x203);
+    ex_file_tbl = (ExFile*)func_0011D370(512 * sizeof(ExFile), 10, D_0056B720, 515);
     memset(ex_file_tbl, 0, 512 * sizeof(ExFile));
 }
 
-void func_00162D18(const char* path) { dbgAssert(D_0056B730, D_0056B720, 0x20C); }
+void PcFileTblSet(const char* path) { dbgAssert(D_0056B730, D_0056B720, 524); }
 
-void* func_00162D30(const char* path, s32* unused) { dbgAssert(D_0056B750, D_0056B720, 0x211); }
+void* PCload(const char* path, s32* unused) { dbgAssert(D_0056B750, D_0056B720, 529); }
 
 // Returns scratch_buff, the 0x1800-byte buffer used for partial sectors and for unpacking.
 char* ScratchBuffGet(void) { return scratch_buff; }
@@ -512,7 +512,7 @@ s32 DiscCheck(void) {
         while (1) {
             if (sceCdDiskReady(1) == SCECdComplete && sceCdStatus() != SCECdStatShellOpen) {
             read:
-                if (D_0030DAA5 == 0) {
+                if (disc_check == 0) {
                     return 0;
                 }
                 if (disc_id == NULL) {
@@ -958,7 +958,7 @@ s16 GroupSet(s32 arg0) {
     s16 fid;
 
     if (sa_file_read_init == 0) {
-        dbgAssert(D_0056B778, D_0056B720, 0x534);
+        dbgAssert(D_0056B778, D_0056B720, 1332);
     }
 
     fid = sa_file.group_tbl[arg0];
@@ -988,7 +988,7 @@ s32 ReadQFileAdd(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
     }
 
     if (q_cnt == READ_Q_CNT) {
-        dbgAssert(D_0056B790, D_0056B720, 0x550);
+        dbgAssert(D_0056B790, D_0056B720, 1360);
     }
 
     entry = &read_q[q_cnt];
@@ -1029,7 +1029,7 @@ s32 ReadQFileAdd(s32 id, void* buffer, void* callback, ReadQEntry* arg3) {
         entry->lsn = 0;
 
         if (D_00565DF4 == 0) {
-            str = FileNameGet(id);
+            str = HostFileNameGet(id);
             func_002D3C80(2);
         } else {
             entry->lsn = FileLsnGet(id);
@@ -1078,7 +1078,7 @@ s32 ReadQFilePartAdd(s32 id, void* buffer, s32 arg2, u32 size, void* callback, R
     }
 
     if (q_cnt == READ_Q_CNT) {
-        dbgAssert(D_0056B790, D_0056B720, 0x5AA);
+        dbgAssert(D_0056B790, D_0056B720, 1450);
     }
 
     entry = &read_q[q_cnt];
@@ -1119,7 +1119,7 @@ s32 ReadQFilePartAdd(s32 id, void* buffer, s32 arg2, u32 size, void* callback, R
 
         if (D_00565DF4 == 0) {
             entry->lsn = arg2 / 2048;
-            str = FileNameGet(id);
+            str = HostFileNameGet(id);
             func_002D3C80(2);
         } else {
             entry->lsn = FileLsnGet(id) + arg2 / 2048;
@@ -1169,7 +1169,7 @@ s32 ReadQLsnAdd(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry* arg
     }
 
     if (q_cnt == READ_Q_CNT) {
-        dbgAssert(D_0056B790, D_0056B720, 0x604);
+        dbgAssert(D_0056B790, D_0056B720, 1540);
     }
 
     entry = &read_q[q_cnt];
@@ -1222,7 +1222,7 @@ void ReadQWait(void) {
     s32 i;
 
     if (read_task_buff == NULL) {
-        dbgAssert(D_0056B800, D_0056B720, 0x63B);
+        dbgAssert(D_0056B800, D_0056B720, 1595);
     }
 
     // Waits until no queue entry is active: the task step and frame wait sit in the for's
@@ -1231,7 +1231,7 @@ void ReadQWait(void) {
         for (i = 0; i < READ_Q_CNT; i++) {
             if (read_q[i].active != 0) {
                 if (func_002D6478() != 0) {
-                    dbgAssert(D_0056B818, D_0056B720, 0x642);
+                    dbgAssert(D_0056B818, D_0056B720, 1602);
                 }
                 break;
             }
@@ -1271,7 +1271,7 @@ s32 ReadQSync(s32 arg0) {
         for (i = 0; i < READ_Q_CNT; i++) {
             if (read_q[i].active != 0) {
                 if (func_002D6478() != 0) {
-                    dbgAssert(D_0056B818, D_0056B720, 0x67E);
+                    dbgAssert(D_0056B818, D_0056B720, 1662);
                 }
                 return 1;
             }
@@ -1282,7 +1282,7 @@ s32 ReadQSync(s32 arg0) {
     return 0;
 }
 
-const char* func_00164A10(s32 unused) { return D_0030DAB8; }
+const char* FileNameGet(s32 unused) { return D_0030DAB8; }
 
 void ReadTask(void) {
     while (1) {
@@ -1306,7 +1306,7 @@ void SaFileReadInit(s32 mode) {
 
     D_0030DAB4 = 0;
     if (sa_file_read_init != 0) {
-        dbgAssert(D_0056B820, D_0056B720, 0x6B5);
+        dbgAssert(D_0056B820, D_0056B720, 1717);
     }
 
     sa_file_read_init = 1;
@@ -1315,21 +1315,21 @@ void SaFileReadInit(s32 mode) {
 
     sa_file.unk50 = 0;
     sa_file.unk34 = func_00162778();
-    sa_file.unk38 = func_00162838();
-    sa_file.unk3C = func_001628F8();
+    sa_file.file_tbl_lsn = FileTblLsnGet();
+    sa_file.group_tbl_lsn = GroupTblLsnGet();
     sa_file.unk40 = func_00162A78();
-    sa_file.unk44 = func_001629B8();
-    sa_file.unk48 = func_00162B38();
+    sa_file.file_tbl_size = FileTblSizeGet();
+    sa_file.group_tbl_size = GroupTblSizeGet();
     sa_file.unk4C = func_00162BF8();
 
-    func_00165378(0);
+    ReadSpinSet(0);
     func_0011C348(0x40);
 
-    scratch_buff = func_0011D370(SCRATCH_BUFF_SIZE, 10, D_0056B720, 0x6C9);
+    scratch_buff = func_0011D370(SCRATCH_BUFF_SIZE, 10, D_0056B720, 1737);
     func_00165ED8();
 
     D_0030DA7E = 0;
-    D_0030DAA5 = 0;
+    disc_check = 0;
 
     if (mode == 0) {
         FileNameChgInit();
@@ -1365,7 +1365,7 @@ void SaFileReadInit(s32 mode) {
                 }
                 size = sceLseek(fd, 0, SCE_SEEK_END);
                 func_0011C348(0x40);
-                sa_file.file_tbl = func_0011D370(size, 10, D_0056B720, 0x702);
+                sa_file.file_tbl = func_0011D370(size, 10, D_0056B720, 1794);
                 sceLseek(fd, 0, SCE_SEEK_SET);
                 if (sceRead(fd, sa_file.file_tbl, size) != size) {
                     dbgBreak();
@@ -1379,7 +1379,7 @@ void SaFileReadInit(s32 mode) {
                 }
                 size = sceLseek(fd, 0, SCE_SEEK_END);
                 func_0011C348(0x40);
-                sa_file.group_tbl = func_0011D370(size, 10, D_0056B720, 0x712);
+                sa_file.group_tbl = func_0011D370(size, 10, D_0056B720, 1810);
                 sceLseek(fd, 0, SCE_SEEK_SET);
                 if (sceRead(fd, sa_file.group_tbl, size) != size) {
                     dbgBreak();
@@ -1393,7 +1393,7 @@ void SaFileReadInit(s32 mode) {
                 }
                 size = sceLseek(fd, 0, SCE_SEEK_END);
                 func_0011C348(0x40);
-                size_tbl = func_0011D370(size, 10, D_0056B720, 0x722);
+                size_tbl = func_0011D370(size, 10, D_0056B720, 1826);
                 sceLseek(fd, 0, SCE_SEEK_SET);
                 if (sceRead(fd, size_tbl, size) != size) {
                     dbgBreak();
@@ -1407,7 +1407,7 @@ void SaFileReadInit(s32 mode) {
                 }
                 size = sceLseek(fd, 0, SCE_SEEK_END);
                 func_0011C348(0x40);
-                module_size_tbl = func_0011D370(size, 10, D_0056B720, 0x732);
+                module_size_tbl = func_0011D370(size, 10, D_0056B720, 1842);
                 sceLseek(fd, 0, SCE_SEEK_SET);
                 if (sceRead(fd, module_size_tbl, size) != size) {
                     dbgBreak();
@@ -1427,8 +1427,8 @@ void SaFileReadInit(s32 mode) {
             lastLsnBase = lsn_base;
             lsn_base = 0;
             if (demo_desc.file_tbl_lsn == 0) {
-                size = func_001629B8();
-                lsn = func_00162838();
+                size = FileTblSizeGet();
+                lsn = FileTblLsnGet();
             } else {
                 size = demo_desc.file_tbl_size;
                 lsn = demo_desc.file_tbl_lsn;
@@ -1438,7 +1438,7 @@ void SaFileReadInit(s32 mode) {
             // size makes CdReadStart's size / 2048 round up too.
             size += 0x7FF;
             func_0011C348(0x40);
-            sa_file.file_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x75B);
+            sa_file.file_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 1883);
 
             while (CdReadStart(lsn, size, sa_file.file_tbl, &read_mode) == 0) {
                 do {
@@ -1451,8 +1451,8 @@ void SaFileReadInit(s32 mode) {
             }
 
             if (demo_desc.group_tbl_lsn == 0) {
-                size = func_00162B38();
-                lsn = func_001628F8();
+                size = GroupTblSizeGet();
+                lsn = GroupTblLsnGet();
             } else {
                 size = demo_desc.group_tbl_size;
                 lsn = demo_desc.group_tbl_lsn;
@@ -1460,7 +1460,7 @@ void SaFileReadInit(s32 mode) {
 
             size += 0x7FF;
             func_0011C348(0x40);
-            sa_file.group_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x772);
+            sa_file.group_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 1906);
 
             while (CdReadStart(lsn, size, sa_file.group_tbl, &read_mode) == 0) {
                 do {
@@ -1480,12 +1480,12 @@ void SaFileReadInit(s32 mode) {
             }
             GroupSet(1);
 
-            size = FileSizeGet(func_001626B8());
+            size = FileSizeGet(SizeTblNoGet());
             func_0011C348(0x40);
             size += 0x7FF;
-            size_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x78D);
+            size_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 1933);
 
-            while (CdReadStart(TblLsnGet(func_001626B8()), size, size_tbl, &read_mode) == 0) {
+            while (CdReadStart(TblLsnGet(SizeTblNoGet()), size, size_tbl, &read_mode) == 0) {
                 do {
                     func_002D3C80(0);
                 } while (sceCdDiskReady(1) != SCECdComplete);
@@ -1495,12 +1495,12 @@ void SaFileReadInit(s32 mode) {
                 func_002D3C80(0);
             }
 
-            size = FileSizeGet(func_001625F8());
+            size = FileSizeGet(ModuleSizeTblNoGet());
             func_0011C348(0x40);
             size += 0x7FF;
-            module_size_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 0x79C);
+            module_size_tbl = func_0011D370(size & ~0x7FF, 10, D_0056B720, 1948);
 
-            while (CdReadStart(TblLsnGet(func_001625F8()), size, module_size_tbl, &read_mode) == 0) {
+            while (CdReadStart(TblLsnGet(ModuleSizeTblNoGet()), size, module_size_tbl, &read_mode) == 0) {
                 do {
                     func_002D3C80(0);
                 } while (sceCdDiskReady(1) != SCECdComplete);
@@ -1547,7 +1547,7 @@ void ReadQCancel(s32 arg0) {
     }
 }
 
-void func_00165378(s32 arg0) {
+void ReadSpinSet(s32 arg0) {
     switch (arg0) {
     default:
     case 0:
@@ -1559,7 +1559,7 @@ void func_00165378(s32 arg0) {
     }
 }
 
-void func_001653A0(s32 arg0) {
+void MovieSpinSet(s32 arg0) {
     switch (arg0) {
     default:
     case 0:
@@ -1584,7 +1584,7 @@ s32 ReadQSeekAdd(s32 lsn, s32 group, s32 no) {
     }
 
     if (q_cnt == READ_Q_CNT) {
-        dbgAssert(D_0056B790, D_0056B720, 0x816);
+        dbgAssert(D_0056B790, D_0056B720, 2070);
     }
 
     entry = &read_q[q_cnt];
@@ -1628,10 +1628,10 @@ void SaFileModeSet(s32 mode) {
         HostModeSet();
     } else {
         sa_file.unk14 = FileSizeGet;
-        sa_file.unk58 = func_00164A10;
+        sa_file.unk58 = FileNameGet;
         sa_file.unk68 = ReadQServe;
-        sa_file.pc_load = func_00162D30;
-        sa_file.pc_file_tbl_set = func_00162D18;
+        sa_file.pc_load = PCload;
+        sa_file.pc_file_tbl_set = PcFileTblSet;
         sa_file.unk4 = FileLsnGet;
         sa_file.unk78 = ReadQLsnAdd;
         sa_file.unk88 = ReadQFileSeekAdd;
@@ -1645,13 +1645,13 @@ void SaFileModeSet(s32 mode) {
     sa_file.unk64 = ReadQInit;
     sa_file.unkC = SaFileModeSet;
     sa_file.unk10 = GroupSet;
-    sa_file.unk7C = func_00165378;
-    sa_file.unk84 = func_001653A0;
+    sa_file.read_spin_set = ReadSpinSet;
+    sa_file.movie_spin_set = MovieSpinSet;
     sa_file.unk80 = ReadQFileStatGet;
     sa_file.unk6C = GroupFileLsnGet;
 }
 
-void func_001656B8(void) { read_task_buff->run(); }
+void ReadTaskRun(void) { read_task_buff->run(); }
 
 // Used by DebugVprintf, creates a new file the first call and appends thereafter
 void DebugLogAppend(const char* str, u32 len) {
@@ -1852,7 +1852,7 @@ void DebugLogFlush(void) {
         }
 
         if (len != 0) {
-            buffer = func_0011D370(len, 10, D_0056B720, 0x928);
+            buffer = func_0011D370(len, 10, D_0056B720, 2344);
 
             index = dbg_line_index;
             cursor = buffer;

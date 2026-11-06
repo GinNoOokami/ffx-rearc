@@ -74,7 +74,6 @@ s32 func_002D6418(void);
 s32 func_002D6478(void);
 void func_002D8E20(const char* ch, const char* str, u32 len);
 s32 func_002D93E8(void);
-u32 func_002D9460(void);
 
 /* data */
 extern s8 D_00565DF4;
