@@ -35,16 +35,16 @@ typedef struct {
 
 /* Archive state (sa_file). Function slots are filled by SaFileModeSet; the
    comments give the release function, and the host one from read_debug.c where
-   HostModeSet overrides the slot. "()" = parameters not known yet. */
+   HostModeSet overrides the slot. */
 typedef struct {
-    /* 0x00 */ s32 (*unk0)();      // ReadQFileAdd
-    /* 0x04 */ s32 (*unk4)(s32);   // FileLsnGet / HostFileLsnGet
-    /* 0x08 */ s32 (*unk8)();      // ReadQSync
-    /* 0x0C */ void (*unkC)(s32);  // SaFileModeSet (this table's own init)
-    /* 0x10 */ s16 (*unk10)(s32);  // GroupSet
-    /* 0x14 */ s32 (*unk14)(s32);  // FileSizeGet / HostFileSizeGet
-    /* 0x18 */ s32 mode;           // SaFileModeSet's argument; 0 = host mode
-    /* 0x1C */ void (*unk1C)(s32); // ReadQCancel
+    /* 0x00 */ s32 (*read_q_file_add)(s32, void*, void*, ReadQEntry*); // ReadQFileAdd
+    /* 0x04 */ s32 (*file_lsn_get)(s32);                               // FileLsnGet / HostFileLsnGet
+    /* 0x08 */ s32 (*read_q_sync)(s32);                                // ReadQSync
+    /* 0x0C */ void (*mode_set)(s32);                                  // SaFileModeSet (this table's own init)
+    /* 0x10 */ s16 (*group_set)(s32);                                  // GroupSet
+    /* 0x14 */ s32 (*file_size_get)(s32);                              // FileSizeGet / HostFileSizeGet
+    /* 0x18 */ s32 mode;                                               // SaFileModeSet's argument; 0 = host mode
+    /* 0x1C */ void (*read_q_cancel)(s32);                             // ReadQCancel
     /* 0x20 */ s32 id_base;
     /* 0x24 */ s32 group;
     /* 0x28 */ u32* file_tbl;      // cdrom.mdg
@@ -59,21 +59,21 @@ typedef struct {
     /* 0x4C */ s32 unk4C;          // func_00162BF8 (2)
     /* 0x50 */ s32 unk50;
     /* 0x54 */ void* (*pc_load)(const char*, s32*); // PCload / HostPcLoad
-    /* 0x58 */ const char* (*unk58)(s32);           // FileNameGet / HostFileNameGet
+    /* 0x58 */ const char* (*file_name_get)(s32);   // FileNameGet / HostFileNameGet
     /* 0x5C */ s32 host_fd;                         // file descriptor during a host read (HostReadQServe); -1 when idle
-    /* 0x60 */ void (*pc_file_tbl_set)(const char*);              // PcFileTblSet / HostPcFileTblSet
-    /* 0x64 */ void (*unk64)(void);                               // ReadQInit
-    /* 0x68 */ void (*unk68)();                                   // ReadQServe / HostReadQServe
-    /* 0x6C */ u32 (*unk6C)(s32, s32);                            // GroupFileLsnGet
-    /* 0x70 */ s32 busy;                                          // 1 while an entry is being processed, 0 after
-    /* 0x74 */ s32 busy_index;                                    // index of that entry in read_q, -1 after
-    /* 0x78 */ s32 (*unk78)(s32, void*, u32, void*, ReadQEntry*); // ReadQLsnAdd / HostReadQLsnAdd
-    /* 0x7C */ void (*read_spin_set)(s32);                        // ReadSpinSet
-    /* 0x80 */ s32 (*unk80)();                                    // ReadQFileStatGet
-    /* 0x84 */ void (*movie_spin_set)(s32);                       // MovieSpinSet
-    /* 0x88 */ s32 (*unk88)();                                    // ReadQFileSeekAdd / HostReadQFileSeekAdd
-    /* 0x8C */ s32 (*unk8C)();                                    // ReadQLsnSeekAdd / HostReadQLsnSeekAdd
-    /* 0x90 */ s32 (*unk90)();                                    // ReadQFilePartAdd
+    /* 0x60 */ void (*pc_file_tbl_set)(const char*); // PcFileTblSet / HostPcFileTblSet
+    /* 0x64 */ void (*read_q_init)(void);            // ReadQInit
+    /* 0x68 */ void (*read_q_serve)(void);           // ReadQServe / HostReadQServe
+    /* 0x6C */ u32 (*group_file_lsn_get)(s32, s32);  // GroupFileLsnGet
+    /* 0x70 */ s32 busy;                             // 1 while an entry is being processed, 0 after
+    /* 0x74 */ s32 busy_index;                       // index of that entry in read_q, -1 after
+    /* 0x78 */ s32 (*read_q_lsn_add)(s32, void*, u32, void*, ReadQEntry*); // ReadQLsnAdd / HostReadQLsnAdd
+    /* 0x7C */ void (*read_spin_set)(s32);                                 // ReadSpinSet
+    /* 0x80 */ s32 (*read_q_file_stat_get)(s32, s32);                      // ReadQFileStatGet
+    /* 0x84 */ void (*movie_spin_set)(s32);                                // MovieSpinSet
+    /* 0x88 */ s32 (*read_q_file_seek_add)(s32, s32);                      // ReadQFileSeekAdd / HostReadQFileSeekAdd
+    /* 0x8C */ s32 (*read_q_lsn_seek_add)(s32);                            // ReadQLsnSeekAdd / HostReadQLsnSeekAdd
+    /* 0x90 */ s32 (*read_q_file_part_add)(s32, void*, s32, u32, void*, ReadQEntry*); // ReadQFilePartAdd
     /* 0x94 */ s32 unk94;
 } SaFile; // size: 0x98
 

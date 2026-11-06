@@ -470,10 +470,10 @@ s32 HostReadQLsnAdd(s32 lsn, void* buffer, u32 size, void* callback, ReadQEntry*
 }
 
 // Host slot +0x88: a stub that returns -1.
-s32 HostReadQFileSeekAdd(void) { return -1; }
+s32 HostReadQFileSeekAdd(s32 unused0, s32 unused1) { return -1; }
 
 // Host slot +0x8C: a stub that returns -1.
-s32 HostReadQLsnSeekAdd(void) { return -1; }
+s32 HostReadQLsnSeekAdd(s32 unused) { return -1; }
 
 // Installs this file's loader functions into the archive state (sa_file).
 // SaFileModeSet(arg) stores arg at +0x18; with arg == 0 it calls this function,
@@ -495,13 +495,13 @@ s32 HostReadQLsnSeekAdd(void) { return -1; }
 // so their parameters, if any, are not visible here.
 
 void HostModeSet(void) {
-    sa_file.unk14 = HostFileSizeGet;
-    sa_file.unk58 = HostFileNameGet;
+    sa_file.file_size_get = HostFileSizeGet;
+    sa_file.file_name_get = HostFileNameGet;
     sa_file.pc_load = HostPcLoad;
-    sa_file.unk68 = HostReadQServe;
+    sa_file.read_q_serve = HostReadQServe;
     sa_file.pc_file_tbl_set = HostPcFileTblSet;
-    sa_file.unk78 = HostReadQLsnAdd;
-    sa_file.unk88 = HostReadQFileSeekAdd;
-    sa_file.unk8C = HostReadQLsnSeekAdd;
-    sa_file.unk4 = HostFileLsnGet;
+    sa_file.read_q_lsn_add = HostReadQLsnAdd;
+    sa_file.read_q_file_seek_add = HostReadQFileSeekAdd;
+    sa_file.read_q_lsn_seek_add = HostReadQLsnSeekAdd;
+    sa_file.file_lsn_get = HostFileLsnGet;
 }

@@ -899,7 +899,7 @@ void ReadQEntrySeek(SaFile* archive, ReadQEntry* entry, s32 index) {
     entry->req_no = 0;
 }
 
-// Release read loop (sa_file.unk68): serves the read queue forever, passing each active entry to ReadQEntryRead
+// Release read loop (sa_file.read_q_serve): serves the read queue forever, passing each active entry to ReadQEntryRead
 // (READ_Q_TYPE_READ: read, or cancel if flagged) or ReadQEntrySeek (READ_Q_TYPE_SEEK), then waiting a frame.
 void ReadQServe(void) {
     SaFile* archive = SaFileGet();
@@ -1286,7 +1286,7 @@ const char* FileNameGet(s32 unused) { return D_0030DAB8; }
 
 void ReadTask(void) {
     while (1) {
-        sa_file.unk68();
+        sa_file.read_q_serve();
         task_wait(1);
     }
 }
@@ -1523,7 +1523,7 @@ void SaFileReadInit(s32 mode) {
     sa_file.host_fd = -1;
     sa_file.busy_index = -1;
     sa_file.busy = 0;
-    sa_file.unk64();
+    sa_file.read_q_init();
 
     read_task_buff->create(ReadTask, 1, 0);
     func_00166370();
@@ -1627,28 +1627,28 @@ void SaFileModeSet(s32 mode) {
     if (mode == 0) {
         HostModeSet();
     } else {
-        sa_file.unk14 = FileSizeGet;
-        sa_file.unk58 = FileNameGet;
-        sa_file.unk68 = ReadQServe;
+        sa_file.file_size_get = FileSizeGet;
+        sa_file.file_name_get = FileNameGet;
+        sa_file.read_q_serve = ReadQServe;
         sa_file.pc_load = PCload;
         sa_file.pc_file_tbl_set = PcFileTblSet;
-        sa_file.unk4 = FileLsnGet;
-        sa_file.unk78 = ReadQLsnAdd;
-        sa_file.unk88 = ReadQFileSeekAdd;
-        sa_file.unk8C = ReadQLsnSeekAdd;
+        sa_file.file_lsn_get = FileLsnGet;
+        sa_file.read_q_lsn_add = ReadQLsnAdd;
+        sa_file.read_q_file_seek_add = ReadQFileSeekAdd;
+        sa_file.read_q_lsn_seek_add = ReadQLsnSeekAdd;
     }
 
-    sa_file.unk8 = ReadQSync;
-    sa_file.unk1C = ReadQCancel;
-    sa_file.unk0 = ReadQFileAdd;
-    sa_file.unk90 = ReadQFilePartAdd;
-    sa_file.unk64 = ReadQInit;
-    sa_file.unkC = SaFileModeSet;
-    sa_file.unk10 = GroupSet;
+    sa_file.read_q_sync = ReadQSync;
+    sa_file.read_q_cancel = ReadQCancel;
+    sa_file.read_q_file_add = ReadQFileAdd;
+    sa_file.read_q_file_part_add = ReadQFilePartAdd;
+    sa_file.read_q_init = ReadQInit;
+    sa_file.mode_set = SaFileModeSet;
+    sa_file.group_set = GroupSet;
     sa_file.read_spin_set = ReadSpinSet;
     sa_file.movie_spin_set = MovieSpinSet;
-    sa_file.unk80 = ReadQFileStatGet;
-    sa_file.unk6C = GroupFileLsnGet;
+    sa_file.read_q_file_stat_get = ReadQFileStatGet;
+    sa_file.group_file_lsn_get = GroupFileLsnGet;
 }
 
 void ReadTaskRun(void) { read_task_buff->run(); }
